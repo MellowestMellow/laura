@@ -1131,7 +1131,7 @@
         }
 
         <!-- 🔹 Archivo solo si es aprobar (especial + etapa 3 + sin observación) o no especial -->
-        @if (!esEspecialActual || (esEspecialActual && asignacionSeleccionada?.idEtapa === 3 && idEstadoSolicitud === 16 && !EvaluarForm.get('observacion')?.value?.trim())) {
+        @if (!esEspecialActual || (esEspecialActual && asignacionSeleccionada?.idEtapa === 3 && asignacionSeleccionada?.idEstadoSolicitud === 16 && !EvaluarForm.get('observacion')?.value?.trim())) {
         <div class="mt-3">
           <br>
           Recordatorio:
