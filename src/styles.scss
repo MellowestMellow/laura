@@ -1,0 +1,688 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* ------------------------------------------------------------------------------------------------- */
+/* Estructura del Angular
+/* ------------------------------------------------------------------------------------------------- */
+:root {
+  --body-bg: var(--p-surface-50);
+  --body-text-color: var(--p-surface-900);
+  --card-border: 1px solid var(--border-color);
+  --card-bg: var(--p-surface-0);
+  --border-color: var(--p-surface-200);
+  --text-color: var(--p-surface-700);
+  --overlay-background: #ffffff;
+}
+
+
+:root[class='p-dark'] {
+  --body-bg: var(--p-surface-950);
+  --body-text-color: var(--p-surface-50);
+  --card-border: 1px solid transparent;
+  --card-bg: var(--p-surface-900);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-color: var(--p-surface-0);
+  --overlay-background: var(--p-surface-900);
+}
+
+/* ------------------------------------------------------------------------------------------------- */
+/* Estructura del Proyecto
+/* ------------------------------------------------------------------------------------------------- */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  /* Ensures the body takes up all available height */
+  background-color: #f3f3f3;
+     min-width: 350px;
+}
+
+@media (max-width: 350px) {
+  body {
+    background-color: #eee;
+  }
+
+  .contenedor {
+    flex-direction: column;
+    font-size: 14px; /* Reducir texto */
+  }
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  /* Ensures the main container takes up all available height */
+
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+
+
+.content {
+  flex: 1;
+  /* This allows the content to occupy the available space */
+}
+
+:root {
+  --p-tooltip-background: #1e88e5;
+  --p-tooltip-color: #ffffff;
+  --p-tooltip-border-radius: 10px;
+  --p-tooltip-padding: 1rem;
+  --p-tooltip-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* ------------------------------------------------------------------------------------------------- */
+/* Colores Input Tablas
+/* ------------------------------------------------------------------------------------------------- */
+// Button styles
+.p-button {
+  &.custom-slash {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #d3d3d3 !important;
+    border-radius: 0.50rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+    color: #229bb9;
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+
+  }
+
+  &.custom-1 {
+    background-color: #336699 !important;
+    color: #fff !important;
+    margin-right: 8px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    border-radius: 0.50rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+
+  }
+
+  .custom-icon-1 {
+    font-size: 1rem;
+    /* O el tamaño que prefieras */
+  }
+
+  &.custom-2 {
+    background-color: #ffca2c !important;
+    color: #000 !important;
+    margin-right: 8px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    border-radius: 0.50rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 700 !important;
+
+    // Target the label inside the button
+    .p-button-label {
+      font-weight: 700 !important;
+    }
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+
+  }
+
+  &.custom-2-1 {
+    background-color: #a5211e !important;
+    border-color: #a5211e !important;
+    color: #fff !important;
+    margin-right: 8px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    border-radius: 0.50rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 700 !important;
+
+    // Target the label inside the button
+    .p-button-label {
+      font-weight: 700 !important;
+    }
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+  }
+
+  &.custom-2-2 {
+    background-color: #0e743b !important;
+    color: #fff !important;
+    margin-right: 8px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    border-radius: 0.50rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 700 !important;
+
+    // Target the label inside the button
+    .p-button-label {
+      font-weight: 700 !important;
+    }
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+  }
+
+  &.custom-3 {
+    background-color: #ffca2c !important;
+    color: #000 !important;
+    width: 60px;
+    border-radius: 0.50rem !important;
+    font-weight: 500 !important;
+    justify-content: center;
+    align-items: center;
+    align-items: center;
+    white-space: nowrap;
+
+    // Target the label inside the button
+    .p-button-label {
+      font-weight: 700 !important;
+    }
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+  }
+
+  &.custom-4 {
+    background-color: #253a69 !important;
+    color: #fff !important;
+    margin-right: 8px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    border-radius: 0.50rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+  }
+
+  &.custom-5 {
+    height: 40px !important;
+    /* Ajusta la altura del input */
+    width: 100% !important;
+    /* Ajusta el ancho del input */
+    margin: 0 auto;
+    justify-content: center;
+    /* Centra los elementos hijos horizontalmente */
+    align-items: center;
+    /* Centra el input horizontalmente */
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+  }
+
+
+
+  &.custom-6 {
+    background-color: #ea6427 !important;
+    color: #fff !important;
+    margin-right: 8px;
+    height: 44px;
+    display: flex;
+    border-color: #ea6427;
+    align-items: center;
+    border-radius: 0.50rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+      box-shadow: none;
+    }
+  }
+
+  &.custom-7 {
+    background-color: #FFFFFF !important;
+    color: #336699 !important;
+    margin-right: 8px;
+    height: 44px;
+    display: flex;
+    border-color: #336699;
+    align-items: center;
+    border-radius: 0.50rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+
+  }
+
+  &.custom-8 {
+    background-color: #004785 !important;
+    color: #fff !important;
+    margin-right: 8px;
+    height: 44px;
+    display: flex;
+    border-color: #004785;
+    align-items: center;
+    border-radius: 0.50rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+
+    &:hover,
+    &:focus {
+      filter: brightness(1.1); // efecto sutil de luz
+      cursor: pointer;
+    }
+  }
+}
+
+/* ------------------------------------------------------------------------------------------------- */
+/* Estructura de Tablas
+/* ------------------------------------------------------------------------------------------------- */
+
+.icon-big {
+  font-size: 1.40rem !important;
+}
+
+/* ------------------------------------------------------------------------------------------------- */
+/* Variables */
+/* ------------------------------------------------------------------------------------------------- */
+$primary-color: #003578;
+$secondary-color: #253a69;
+$light-gray: #d3d3d3;
+$border-color: #dee2e6;
+$error-color: red;
+$background-light: #f8f9fa;
+$background-header: #e9ecef;
+$text-dark: #495057;
+$text-black: #000;
+$text-white: #fff;
+
+/* ------------------------------------------------------------------------------------------------- */
+/* Estructura del HTML */
+/* ------------------------------------------------------------------------------------------------- */
+
+.linea-de-color {
+  height: 4px;
+  background-color: $primary-color;
+  width: 100%;
+}
+
+.centrado {
+  text-align: center;
+}
+
+.header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-weight: bolder;
+  font-size: 1.35rem;
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+.header-title {
+  font-weight: bold;
+  font-size: 1.25rem;
+  text-align: center;
+  width: 100%;
+  margin-left: 20%;
+}
+
+.animated-grid {
+  transition: all 0.3s ease-in-out;
+
+  >* {
+    transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+  }
+}
+
+
+.title-header {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 6px;
+    background: linear-gradient(270deg, #229bb9, #253a69, #336699, #229bb9);
+    background-size: 400% 100%;
+    animation: gradientMove 3s ease infinite;
+    border-radius: 2px;
+  }
+}
+
+// Animación
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.custom-container {
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+.body {
+  text-align: center;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.left-buttons,
+.right-search {
+  display: flex;
+  gap: 10px;
+}
+
+.right-search {
+  align-items: center;
+  margin-left: auto;
+}
+
+.centraciones {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.custom-margin {
+  margin: 0;
+}
+
+::ng-deep {
+  .p-tooltip .p-tooltip-text {
+    background-color: #f9fafb;
+    color: $text-black;
+    width: 150%;
+    font-size: 14px;
+    font-weight: 400;
+    white-space: pre-line;
+  }
+
+  .tooltip-required {
+    color: $error-color;
+  }
+}
+
+.error-message {
+  color: $error-color;
+  font-size: 12px;
+  margin-left: 10px;
+}
+
+
+/* ------------------------------------------------------------------------------------------------- */
+/* Para Dispositivos */
+/* ------------------------------------------------------------------------------------------------- */
+
+@mixin responsive-layout {
+  .centracion {
+    margin-right: 2%;
+    margin-left: 7%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+
+    .col {
+      padding-right: 0;
+    }
+  }
+
+  .custom-container {
+    padding-left: 0%;
+    padding-right: 0%;
+  }
+}
+
+@mixin button-responsive {
+  .button-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .left-buttons,
+  .right-search {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .right-search {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 880px) {
+  @include responsive-layout;
+  @include button-responsive;
+
+  .centraciones {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .left-buttons,
+  .right-search {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .right-search {
+    margin-left: 0;
+  }
+
+  .tamano {
+    height: 'autoResize';
+  }
+}
+
+@media (max-width: 479px) {
+  @include button-responsive;
+
+  .responsive {
+    display: none;
+  }
+}
+
+
+.custom-spinner {
+  border: 12px solid rgba(255, 255, 255, 0.2); /* borde más tenue */
+  border-top: 12px solid #fff; /* parte animada */
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  animation: spin 0.8s linear infinite, colorChange 1.2s linear infinite;
+  margin-bottom: 1rem;
+}
+
+/* Animación de giro */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animación de cambio de color en tonos azules */
+@keyframes colorChange {
+  0% {
+    border-top-color: #1e3a8a;
+    /* azul oscuro */
+  }
+
+  16.6% {
+    border-top-color: #3b82f6;
+    /* azul brillante */
+  }
+
+  33.2% {
+    border-top-color: #60a5fa;
+    /* azul claro */
+  }
+
+  49.8% {
+    border-top-color: #2563eb;
+    /* azul medio */
+  }
+
+  66.4% {
+    border-top-color: #3b82f6;
+    /* azul brillante */
+  }
+
+  83% {
+    border-top-color: #1e40af;
+    /* azul profundo */
+  }
+
+  100% {
+    border-top-color: #1e3a8a;
+    /* azul oscuro */
+  }
+}
+
+/* Tooltip estilo blanco con azul (custom-7) */
+.p-tooltip.tooltip-custom-7,
+.p-tooltip.tooltip-custom-7 .p-tooltip-text {
+  color: #336699 !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 0.75rem !important;
+  max-width: 250px !important;
+  white-space: normal !important;
+}
+
+/* Texto directamente */
+.p-tooltip.tooltip-custom-7 .p-tooltip-text {
+  color: #336699 !important;
+  background-color: #ffffff !important;
+  border: 1px solid #336699 !important;
+  border-radius: 0.5rem !important;
+  text-align: center;
+}
+
+/* Tooltip estilo azul con texto blanco (custom-1) */
+.p-tooltip.tooltip-custom-1,
+.p-tooltip.tooltip-custom-1 .p-tooltip-text {
+  color: #ffffff !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 0.75rem !important;
+  max-width: 250px !important;
+  white-space: normal !important;
+}
+
+
+.p-tooltip.tooltip-custom-1 .p-tooltip-text {
+  color: #ffffff !important;
+  background-color: #336699 !important;
+  text-align: center;
+}
+
+/* Estilo para hacer el título del mes en mayúsculas */
+.fc-toolbar-title {
+  text-transform: uppercase !important;
+}
+
+/* Opcional: También puedes aplicar otros estilos al título */
+.fc-toolbar-title {
+  text-transform: uppercase !important;
+  font-weight: 600;
+}
+
+/* Si quieres que solo el mes esté en mayúsculas pero no el año */
+.fc-toolbar-title {
+  text-transform: capitalize !important;
+}
+
+.fc-toolbar-title::first-letter {
+  text-transform: uppercase !important;
+}

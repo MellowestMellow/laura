@@ -1,0 +1,269 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+@if (loadingtable) {
+<div class="flex flex-col items-center justify-center text-center h-full p-4" style="background-color: transparent;">
+  <div class="custom-spinner mb-4"></div>
+</div>
+}
+
+@if (!loadingtable) {
+<div class="custom-container">
+  <p-panel class="transparente">
+
+    <ng-template pTemplate="header">
+      <div class="boton-container">
+        <p-button icon="pi pi-angle-double-left" (click)="regresarPanel()" variant="outlined" />
+      </div>
+      <div class="header-container title-header gap-2">
+
+        <span>
+          Usuarios de Tickets
+        </span>
+      </div>
+    </ng-template>
+    <br>
+
+    <p-table #dt [value]="usuarios" [paginator]="true" columnResizeMode="expand" showGridlines
+      [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [rowsPerPageOptions]="[5, 10, 25]" dataKey="id"
+      [globalFilterFields]="['nombre','correo','numeroEmpleado','estadoUsuario']">
+
+      <ng-template pTemplate="caption">
+        <div class="toolbar">
+          <!-- Botones a la izquierda -->
+          <div class="centraciones">
+            <!-- Contenedor de los botones a la izquierda -->
+            <div class="left-buttons">
+              <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder" label="Reportes"
+                variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised text />
+              <p-popover #op>
+                <div class="flex flex-col gap-4">
+                  <div>
+                    <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                      styleClass="btn fw-bolder custom-2-1 w-full" raised text>
+                    </p-button>
+                  </div>
+                  <div>
+                    <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                      styleClass="btn fw-bolder custom-2-2 w-full" raised text>
+                    </p-button>
+                  </div>
+                </div>
+              </p-popover>
+            </div>
+
+            <!-- Contenedor de los botones a la derecha -->
+            <div class="right-search">
+              <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true" styleClass="btn custom-slash"
+                (click)="clear(dt)" class="responsive" />
+
+              <p-iconField iconPosition="right">
+                <p-inputIcon class="pi pi-search" />
+                <input pInputText type="text" class="custom-search-input" placeholder="Buscar usuario"
+                  [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dt)" />
+              </p-iconField>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="centered-header" style="min-width: 5rem">
+            <div class="flex items-center">
+              N°
+              <p-columnFilter type="text" field="numero" display="menu" />
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 8rem">
+            <div class="flex items-center">
+              Correo Electrónico
+              <p-columnFilter type="text" field="correo" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 8rem">
+            <div class="flex items-center">
+              Estado
+              <p-columnFilter type="text" field="estadoUsuario" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 15rem">
+            <div class="flex items-center">
+              Tickets Asociados
+              <p-columnFilter type="text" field="tickets" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 15rem">
+            <div class="flex items-center">
+              Fecha de Expiración de Contraseña
+              <p-columnFilter type="date" dateFormat="dd 'de' MM 'del' yy" field="fechaVencimiento"
+                display="menu"></p-columnFilter>
+            </div>
+          </th>
+          @if (permisoActualizar || permisoEliminar) {
+          <th class="centered-header" style="min-width: 8rem">
+            <div class="flex align-items-center">Acciones</div>
+          </th>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-usuario>
+        <tr>
+          <td class="centered-cell">{{ usuario.numero || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ usuario.correo || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ usuario.estadoUsuario || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ usuario.tickets || 'No cuenta con ningún ticket' }}</td>
+          <td class="centered-cell">
+            {{ usuario.fechaVencimiento ? (usuario.fechaVencimiento | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a") : 'No
+            proporcionado' }}
+          </td>
+          @if (permisoActualizar || permisoEliminar) {
+          <td class="centered-cell">
+            <div class="flex justify-center items-center">
+              <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                styleClass="btn fw-bolder custom-8" raised text></p-button>
+              <p-popover #op>
+                <div class="flex flex-col gap-4">
+
+                  @if (permisoActualizar) {
+                  <p-button label="Actualizar" (click)="cargarDatos(usuario, 'Modificar')"
+                    [disabled]="loadingDialogGeneral"
+                    [icon]="loadingDialogActualizar ? 'pi pi-spin pi-spinner' : 'pi pi-user-edit fw-medium'"
+                    styleClass="btn fw-bolder custom-1 w-full" text>
+                  </p-button>
+                  }
+
+                  @if (permisoEliminar) {
+                  <p-button label="Inactivar" (click)="cargarDatos(usuario, 'Inactivar')"
+                    [disabled]="loadingDialogGeneral"
+                    [icon]="loadingDialogInactivar ? 'pi pi-spin pi-spinner' : 'pi pi-user-minus fw-medium'"
+                    styleClass="btn fw-bolder custom-7 w-full" text>
+                  </p-button>
+                  }
+
+                </div>
+              </p-popover>
+            </div>
+          </td>
+          }
+
+
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+
+        <tr>
+          <td colspan="8" class="centered-cell">
+            No se encontraron usuarios.
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+    <br>
+
+  </p-panel>
+</div>
+}
+
+<!-------------- Dialog de Actualización de Usuario ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Actualización de Usuario {{ nombreUsuario }}</h2>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="actualizarUsuarioPersona()" [formGroup]="ActualizarForm">
+    <p-panel>
+
+      <p-fluid>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-select formControlName="idEstadoUsuario" [options]="estadoUsuario" optionLabel="estado"
+              optionValue="idEstadoUsuario" [showClear]="true" [filter]="true" filterBy="estado" appendTo="body"
+              class="w-full" />
+            <label for="dd-city">1. Estado del Usuario *</label>
+            @if (ActualizarForm.get('idEstadoUsuario')?.hasError('required') &&
+            ActualizarForm.get('idEstadoUsuario')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              El estado es obligatorio *.
+            </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-datepicker formControlName="dfFechaVencimientoUsuario" appendTo="body" [showButtonBar]="true"
+              inputId="date" [iconDisplay]="'input'" [showIcon]="true" iconDisplay="input" />
+            <label for="date">2. Fecha de Expiración de Contraseña *</label>
+            @if (ActualizarForm.get('dfFechaVencimientoUsuario')?.hasError('required') &&
+            ActualizarForm.get('dfFechaVencimientoUsuario')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              La fecha de expiración es obligatoria *.
+            </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit" [disabled]="ActualizarForm.invalid || isLoadingActualizar"
+            [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+      </p-fluid>
+
+
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Inactivación de Usuario ---------- -->
+<p-dialog header="Header" [(visible)]="visibleInactivar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Inactivación de Usuario</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="InactivarForm">
+    <p-panel>
+      <div style="text-align: justify; padding: 0 1rem;">
+        Estás a punto de inactivar la cuenta del usuario, esta acción deshabilitará su acceso al sistema de forma
+        inmediata. A partir de ese momento, no podrá iniciar
+        sesión, acceder a sus servicios, ni ejecutar ninguna acción dentro de la plataforma.
+        <br><br>
+        Además, se revocarán todos sus permisos y quedarán suspendidas sus operaciones pendientes, en caso de haberlas.
+        Esta medida puede revertirse posteriormente reactivando la cuenta, pero mientras tanto, el usuario quedará
+        completamente bloqueado.
+        <br><br>
+        Por favor, asegúrate de que comprendes las consecuencias de esta acción antes de proceder.
+      </div>
+      <div style="text-align: center; padding-top: 1rem;">
+        ¿Estás seguro de que deseas continuar con el proceso de inactivación?
+      </div>
+
+      <p-footer style="display: flex; justify-content: center; gap: 10px;">
+        <button pButton type="button" [disabled]="isLoadingInactivar"
+          [icon]="isLoadingInactivar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+          class="btn fw-bolder custom-1 w-full" (click)="handleAceptarInactivar()"></button>
+
+        <button pButton type="button" icon="bi bi-x-circle" label="Cancelar" class="btn fw-bolder custom-2-1 w-full"
+          [disabled]="isLoadingInactivar" (click)="visibleInactivar = false"></button>
+      </p-footer>
+    </p-panel>
+  </form>
+
+</p-dialog>

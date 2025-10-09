@@ -1,0 +1,280 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+
+@if (loadingtable) {
+<div class="flex flex-col items-center justify-center text-center h-full p-4" style="background-color: transparent;">
+  <div class="custom-spinner mb-4"></div>
+</div>
+}
+
+@if (!loadingtable) {
+<div class="custom-container">
+  <p-panel class="transparente">
+
+    <ng-template pTemplate="header">
+      <div class="header-container title-header gap-2">
+        <span>
+          Roles del Sistema de Información
+        </span>
+      </div>
+    </ng-template>
+    <br>
+
+    <p-table #dt [value]="rol" [paginator]="true" columnResizeMode="expand" showGridlines
+      [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+      [globalFilterFields]="['idRol','rol','descripcion']">
+
+      <ng-template pTemplate="caption">
+        <div class="toolbar">
+          <!-- Botones a la izquierda -->
+          <div class="centraciones">
+            <!-- Contenedor de los botones a la izquierda -->
+            <div class="left-buttons">
+              @if (permisoInsertar) {
+              <p-button label="Registrar" (click)="showDialog('Registrar')"
+                icon="bi bi-plus-circle fw-bolder custom-icon-1" styleClass="btn fw-bolder custom-1" raised text>
+              </p-button>
+              }
+            </div>
+
+            <!-- Contenedor de los botones a la derecha -->
+            <div class="right-search">
+              <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true" styleClass="btn custom-slash"
+                (click)="clear(dt)" class="responsive" />
+
+              <p-iconField iconPosition="right">
+                <p-inputIcon class="pi pi-search" />
+                <input pInputText type="text" class="custom-search-input" placeholder="Buscar rol"
+                  [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dt)" />
+              </p-iconField>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="centered-header" style="min-width: 6rem">
+            <div class="flex items-center">
+              N°
+              <p-columnFilter type="text" field="numero" display="menu" />
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 15rem">
+            <div class="flex items-center">
+              Rol
+              <p-columnFilter type="text" field="rol" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 15rem">
+            <div class="flex items-center">
+              Descripción
+              <p-columnFilter type="text" field="descripcion" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          @if (permisoActualizar || permisoEliminar) {
+          <th class="centered-header" style="min-width: 8rem">
+            <div class="flex align-items-center">Acciones</div>
+          </th>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-rol>
+        <tr>
+          <td class="centered-cell">{{ rol.numero || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ rol.rol || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ rol.descripcion || 'No proporcionado' }}</td>
+          
+          @if (permisoActualizar || permisoEliminar) {
+          <td class="centered-cell">
+            <div class="flex justify-center items-center">
+              <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                styleClass="btn fw-bolder custom-8" raised text></p-button>
+              <p-popover #op>
+                <div class="flex flex-col gap-4">
+
+                  @if (permisoActualizar) {
+                  <p-button label="Actualizar" (click)="cargarDatos(rol, 'Modificar')" [disabled]="loadingDialogGeneral"
+                    [icon]="loadingDialogActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-arrow-counterclockwise fw-medium'"
+                    styleClass="btn fw-bolder custom-1 w-full" text>
+                  </p-button>
+
+                  <p-button label="Permisos" (click)="irPermisos(rol.idRol, rol.rol)"
+                    [icon]="'bi bi-layers-half fw-medium'" styleClass="btn fw-bolder custom-7 w-full" text>
+                  </p-button>
+                  }
+
+                  @if (permisoEliminar) {
+                  <p-button label="Eliminar" (click)="cargarDatos(rol, 'Eliminar')" [disabled]="loadingDialogGeneral"
+                    [icon]="loadingDialogEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle fw-medium'"
+                    styleClass="btn fw-bolder custom-1 w-full" text>
+                  </p-button>
+                  }
+                </div>
+              </p-popover>
+
+            </div>
+          </td>
+          }
+
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+
+        <tr>
+          <td colspan="4" class="centered-cell">
+            No se encontraron datos.
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+    <br>
+
+  </p-panel>
+</div>
+}
+
+<!-------------- Dialog de Registro de Rol ---------- -->
+<p-dialog header="Header" [(visible)]="visibleRegistrar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Registro de Rol</h2>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="insertarRol()" [formGroup]="RegistrarForm">
+    <p-panel>
+
+      <p-fluid>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <input pInputText formControlName="rol" appCapitalizable />
+            <label for="email">1. Nombre del Rol *</label>
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <p-iftalabel class="sm:col-span-2">
+            <textarea pTextarea [autoResize]="true" rows="1" formControlName="descripcion" appCapitalizable
+              style="min-height: 60px;"></textarea>
+            <label for="email">2. Descripción del Rol *</label>
+          </p-iftalabel>
+
+        </div>
+
+        <div class="space"></div>
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit" [disabled]="RegistrarForm.invalid || isLoadingRegistrar"
+            [icon]="isLoadingRegistrar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+      </p-fluid>
+
+
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Actualización de Rol ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Actualización de Rol de {{ nombreRol }}</h2>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="actualizarRol()" [formGroup]="ActualizarForm">
+    <p-panel>
+
+      <p-fluid>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <input pInputText formControlName="rol" appCapitalizable />
+            <label for="email">1. Nombre del Rol *</label>
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <p-iftalabel class="sm:col-span-2">
+            <textarea pTextarea style="resize: none; min-height: 100px !important" [autoResize]="true" rows="1"
+              formControlName="descripcion" appCapitalizable></textarea>
+            <label for="email">2. Descripción del Rol *</label>
+          </p-iftalabel>
+
+        </div>
+
+        <div class="space"></div>
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit" [disabled]="ActualizarForm.invalid || isLoadingActualizar"
+            [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+      </p-fluid>
+
+
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Diálogo de Eliminación de Rol ---------- -->
+<p-dialog header="Header" [(visible)]="visibleEliminar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles"> Eliminación de Rol</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="Eliminarform">
+    <p-panel>
+      <div style="padding: 0; height: auto; width: 100%; position: relative; text-align: center;">
+        Estás a punto de eliminar el rol <strong>{{ nombreRol }}</strong>.
+      </div>
+      <br>
+      <div style="text-align: justify; padding: 0 1rem;">
+        Esta acción eliminará permanentemente el rol del sistema. Una vez eliminado, no podrá ser asignado a ningún
+        usuario ni utilizado para definir permisos.
+        <br><br>
+        <strong>Advertencia:</strong> Si este rol aún está asociado a uno o más usuarios, no podrá eliminarse. Para
+        poder continuar, asegúrate de reasignar un nuevo rol a todos los usuarios que actualmente lo tengan.
+        <br><br>
+        Por favor, asegúrate de que comprendes las implicaciones de esta acción antes de continuar.
+      </div>
+      <div style="text-align: center; padding-top: 1rem;">
+        ¿Estás seguro de que deseas eliminar este rol?
+      </div>
+
+      <p-footer style="display: flex; justify-content: center; gap: 10px;">
+        <button pButton type="button" [disabled]="isLoadingEliminar"
+          [icon]="isLoadingEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+          class="btn fw-bolder custom-1 w-full" (click)="eliminarRol()"></button>
+
+        <button pButton type="button" icon="bi bi-x-circle" label="Cancelar" class="btn fw-bolder custom-2-1 w-full"
+          [disabled]="isLoadingEliminar" (click)="visibleEliminar = false"></button>
+      </p-footer>
+    </p-panel>
+  </form>
+
+</p-dialog>

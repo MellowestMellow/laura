@@ -1,0 +1,276 @@
+<div class="estadistica-container">
+@if (loading) {
+<div class="flex flex-col items-center justify-center text-center h-full p-4" style="background-color: transparent;">
+  <div class="custom-spinner mb-4"></div>
+</div>
+}
+
+@if (!loading) {
+<div class="custom-container">
+  <p-panel>
+    <!-- Header -->
+    <div class="header-container title-header gap-2" style="margin-bottom: 2rem;">
+      <span>
+        Estadísticas Personales - {{ nombrePersona }}
+      </span>
+    </div>
+
+    <!-- Acciones -->
+    <div class="acciones-container">
+      <p-button label="Actualizar Métricas" (click)="obtenerMetricas()" [disabled]="loading" icon="pi pi-refresh"
+        styleClass="btn fw-bolder custom-7" raised text>
+      </p-button>
+
+     @if (mostrarDropdown) {
+  <p-autocomplete
+      [(ngModel)]="selectedItem"
+      [suggestions]="filteredItems"
+      optionLabel="label"
+      (completeMethod)="filterItems($event)"
+      (onSelect)="onUsuarioSeleccionado($event)"
+      [dropdown]="true"
+      [forceSelection]="true"
+      style="width: 30%;">
+      
+      <ng-template let-user pTemplate="selectedItem">
+          {{ user.label }}
+      </ng-template>
+      <ng-template let-user pTemplate="item">
+          {{ user.label }}
+      </ng-template>
+  </p-autocomplete>
+}
+
+
+      <p-button label="Descargar Excel" icon="pi pi-download" styleClass="btn fw-bolder custom-2-2 w-full"
+        [disabled]="loading" (click)="descargarMetricasExcel()" raised text>
+      </p-button>
+    </div>
+
+    <!-- 🔵 SECCIÓN: Métricas por Tipo/Categoría -->
+    <div class="seccion-metricas">
+      <br>
+      <p-panel class="card-metricas">
+        <ng-template pTemplate="header">
+          <div class="header-container title-header">
+            <h4>Métricas por Tipo de Solicitud</h4>
+          </div>
+        </ng-template>
+
+        @if (barChartTipoCategoria && metricasPorTipoCategoria.length) {
+        <!-- Contenedor combinado -->
+        <div class="metricas-contenedor">
+          <!-- 📊 Gráfico -->
+          <div class="grafico-container">
+            <h4 class="subtitulo-seccion">Gráfico de Solicitudes Asignadas</h4>
+            <div class="chart-wrapper">
+              <p-chart type="bar" [data]="barChartTipoCategoria" [options]="chartOptions"></p-chart>
+            </div>
+          </div>
+
+          <!-- 📋 Tabla con Tabs -->
+          <div class="tabla-container">
+            <h4 class="subtitulo-seccion">Datos Detallados de Solicitudes Asignadas</h4>
+            <p-tabs [(value)]="categoriaSeleccionada" class="custom-tabs">
+              <p-tablist>
+                @for (categoria of categoriasUnicas; track $index) {
+                <p-tab [value]="categoria">
+                  <i class="pi pi-folder mr-2"></i>{{ categoria }}
+                </p-tab>
+                } @empty {
+                <p>No hay categorías disponibles</p>
+                }
+              </p-tablist>
+
+              <p-tabpanels>
+                @for (categoria of categoriasUnicas; track $index) {
+                <p-tabpanel [value]="categoria">
+                  <div class="tabla-scroll">
+                    <table class="custom-table">
+                      <thead>
+                        <tr>
+                          <th><i class="pi pi-calendar mr-1"></i>Año</th>
+                          <th><i class="pi pi-clock mr-1"></i>Trimestre</th>
+                          <th><i class="pi pi-tag mr-1"></i>Tipo de Solicitud</th>
+                          <th><i class="pi pi-list mr-1"></i>Total Asignadas</th>
+                          <th><i class="pi pi-plus-circle mr-1"></i>Nuevas</th>
+                          <th><i class="pi pi-check-circle mr-1"></i>Finalizadas</th>
+                          <th><i class="pi pi-sync mr-1"></i>En Proceso</th>
+                          <th><i class="pi pi-percentage mr-1"></i>% Resolución</th>
+                          <th><i class="pi pi-chart-pie mr-1"></i>% por Tipo</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (item of getMetricasPorCategoria(categoria); track item.tipoSolicitud) {
+                        <tr>
+                          <td>{{ item.anio }}</td>
+                          <td>{{ item.trimestre }}</td>
+                          <td>{{ item.tipoSolicitud }}</td>
+                          <td><span class="badge-numero">{{ item.totalAsignadas }}</span></td>
+                          <td><span class="badge-nuevas">{{ item.nuevas }}</span></td>
+                          <td><span class="badge-finalizadas">{{ item.finalizadas }}</span></td>
+                          <td><span class="badge-proceso">{{ item.enProceso }}</span></td>
+                          <td>{{ item.promedioDiasResolucion ?? '—' }}</td>
+                          <td>{{ item.promedioDiasPorTipoSolicitud ?? '—' }}</td>
+                        </tr>
+                        } @empty {
+                        <tr>
+                          <td colspan="9">No hay datos</td>
+                        </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </p-tabpanel>
+                } @empty {
+                <p>No hay categorías disponibles</p>
+                }
+              </p-tabpanels>
+            </p-tabs>
+          </div>
+        </div>
+        } @else {
+        <div class="no-data-message">
+          <i class="pi pi-info-circle mr-2"></i>
+          <p>No hay métricas por tipo de solicitud disponibles.</p>
+        </div>
+        }
+      </p-panel>
+    </div>
+
+    <!-- 🟢 SECCIÓN: Métricas por Etapa -->
+    <div class="seccion-metricas">
+      <br>
+      <p-panel class="card-metricas">
+        <ng-template pTemplate="header">
+          <div class="header-container title-header">
+            <h4>Métricas de Etapa de la Solicitudes Curricular Realizadas</h4>
+          </div>
+        </ng-template>
+
+        @if (barChartEtapas && metricasPorEtapa.length) {
+        <!-- Contenedor combinado -->
+        <div class="metricas-contenedor">
+          <!-- 📋 Tabla primero -->
+          <div class="tabla-container">
+            <h4 class="subtitulo-seccion">Datos Detallados de las Etapas Realizadas</h4>
+            <div class="tabla-scroll">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th><i class="pi pi-calendar mr-1"></i>Año</th>
+                    <th><i class="pi pi-clock mr-1"></i>Trimestre</th>
+                    <th><i class="pi pi-sitemap mr-1"></i>Etapa</th>
+                    <th><i class="pi pi-hashtag mr-1"></i>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of metricasPorEtapa; track item.etapa) {
+                  <tr>
+                    <td>{{ item.anio }}</td>
+                    <td>{{ item.trimestre }}</td>
+                    <td>{{ item.etapa }}</td>
+                    <td><span class="badge-numero">{{ item.totalAsignadasEnEtapa }}</span></td>
+                  </tr>
+                  } @empty {
+                  <tr>
+                    <td colspan="4">No hay datos</td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 📊 Gráfico después -->
+          <div class="grafico-container">
+            <h4 class="subtitulo-seccion">Gráfico de Etapas Realizadas</h4>
+            <div class="chart-wrapper">
+              <p-chart type="bar" [data]="barChartEtapas" [options]="chartOptions"></p-chart>
+            </div>
+          </div>
+        </div>
+        } @else {
+        <div class="no-data-message">
+          <i class="pi pi-info-circle mr-2"></i>
+          <p>No hay métricas por etapa de la solicitudes curriculares disponibles.</p>
+        </div>
+        }
+      </p-panel>
+    </div>
+
+    <!-- 🟡 SECCIÓN: Tiempo por Solicitud -->
+    <div class="seccion-metricas">
+      <br>
+      <p-panel class="card-metricas">
+        <ng-template pTemplate="header">
+          <div class="header-container title-header">
+            <h4>Tiempo Estimado por Solicitud</h4>
+          </div>
+        </ng-template>
+
+        @if (lineChartTiempo && tiemposPorSolicitud.length) {
+        <!-- Contenedor combinado -->
+        <div class="metricas-contenedor">
+          <!-- 📊 Gráfico -->
+          <div class="grafico-container">
+            <h4 class="subtitulo-seccion">Gráfico del Tiempo Estimado de la Solicitud</h4>
+            <div class="chart-wrapper">
+              <p-chart type="line" [data]="lineChartTiempo" [options]="chartOptions"></p-chart>
+            </div>
+          </div>
+
+          <!-- 📋 Tabla -->
+          <div class="tabla-container">
+            <h4 class="subtitulo-seccion">Datos Estimados de la Solicitud</h4>
+            <div class="tabla-scroll">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th><i class="pi pi-file mr-1"></i>Solicitud</th>
+                    <th><i class="pi pi-folder mr-1"></i>Categoría</th>
+                    <th><i class="pi pi-flag mr-1"></i>Estado Actual</th>
+                    <th><i class="pi pi-clock mr-1"></i>Tiempo (hrs)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of tiemposPorSolicitud.slice(first, first + rows); track item.nombreSolicitud) {
+                  <tr>
+                    <td>{{ item.nombreSolicitud }}</td>
+                    <td>{{ item.categoria }}</td>
+                    <td>
+                      <span class="estado-badge">
+                        {{ item.estadoFinal }}
+                      </span>
+                    </td>
+                    <td><span class="tiempo-badge">{{ item.tiempoHoras ?? '—' }}</span></td>
+                  </tr>
+                  } @empty {
+                  <tr>
+                    <td colspan="4">No hay datos</td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Paginador -->
+            <div class="paginador-container">
+              <p-paginator [rows]="rows" [first]="first" [totalRecords]="tiemposPorSolicitud.length"
+                [rowsPerPageOptions]="[5, 10, 20]" (onPageChange)="onPageChange($event)">
+              </p-paginator>
+            </div>
+          </div>
+        </div>
+        } @else {
+        <div class="no-data-message">
+          <i class="pi pi-info-circle mr-2"></i>
+          <p>No hay métricas de tiempo estimado por solicitud disponibles.</p>
+        </div>
+        }
+      </p-panel>
+    </div>
+  </p-panel>
+</div>
+}
+</div>

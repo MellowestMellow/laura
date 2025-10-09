@@ -1,0 +1,121 @@
+/* ------------------------------------------------------------------------------------------------- */
+/* Variables */
+/* ------------------------------------------------------------------------------------------------- */
+$primary-color: #003578;
+$secondary-color: #253a69;
+$light-gray: #d3d3d3;
+$border-color: #dee2e6;
+$error-color: red;
+$background-light: #f8f9fa;
+$background-header: #e9ecef;
+$text-dark: #495057;
+$text-black: #000;
+$text-white: #fff;
+
+.centered-header {
+    text-align: center;
+    vertical-align: middle;
+
+    .flex {
+        justify-content: center;
+    }
+}
+
+.centered-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+:host {
+    ::ng-deep {
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .space {
+            margin-bottom: 25px !important;
+        }
+
+        .label-margin {
+            font-size: 11px !important;
+            margin-right: 50px !important;
+        }
+
+        .p-button.custom-button-centerss {
+            position: absolute;
+            left: 46.5%;
+            transform: translateX(-50%);
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid $light-gray !important;
+            border-radius: 0.50rem !important;
+            font-weight: 500 !important;
+            height: 41px;
+            white-space: nowrap;
+            background-color: $secondary-color !important;
+            color: $text-white !important;
+            justify-content: center;
+        }
+    }
+}
+
+
+/* Estilos existentes */
+
+/* Estilo para centrar el contenido de las celdas */
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Asegurarse de que los encabezados también estén centrados */
+:host ::ng-deep .p-datatable .p-datatable-thead > tr > th {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Estilo para el mensaje de tabla vacía */
+.centered-cell {
+  text-align: center;
+}
+
+/* Estilos para los encabezados centrados */
+.centered-header {
+  text-align: center;
+}
+
+/* Estilos para la toolbar */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.centraciones {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.left-buttons, .right-search {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Estilos responsivos */
+@media screen and (max-width: 768px) {
+  .centraciones {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .left-buttons, .right-search {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,32 @@
+<p-fluid>
+  <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <p-floatlabel variant="on" class="sm:col-span-2">
+      <textarea pTextarea [(ngModel)]="texto" name="observacion" autoResize="true" rows="2"
+        style="min-height: 80px; max-height: 180px; overflow-y: auto" required [ngClass]="{
+          'ng-invalid': showError && (!texto || texto.length > limite)
+        }" (ngModelChange)="onTextoChange($event)" [attr.maxlength]="limite"></textarea>
+
+      <label for="observaciones">
+        <span>1. Observaciones <span style="color: red">*</span></span>
+        <small [ngStyle]="{
+            color: texto.length > limite ? 'red' : '#555',
+            'margin-left': '12px'
+          }">
+          {{ texto.length || 0 }} / {{ limite }}
+        </small>
+      </label>
+
+      @if (showError && !texto) {
+      <small style="color: red">
+        Este campo es obligatorio.
+      </small>
+      }
+
+      @if (texto.length > limite) {
+      <small style="color: red">
+        No se permite más de {{ limite }} caracteres.
+      </small>
+      }
+    </p-floatlabel>
+  </div>
+</p-fluid>

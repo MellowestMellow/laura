@@ -1,0 +1,422 @@
+// Variables de colores
+$primary-color: #003578;
+$secondary-color: #253a69;
+$accent-color: #229bb9;
+$gradient-bg: linear-gradient(300deg, #229bb9, #336699, #229bb9);
+
+.loading-overlay {
+  position: fixed; /* o absolute si solo sobre un contenedor */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4); /* 🔹 Fondo oscuro semitransparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  color: #fff;
+}
+
+
+.internal-dashboard {
+  padding: 0.75rem 0.5rem;
+  max-width: 95vw;
+  width: 100%;
+  margin: 0 auto;
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.25rem;
+    max-width: 98vw;
+  }
+
+  .dashboard-section {
+    margin-bottom: 1.25rem;
+    background-color: #f9fafb;
+    padding: 1rem;
+    border-radius: 6px;
+    justify-content: center;
+  }
+
+
+  .section-title,
+  .chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    text-align: center; // ← centrado
+  }
+
+  .metric-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgb(18, 21, 71);
+    margin-bottom: 0.8rem;
+    text-align: center; // ← centrado
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 0.5rem;
+  }
+
+  .metric-titles {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgb(18, 21, 71);
+    text-align: center; // ← centrado
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .metrics-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    padding: 0.5rem 0.25rem;
+
+    .metric-block {
+      flex: 1 1 45%;
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+
+
+      .metric-items {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        .metric-card {
+          background: white;
+          border-radius: 6px;
+          box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+          padding: 0.75rem 1rem;
+          flex-direction: column; // ← CAMBIAR para alinear ícono arriba y texto abajo
+          align-items: center; // ← CENTRA horizontalmente
+          text-align: center; // ← asegura que texto esté centrado
+          gap: 0.75rem;
+          min-width: 140px;
+          flex: 1 1 30%;
+
+
+          .metric-icon {
+            font-size: 1.5rem;
+            text-align: center;
+          }
+
+          .metric-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #1f2937;
+            text-align: center; // ← centrado
+          }
+
+          .metric-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-align: center; // ← centrado
+          }
+        }
+      }
+    }
+  }
+
+  .charts-grid-2x2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .p-card {
+      height: 100%;
+    }
+  }
+
+  .executive-summary-grid {
+    display: grid;
+    text-align: center; // ← centrado
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .summary-card {
+    display: flex;
+    flex-direction: column; // ← CAMBIAR para alinear ícono arriba y texto abajo
+    align-items: center; // ← CENTRA horizontalmente
+    text-align: center; // ← asegura que texto esté centrado
+    padding: 0.75rem;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+
+    .summary-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      margin-bottom: 0.5rem;
+    }
+
+    .summary-content {
+      .summary-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+
+      }
+
+      .summary-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: $primary-color;
+      }
+    }
+  }
+}
+
+:host ::ng-deep {
+  .p-card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+  }
+
+  .p-card-header {
+    padding: 0.6rem 0.9rem;
+    background: $gradient-bg;
+    color: white;
+
+    h4,
+    h3 {
+      font-size: 1rem !important;
+      font-weight: 600;
+    }
+  }
+
+  .p-card-content {
+    padding: 1rem;
+    background-color: white;
+    border-radius: 6px;
+  }
+
+  .p-chart canvas {
+    max-height: 200px !important;
+  }
+
+  &.full-width-chart canvas {
+    max-height: 250px !important;
+  }
+
+  .p-tabview {
+    margin-top: 1rem;
+  }
+
+  .p-tabview-nav {
+    background: $gradient-bg;
+    color: white;
+
+    .p-tabview-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  }
+
+  .p-tabview-content {
+    padding: 1rem;
+    background-color: white;
+    border-radius: 6px;
+  }
+
+  .p-chart {
+    margin: 0 auto;
+    max-width: 100%;
+    height: 300px;
+
+    canvas {
+      max-height: 100% !important;
+      width: 100% !important;
+    }
+  }
+
+  .p-chart-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $primary-color;
+    margin-bottom: 0.5rem;
+  }
+
+  .p-chart-legend {
+    font-size: 0.8rem;
+    color: #4b5563;
+    margin-top: 0.5rem;
+
+    .p-chart-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      .p-chart-legend-color {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+      }
+    }
+  }
+
+  .p-chart-tooltip {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+
+  .p-chart-tooltip-item {
+    margin-bottom: 0.25rem;
+
+    .p-chart-tooltip-label {
+      font-weight: 600;
+    }
+
+    .p-chart-tooltip-value {
+      color: #4b5563;
+    }
+  }
+
+  .p-chart-tooltip-header {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .p-chart-tooltip-footer {
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+
+  .icon-blue {
+    color: #2f80ed;
+  }
+
+  .icon-green {
+    color: #10b981;
+  }
+
+  .icon-orange {
+    color: #f59e0b;
+  }
+
+  .icon-teal {
+    color: #14b8a6;
+  }
+
+  .icon-purple {
+    color: #7c3aed;
+  }
+
+  .icon-yellow {
+    color: #fbbf24;
+  }
+
+  .icon-red {
+    color: #ef4444;
+  }
+
+  .icon-navy {
+    color: #253a69;
+  }
+
+  .icon-cyan {
+    color: #229bb9;
+  }
+}
+
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  .anio-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Tablet: fila pero con ajuste */
+  @media (max-width: 1023px) and (min-width: 600px) {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    .anio-group {
+      gap: 4px;
+    }
+  }
+
+  /* Móvil */
+  @media (max-width: 599px) {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    .trimestre-group,
+    .anio-group,
+    .exportar-group {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .anio-group {
+      flex-direction: row;
+    }
+
+    .exportar-group p-button {
+      width: auto; /* Botón centrado tamaño natural */
+    }
+  }
+}
+
+
+.internal-dashboard {
+  padding: 0.75rem;
+  margin: 0 auto;
+
+  /* Ajustes para métricas */
+  .metrics-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+ 
+  /* Ajustar gráficos */
+  :host ::ng-deep {
+    .p-chart {
+      width: 100% !important;
+      max-width: 100%;
+      canvas {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 350px; // Más alto para móvil
+      }
+    }
+  }
+
+  /* Resumen ejecutivo */
+  .executive-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+  }
+}
+

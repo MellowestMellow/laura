@@ -1,0 +1,43 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Estilo inicial con fondo suave y transición */
+  body {
+    background-color: rgba(255, 255, 255, 0.8); /* Fondo suave */
+    transition: background-color 0.3s ease; /* Transición suave */
+  }
+  
+  /* Cambia a fondo transparente una vez que el contenido esté listo */
+  body.loaded {
+    background-color: transparent;
+  }
+  
+  /* Aplica la transición de opacidad */
+  .fade-in {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  .fade-in.loaded {
+    opacity: 1;
+  }
+  
+  .main-container {
+    min-height: 100%;  /* Hace que el contenido ocupe toda la altura disponible */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .content {
+    flex: 1;  /* Esto hace que el contenido ocupe el espacio disponible entre el encabezado y el footer */
+  }
+  
+  /* Contenedor principal */
+  main {
+    flex-grow: 1;
+  }

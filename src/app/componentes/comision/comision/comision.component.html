@@ -1,0 +1,730 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+@if(loadingtable){
+  <div class="flex flex-col items-center justify-center text-center h-full p-4"
+    style="background-color: transparent;">
+    <div class="custom-spinner mb-4"></div>
+  </div>
+}
+
+@if(!loadingtable){
+  <div class="custom-container">
+    <p-panel styleClass="transparente">
+      <ng-template pTemplate="header">
+        <div class="header-container title-header gap-2">
+          <span> Comisiones Académicas </span>
+        </div>
+      </ng-template>
+      <br />
+
+      <p-table #dt [value]="comision" [paginator]="true" columnResizeMode="expand" showGridlines
+        [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [rowsPerPageOptions]="[5, 10, 25]" dataKey="id"
+        [globalFilterFields]="[
+          'nombreComision',
+          'nombreSubComision',
+          'nombreCampus',
+          'nombreDepartamento',
+          'nombreEstadoComision',
+          'nombreEstadoSubComision'
+        ]">
+
+        <ng-template pTemplate="caption">
+          <div class="toolbar">
+            <!-- Botones a la izquierda -->
+            <div class="centraciones">
+              <!-- Contenedor de los botones a la izquierda -->
+              <div class="left-buttons">
+                <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder" label="Reportes"
+                  variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised text />
+                <p-popover #op>
+                  <div class="flex flex-col gap-4">
+                    <div>
+                      <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                        styleClass="btn fw-bolder custom-2-1 w-full" raised text>
+                      </p-button>
+                    </div>
+                    <div>
+                      <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                        styleClass="btn fw-bolder custom-2-2 w-full" raised text>
+                      </p-button>
+                    </div>
+                  </div>
+                </p-popover>
+              </div>
+
+              <!-- Contenedor de los botones a la derecha -->
+              <div class="right-search">
+                <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true" styleClass="btn custom-slash"
+                  class="responsive" (click)="clear(dt)" />
+
+                <p-iconField iconPosition="right">
+                  <p-inputIcon styleClass="pi pi-search" />
+                  <input pInputText type="text" class="custom-search-input" placeholder="Buscar comisión"
+                    [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dt)" />
+                </p-iconField>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th class="centered-header" style="min-width: 6rem">
+              <div class="flex items-center">
+                N°
+                <p-columnFilter type="text" field="numero" display="menu" />
+              </div>
+            </th>
+            <th class="centered-header" style="min-width: 20rem">
+              <div class="flex items-center">
+                Nombre de la Comisión
+                <p-columnFilter type="text" field="nombreComision" display="menu"></p-columnFilter>
+              </div>
+            </th>
+            <th class="centered-header" style="min-width: 12rem">
+              <div class="flex items-center">
+                Estado de la Comisión
+                <p-columnFilter type="text" field="nombreEstadoComision" display="menu"></p-columnFilter>
+              </div>
+            </th>
+            <th class="centered-header" style="min-width: 15rem">
+              <div class="flex items-center">
+                Departamento
+                <p-columnFilter type="text" field="nombreDepartamento" display="menu"></p-columnFilter>
+              </div>
+            </th>
+            <th class="centered-header" style="min-width: 20rem">
+              <div class="flex items-center">
+                Subcomisión Asociada
+                <p-columnFilter type="text" field="nombreSubComision" display="menu"></p-columnFilter>
+              </div>
+            </th>
+            <th class="centered-header" style="min-width: 10rem">
+              <div class="flex items-center">Integrantes</div>
+            </th>
+            <th class="centered-header" style="min-width: 12rem">
+              <div class="flex items-center">
+                Estado de la Subcomisión
+                <p-columnFilter type="text" field="nombreEstadoSubComision" display="menu"></p-columnFilter>
+              </div>
+            </th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-comision>
+          <tr>
+            <td class="centered-cell">
+              {{ comision.numero || "No proporcionado" }}
+            </td>
+            <td class="centered-cell">
+              {{ comision.nombreComision || "No proporcionado" }}
+            </td>
+            <td class="centered-cell">
+              <div class="flex flex-col items-center">
+                <p-button (click)="cargarDatos(comision, 'EstadoComision')" styleClass="icon-button"
+                  [disabled]="loadingDialogGeneral || !permisoActualizar" [rounded]="true" [outlined]="true"
+                  [icon]="
+                comision.idEstadoComision === 1  ? 'pi pi-check-circle' : comision.idEstadoComision === 2  ? 'pi pi-clock'   : 'bi bi-back' " [ngClass]="{ 'no-efecto': !permisoActualizar }">
+                </p-button>
+                <small class="font-semibold text-[#253a69] text-center mt-1" style="font-size: 0.80rem;">
+                  {{ comision.nombreEstadoComision || 'No proporcionado' }}
+                </small>
+              </div>
+            </td>
+
+            <td class="centered-cell">
+              {{ comision.nombreDepartamento || "No proporcionado" }}
+            </td>
+            <td class="centered-cell">
+              {{ comision.nombreSubComision || "No proporcionado" }}
+            </td>
+            <td class="centered-cell">
+              <div class="flex flex-col items-center">
+                <p-button (click)="cargarDatos(comision, 'Integrante')" styleClass="icon-buttons"
+                  [disabled]="!permisoActualizar || (loadingComisionId !== null && loadingComisionId !== comision.idSubComision)"
+                  [rounded]="true" [outlined]="true"
+                  [icon]="loadingComisionId === comision.idSubComision ? 'pi pi-spin pi-spinner' : 'pi pi-users'"
+                  [ngClass]="{'no-efecto': !permisoActualizar}">
+                </p-button>
+                <small class="font-semibold text-[#ea6427] text-center mt-1" style="font-size: 0.80rem;">
+                  Integrantes
+                </small>
+              </div>
+            </td>
+            <td class="centered-cell">
+              <div class="flex flex-col items-center">
+                <p-button (click)="cargarDatos(comision, 'EstadoSubComision')" styleClass="icon-button"
+                  [disabled]="loadingDialogGeneral || !permisoActualizar" [rounded]="true" [outlined]="true" [icon]="
+          comision.idEstadoSubComision === 1 
+            ? 'pi pi-check-circle' 
+            : comision.idEstadoSubComision === 2 
+              ? 'pi pi-clock' 
+              : 'bi bi-back'
+        " [ngClass]="{ 'no-efecto': !permisoActualizar }">
+                </p-button>
+                <small class="font-semibold text-[#253a69] text-center mt-1" style="font-size: 0.80rem;">
+                  {{ comision.nombreEstadoSubComision || 'No proporcionado' }}
+                </small>
+              </div>
+            </td>
+
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="9" class="centered-cell">No se encontraron datos.</td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <br />
+    </p-panel>
+  </div>
+}
+
+<!-------------- Dialog de Actualización Estado de Comisión ---------- -->
+<p-dialog header="Header" [(visible)]="visibleEstadoComision" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Estado de la Comisión Académica</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="ComisionForm">
+    <p-panel>
+      <div style="
+          padding: 0;
+          height: auto;
+          width: 100%;
+          position: relative;
+          text-align: center;
+        ">
+        Estás a punto de actualizar el estado de
+        <div>
+          <strong>{{ nombreComision }}</strong>
+        </div>
+      </div>
+      <br />
+      <div style="text-align: justify; padding: 0 1rem">
+        El estado actual de la comisión es
+        <strong>{{ estadoComision }}</strong>, esta acción cambiará el estado de la comisión a
+        <strong>{{ estadoComisionTemp === 1 ? " Inactivo" : " Activo" }}</strong>, lo que conlleva las siguientes
+        implicaciones:
+        <br />
+        <br />
+        <ol class="comision-list">
+          @if(estadoComisionTemp === 1){
+            <div>
+              <div style="text-align: center">
+                <strong>Inactivar la Comisión Académica</strong>
+              </div>
+              <br />
+              <ol class="subcomision-list">
+                <li>
+                  Deshabilitará el acceso completo al sistema para todos los
+                  miembros de la comisión.
+                </li>
+                <li>
+                  Suspendiendo la capacidad de iniciar sesión en la plataforma.
+                </li>
+                <li>
+                  Revocará todos los permisos asociados con la comisión y las
+                  subcomisiones relacionadas.
+                </li>
+                <li>
+                  Los usuarios de la subcomisión perderán su acceso a los
+                  servicios y funciones vinculadas a la misma.
+                </li>
+                <li>
+                  Cualquier operación pendiente en la comisión será suspendida
+                  automáticamente, sin posibilidad de ejecutar tareas adicionales
+                  ni procesar solicitudes.
+                </li>
+              </ol>
+            </div>
+          }
+
+          @if(estadoComisionTemp !== 1){
+            <div>
+              <div style="text-align: center">
+                <strong>Activar la Comisión Académica</strong>
+              </div>
+              <br />
+              <ol class="subcomision-list">
+                <li>
+                  Restaurará el acceso completo al sistema para todos los miembros
+                  de la comisión.
+                </li>
+                <li>
+                  Permitirá la capacidad de iniciar sesión nuevamente y acceder a
+                  los servicios y funciones de la plataforma.
+                </li>
+                <li>
+                  Se restablecerán todos los permisos revocados para la comisión y
+                  sus subcomisiones.
+                </li>
+                <li>
+                  Los usuarios de la subcomisión recuperarán su acceso a los
+                  recursos y funcionalidades asociados con sus roles.
+                </li>
+                <li>
+                  Las operaciones pendientes que se encontraban suspendidas podrán
+                  ser retomadas, agilizando el trabajo y las tareas dentro de la
+                  comisión.
+                </li>
+              </ol>
+            </div>
+          }
+
+        </ol>
+
+        Por favor, asegúrate de tener una comprensión completa de las
+        consecuencias de esta acción antes de proceder. Recuerda que esta
+        decisión tendrá repercusiones inmediatas en la operatividad de la
+        plataforma y de los usuarios involucrados. Si tienes alguna duda o
+        necesitas más información antes de continuar, no dudes en solicitarla.
+      </div>
+
+      <div style="text-align: center; padding-top: 1rem">
+        ¿Estás seguro de que deseas continuar con el proceso de actualización de
+        estado?
+      </div>
+
+      <p-footer style="display: flex; justify-content: center; gap: 10px">
+        <button pButton type="button" [disabled]="isLoadingComision" [icon]="
+            isLoadingComision ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'
+          " label="Aceptar" class="btn fw-bolder custom-1 w-full" (click)="actualizarEstadoComision()"></button>
+
+        <button pButton type="button" icon="bi bi-x-circle" label="Cancelar" class="btn fw-bolder custom-2-1 w-full"
+          [disabled]="isLoadingComision" (click)="visibleEstadoComision = false"></button>
+      </p-footer>
+    </p-panel>
+  </form>
+</p-dialog>
+
+<!-------------- Dialog de Actualización Estado de Comisión ---------- -->
+<p-dialog header="Header" [(visible)]="visibleEstadoSubComision" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Estado de la Subcomisión Académica</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="SubComisionForm">
+    <p-panel>
+      <div style="
+          padding: 0;
+          height: auto;
+          width: 100%;
+          position: relative;
+          text-align: center;
+        ">
+        Estás a punto de actualizar el estado de la
+        <div>
+          <strong>{{ nombreSubComision }}</strong>
+        </div>
+      </div>
+      <br />
+      <div style="text-align: justify; padding: 0 1rem">
+        El estado actual de la subcomisión es
+        <strong>{{ estadoSubComision }}</strong>, esta acción cambiará el estado de la subcomisión a
+        <strong>{{
+          estadoSubComisionTemp === 1 ? " Inactivo" : " Activo"
+          }}</strong>, lo que conlleva las siguientes implicaciones:
+        <br />
+        <br />
+        <ol class="comision-list">
+          @if(estadoSubComisionTemp === 1){
+            <div>
+              <div style="text-align: center">
+                <strong>Inactivar la Subcomisión Académica</strong>
+              </div>
+              <br />
+              <ol class="subcomision-list">
+                <li>
+                  Deshabilitará el acceso completo al sistema para todos los
+                  miembros de la subcomisión.
+                </li>
+                <li>
+                  Suspendiendo la capacidad de iniciar sesión en la plataforma.
+                </li>
+                <li>
+                  Cualquier operación pendiente en la subcomisión será suspendida
+                  automáticamente, sin posibilidad de ejecutar tareas adicionales
+                  ni procesar solicitudes.
+                </li>
+              </ol>
+            </div>
+          }
+
+          @if(estadoSubComisionTemp !== 1){
+            <div>
+              <div style="text-align: center">
+                <strong>Activar la Subomisión Académica</strong>
+              </div>
+              <br />
+              <ol class="subcomision-list">
+                <li>
+                  Restaurará el acceso completo al sistema para todos los miembros
+                  de la subcomisión.
+                </li>
+                <li>
+                  Permitirá la capacidad de iniciar sesión nuevamente y acceder a
+                  los servicios y funciones de la plataforma.
+                </li>
+                <li>
+                  Se restablecerán todos los permisos revocados para las
+                  subcomisiones.
+                </li>
+                <li>
+                  Los usuarios de la subcomisión recuperarán su acceso a los
+                  recursos y funcionalidades asociados con sus roles.
+                </li>
+                <li>
+                  Las operaciones pendientes que se encontraban suspendidas podrán
+                  ser retomadas, agilizando el trabajo y las tareas dentro de la
+                  comisión.
+                </li>
+              </ol>
+            </div>
+          }
+        </ol>
+
+        Por favor, asegúrate de tener una comprensión completa de las
+        consecuencias de esta acción antes de proceder. Recuerda que esta
+        decisión tendrá repercusiones inmediatas en la operatividad de la
+        plataforma y de los usuarios involucrados. Si tienes alguna duda o
+        necesitas más información antes de continuar, no dudes en solicitarla.
+      </div>
+
+      <div style="text-align: center; padding-top: 1rem">
+        ¿Estás seguro de que deseas continuar con el proceso de actualización de
+        estado?
+      </div>
+
+      <p-footer style="display: flex; justify-content: center; gap: 10px">
+        <button pButton type="button" [disabled]="isLoadingSubComision" [icon]="
+            isLoadingSubComision
+              ? 'pi pi-spin pi-spinner'
+              : 'bi bi-check2-circle'
+          " label="Aceptar" class="btn fw-bolder custom-1 w-full" (click)="actualizarEstadoSubComision()"></button>
+
+        <button pButton type="button" icon="bi bi-x-circle" label="Cancelar" class="btn fw-bolder custom-2-1 w-full"
+          [disabled]="isLoadingSubComision" (click)="visibleEstadoSubComision = false"></button>
+      </p-footer>
+    </p-panel>
+  </form>
+</p-dialog>
+
+<!-------------- Dialog de Integrantes SubComisión ---------- -->
+<p-dialog header="Header" [(visible)]="visibleIntegrante" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '90vw' }" [draggable]="false"
+  [resizable]="false" (onHide)="onCloseModal()">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Integrantes de la {{ nombreSubComision }}</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="ActualizarIntegrantesForm">
+    <p-panel>
+          <p-fluid>
+            <div>
+              <div class="table-container">
+                @if(!visibleActualizarIntegrante){
+                  <p-table [value]="integrantes" showGridlines
+                    [tableStyle]="{ 'min-width': '30rem' }" dataKey="id">
+                    <ng-template pTemplate="caption">
+                      <div class="toolbar">
+                        <!-- Botones a la izquierda -->
+                        <div class="centraciones">
+                          <!-- Contenedor de los botones a la izquierda -->
+                          <div class="left-buttons">
+                            <p-button label="Actualizar Integrantes" (click)="mostrarActualizacion()"
+                              [disabled]="loadingActualizarIntegrante || !permisoActualizar" [rounded]="true"
+                              [icon]="loadingActualizarIntegrante ? 'pi pi-spin pi-spinner' : 'pi pi-user-edit fw-bolder'"
+                              styleClass="btn fw-bolder custom-1" raised text>
+                            </p-button>
+                          </div>
+                        </div>
+                      </div>
+                    </ng-template>
+
+                    <ng-template pTemplate="header">
+                      <tr>
+                        <th class="centered-header" style="min-width: 7rem">
+                          N°
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Nombre
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Correo
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Número de Empleado
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Rol
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Contacto
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Estado
+                        </th>
+                      </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-integrante>
+                      <tr>
+                        <td class="centered-cell">{{ integrante.numero || 'No proporcionado' }}</td>
+                        <td class="centered-cell">{{ integrante.nombreCompleto || 'No proporcionado' }}</td>
+                        <td class="centered-cell">{{ integrante.correo || 'No proporcionado' }}</td>
+                        <td class="centered-cell">{{ integrante.numEmpleado || 'No proporcionado' }}</td>
+                        <td class="centered-cell">{{ integrante.nombreRol || 'No proporcionado' }}</td>
+                        <td class="centered-cell">{{ integrante.telefonos || 'No proporcionado' }}</td>
+                        <td class="centered-cell">{{ integrante.estadoUsuario || 'No proporcionado' }}</td>
+                      </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="emptymessage">
+                      <tr>
+                        <td colspan="7" class="centered-cell">
+                          No se encontraron datos.
+                        </td>
+                      </tr>
+                    </ng-template>
+                  </p-table>
+                }
+
+                @if(visibleActualizarIntegrante){
+                  <div>
+                    {{ 'Solicitudes disponibles: ' }}
+                    <p-iftalabel class="sm:col-span-2">
+                      <p-select [options]="solicitudes" formControlName="idSolicitud" optionLabel="nombreSolicitud"
+                        styleClass="w-full" optionValue="idSolicitud" [showClear]="true" [filter]="true"
+                        filterBy="nombreSolicitud" appendTo="body"
+                        [ngClass]="{'ng-invalid ng-dirty': ActualizarIntegrantesForm.get('idSolicitud')?.invalid && ActualizarIntegrantesForm.get('idSolicitud')?.touched}">
+                      </p-select>
+                      <label for="solicitud">Solicitud *</label>
+                    </p-iftalabel>
+                  </div>
+                }
+
+                <div class="space"></div>
+
+                @if(visibleActualizarIntegrante){
+                  <p-table [value]="integrante.controls" showGridlines
+                    [tableStyle]="{ 'min-width': '30rem' }" dataKey="id">
+                    <ng-template pTemplate="header">
+                      <tr>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Primer Nombre
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Segundo Nombre
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Primer Aapellido
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Segundo Apellido
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Correo
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Número de Empleado
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Contacto
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Rol
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Permiso
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                          Eliminar
+                        </th>
+                      </tr>
+                    </ng-template>
+
+                    <ng-template #body let-row let-i="rowIndex" let-editing="editing">
+                      <tr [formGroup]="row">
+                        <td pEditableColumn pEditableColumnField="primerNombre" class="centered-cell"
+                          [pEditableColumnDisabled]="!!row.get('primerNombre')?.value">
+                          <p-cellEditor>
+                            <ng-template #input>
+                              <input pInputText type="text" formControlName="primerNombre" appCapitalizable
+                                appValidaciones [nameValidation]="true" [maxlength]="25" placeholder="Primer Nombre" />
+                            </ng-template>
+                            <ng-template #output>
+                              <span [ngClass]="{ 'text-gray-400 italic': !row.get('primerNombre')?.value }">
+                                {{ row.get('primerNombre')?.value || 'Haga clic para editar' }}
+                              </span>
+                            </ng-template>
+                          </p-cellEditor>
+                        </td>
+                        <td pEditableColumn pEditableColumnField="segundoNombre" class="centered-cell"
+                          [pEditableColumnDisabled]="!!row.get('segundoNombre')?.value">
+                          <p-cellEditor>
+                            <ng-template #input>
+                              <input pInputText formControlName="segundoNombre" appCapitalizable appValidaciones
+                                [nameValidation]="true" [maxlength]="25" placeholder="Segundo Nombre" />
+                            </ng-template>
+                            <ng-template #output>
+                              <span [ngClass]="{ 'text-gray-400 italic': !row.get('segundoNombre')?.value }">
+                                {{ row.get('segundoNombre')?.value || 'Haga clic para editar' }}
+                              </span>
+                            </ng-template>
+                          </p-cellEditor>
+                        </td>
+                        <td pEditableColumn pEditableColumnField="primerApellido" class="centered-cell"
+                          [pEditableColumnDisabled]="!!row.get('primerApellido')?.value">
+                          <p-cellEditor>
+                            <ng-template #input>
+                              <input pInputText type="text" formControlName="primerApellido" appCapitalizable
+                                appValidaciones [nameValidation]="true" [maxlength]="25" placeholder="Primer Apellido" />
+                            </ng-template>
+                            <ng-template #output>
+                              <span [ngClass]="{ 'text-gray-400 italic': !row.get('primerApellido')?.value }">
+                                {{ row.get('primerApellido')?.value || 'Haga clic para editar' }}
+                              </span>
+                            </ng-template>
+                          </p-cellEditor>
+                        </td>
+                        <td pEditableColumn pEditableColumnField="segundoApellido" class="centered-cell"
+                          [pEditableColumnDisabled]="!!row.get('segundoApellido')?.value">
+                          <p-cellEditor>
+                            <ng-template #input>
+                              <input pInputText type="text" formControlName="segundoApellido" appCapitalizable
+                                appValidaciones [nameValidationTwoWords]="true" [maxlength]="25"
+                                placeholder="Segundo Apellido" />
+                            </ng-template>
+                            <ng-template #output>
+                              <span [ngClass]="{ 'text-gray-400 italic': !row.get('segundoApellido')?.value }">
+                                {{ row.get('segundoApellido')?.value || 'Haga clic para editar' }}
+                              </span>
+                            </ng-template>
+                          </p-cellEditor>
+                        </td>
+                        <td pEditableColumn pEditableColumnField="correo" class="centered-cell"
+                          [pEditableColumnDisabled]="!!row.get('correo')?.value">
+                          <p-cellEditor>
+                            <ng-template #input>
+                              <input pInputText type="text" formControlName="correo" [maxlength]="100"
+                                placeholder="Correo" />
+                            </ng-template>
+                            <ng-template #output>
+                              <span [ngClass]="{ 'text-gray-400 italic': !row.get('correo')?.value }">
+                                {{ row.get('correo')?.value || 'Haga clic para editar' }}
+                              </span>
+                            </ng-template>
+                          </p-cellEditor>
+                        </td>
+                        <td pEditableColumn pEditableColumnField="numEmpleado" class="centered-cell"
+                          [pEditableColumnDisabled]="!!row.get('numEmpleado')?.value">
+                          <p-cellEditor>
+                            <ng-template #input>
+                              <input pInputText type="text" formControlName="numEmpleado" [onlyNumbersValidation]="true"
+                                appValidaciones [maxlength]="10" placeholder="Número de empleado" />
+                            </ng-template>
+                            <ng-template #output>
+                              <span [ngClass]="{ 'text-gray-400 italic': !row.get('numEmpleado')?.value }">
+                                {{ row.get('numEmpleado')?.value || 'Haga clic para editar' }}
+                              </span>
+                            </ng-template>
+                          </p-cellEditor>
+                        </td>
+                        <td pEditableColumn pEditableColumnField="telefonos" class="centered-cell"
+                          [pEditableColumnDisabled]="!!row.get('telefonos')?.value">
+                          <p-cellEditor>
+                            <ng-template #input>
+                              <input pInputText type="text" formControlName="telefonos" [onlyNumbersValidation]="true"
+                                appValidaciones [maxlength]="10" placeholder="Contacto Telefónico" />
+                            </ng-template>
+                            <ng-template #output>
+                              <span [ngClass]="{ 'text-gray-400 italic': !row.get('telefonos')?.value }">
+                                {{ row.get('telefonos')?.value || 'Haga clic para editar' }}
+                              </span>
+                            </ng-template>
+                          </p-cellEditor>
+                        </td>
+                        <td class="centered-cell">
+                          <p-iftalabel class="sm:col-span-2">
+                            <p-select formControlName="rol" optionLabel="rol" [options]="rolOptions" optionValue="idRol"
+                              [showClear]="true" [filter]="true" filterBy="rol" appendTo="body" styleClass="w-full"
+                              (onChange)="onRolChange($event, i)">
+                            </p-select>
+                            <label>Rol</label>
+                          </p-iftalabel>
+                          <ng-template #output>
+                            <span [ngClass]="{ 'text-gray-400 italic': !row.get('rol')?.value }">
+                              {{ row.get('rol')?.value || 'Haga clic para editar' }}
+                            </span>
+                          </ng-template>
+                        </td>
+                        <td class="centered-cell">
+                          <p-iftalabel class="sm:col-span-2">
+                            <p-select formControlName="permiso" optionLabel="rol" [options]="permisoOptions"
+                              optionValue="idRol" [showClear]="true" [filter]="true" filterBy="rol" appendTo="body"
+                              styleClass="w-full">
+                            </p-select>
+                            <label>Permiso</label>
+                          </p-iftalabel>
+                          <ng-template #output>
+                            <span [ngClass]="{ 'text-gray-400 italic': !row.get('permiso')?.value }">
+                              {{ row.get('permiso')?.value || 'Haga clic para editar' }}
+                            </span>
+                          </ng-template>
+                        </td>
+                        <td class="centered-cell" class="centered-cell">
+                          <button type="button" pButton icon="pi pi-trash" (click)="removeRow(i)"
+                            [disabled]="isLoadingIntegrante" class="p-button-rounded p-button-danger">
+                          </button>
+                        </td>
+                      </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="footer">
+                      <tr>
+                        <td colspan="10">
+                          <button type="button" (click)="addRow()" pButton icon="pi pi-plus" label="Agregar Usuario"
+                            [disabled]="isLoadingIntegrante" class="p-button-text"></button>
+                        </td>
+                      </tr>
+                    </ng-template>
+
+                    <ng-template pTemplate="emptymessage">
+                      <tr>
+                        <td colspan="8" class="centered-cell">
+                          No se encontraron datos.
+                        </td>
+                      </tr>
+                    </ng-template>
+                  </p-table>
+                }
+              </div>
+            </div>
+
+            @if(visibleActualizarIntegrante){
+              <div class="pt-4">
+                <p-button label="Enviar" (onClick)="actualizarIntegrantes()"
+                  [disabled]="ActualizarIntegrantesForm.invalid || isLoadingIntegrante"
+                  [icon]="isLoadingIntegrante ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                  styleClass="btn fw-bolder custom-1 w-full">
+                </p-button>
+              </div>
+            }
+          </p-fluid>
+    
+    </p-panel>
+  </form>
+</p-dialog>

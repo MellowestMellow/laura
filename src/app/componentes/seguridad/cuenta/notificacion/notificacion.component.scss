@@ -1,0 +1,66 @@
+/* ------------------------------------------------------------------------------------------------- */
+/* Variables */
+/* ------------------------------------------------------------------------------------------------- */
+$primary-color: #003578;
+$secondary-color: #253a69;
+$light-gray: #d3d3d3;
+$border-color: #dee2e6;
+$error-color: red;
+$background-light: #f8f9fa;
+$background-header: #e9ecef;
+$text-dark: #495057;
+$text-black: #000;
+$text-white: #fff;
+
+.centered-header {
+    text-align: center;
+    vertical-align: middle;
+
+    .flex {
+        justify-content: center;
+    }
+}
+
+.centered-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+:host {
+    ::ng-deep {
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .space {
+            margin-bottom: 25px !important;
+        }
+
+        .label-margin {
+            font-size: 11px !important;
+            margin-right: 50px !important;
+        }
+
+        .p-button.custom-button-centerss {
+            position: absolute;
+            left: 46.5%;
+            transform: translateX(-50%);
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid $light-gray !important;
+            border-radius: 0.50rem !important;
+            font-weight: 500 !important;
+            height: 41px;
+            white-space: nowrap;
+            background-color: $secondary-color !important;
+            color: $text-white !important;
+            justify-content: center;
+        }
+    }
+}
+
+.not-leido {
+  background-color: #e7f0fa; /* Azul claro */
+}

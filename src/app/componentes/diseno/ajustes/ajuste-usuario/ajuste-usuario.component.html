@@ -1,0 +1,54 @@
+<br>
+<br>
+<br>
+
+<div class="custom-container">
+    <div class="toolbar">
+        <div class="right-search">
+            <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true" styleClass="btn custom-slash"
+                class="responsive" (click)="clearSearch()" [style]="{'background-color':'white'}" />
+
+            <p-iconField iconPosition="right">
+                <p-inputIcon class="pi pi-search" />
+                <input pInputText type="text" [(ngModel)]="searchTerm" placeholder="Buscar ajuste"
+                    (input)="searchOptions()" />
+            </p-iconField>
+        </div>
+    </div>
+
+    @if (filteredAjustes.length > 0) {
+    <p-carousel [value]="filteredAjustes" [numVisible]="searchTerm.trim() ? 1 : 2" [numScroll]="1" [circular]="true"
+        [showNavigators]="false" [autoplayInterval]="6000" [responsiveOptions]="responsiveOptions">
+
+        <ng-template let-ajuste #item>
+            <div class="card-container border rounded m-2 p-4 h-full"
+                [ngClass]="{'bg-white': !ajuste.isBlue, 'bg-blue-336699': ajuste.isBlue}">
+                <div class="text-center mb-3">
+                    <i class="{{ ajuste.icono }} icon-size text-primary-600"></i>
+                </div>
+                <div class="mb-2 font-bold text-xl text-center">
+                    {{ ajuste.nombre }}
+                </div>
+                <div class="text-sm text-center mb-4 descripcion-texto">
+                    {{ ajuste.descripcion }}
+                </div>
+                <div class="text-center">
+                    <p-button label="Gestionar Módulo" styleClass="btn fw-bolder custom-1 w-full"
+                        (click)="goToModule(ajuste)" />
+                </div>
+            </div>
+        </ng-template>
+    </p-carousel>
+    }
+
+
+    <!-- Mensaje si no hay resultados -->
+    @if (filteredAjustes.length === 0) {
+    <div class="no-results text-center p-4">
+        <i class="pi pi-search icono-error mb-3"></i>
+        <p class="mensaje-error">
+            No se encontraron resultados para "{{ searchTerm }}".
+        </p>
+    </div>
+    }
+</div>

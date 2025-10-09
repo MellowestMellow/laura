@@ -1,0 +1,44 @@
+[
+        {
+            "idCalendario": 1,
+            "idUnidadAcademica": 4,
+            "nombreUnidadAcademica": "Vicerrectoría Académica de Orientación y Asuntos Estudiantiles (VOAE)",
+            "idProceso": 2,
+            "proceso": "Mega Feria de la Salud",
+            "descripcion": "Mega Feria de la Salud 09 de abril 2025 y 10 de septiembre 2025",
+            "fechaInicio": "2025-07-09T16:41:51.712Z",
+            "fechaFin": "2025-07-10T16:41:51.712Z"
+        },
+        {
+            "idCalendario": 1,
+            "idUnidadAcademica": 1,
+            "nombreUnidadAcademica": "Vicerrectoría Académica de Orientación y Asuntos Estudiantiles (VOAE)",
+            "idProceso": 3,
+            "proceso": "Día Internacional del Voluntariado",
+            "descripcion": "Día Internacional del Voluntariado 05 de diciembre 2025",
+            "fechaInicio": "2025-07-05T00:00:00.712Z",
+            "fechaFin": "2025-07-05T23:59:00.712Z"
+        },
+        {
+            "idCalendario": 1,
+            "idUnidadAcademica": 2,
+            "nombreUnidadAcademica": "Dirección de Ingreso, Permanencia y Promoción (DDIP)",
+            "idProceso": 4,
+            "proceso": "Cancelación excepcional de asignaturas",
+            "descripcion": "Cancelación excepcional de asignaturas por Coordinador de Carrera",
+            "fechaInicio": "2025-07-13T16:41:51.712Z",
+            "fechaFin": "2025-07-02T16:41:51.712Z"
+        },
+        {
+            "idCalendario": 1,
+            "idUnidadAcademica": 3,
+            "nombreUnidadAcademica": "Dirección de Ingreso, Permanencia y Promoción (DDIP)",
+            "idProceso": 5,
+            "proceso": "Cancelación excepcional de asignaturas",
+            "descripcion": "Cancelación excepcional de asignaturas por Coordinador de Carrera",
+            "fechaInicio": "2025-07-07T16:41:51.712Z",
+            "fechaFin": "2025-08-28T16:41:51.712Z"
+        }
+    ]
+
+

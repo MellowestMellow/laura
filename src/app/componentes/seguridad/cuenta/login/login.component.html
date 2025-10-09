@@ -1,0 +1,263 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+<div class="bodys">
+
+  <div class="login-wrapper">
+    <div class="image-containers">
+      <div>
+        <p-carousel [value]="images" [numVisible]="1" [numScroll]="1" [circular]="true" [autoplayInterval]="8000"
+          [showIndicators]="false" [showNavigators]="false">
+          <ng-template pTemplate="item" let-image>
+            <div class="carousel-item">
+              <p-image [src]="image.src" [alt]="image.alt" width="350" class="responsive-image"></p-image>
+            </div>
+          </ng-template>
+        </p-carousel>
+      </div>
+    </div>
+
+
+    <!-- Contenedor de Login -->
+    @if (!mostrarOtp && !verAutoregistro && !verLogin) {
+    <div class="login-container">
+      <br>
+      <div class="boton-container">
+        <p-button icon="pi pi-angle-double-left" (click)="regresarPanel()" variant="outlined"
+          pTooltip="Regresar a Inicio" tooltipStyleClass="tooltip-custom-1" />
+      </div>
+      <br>
+      <div class="login-images">
+        <p-image src="LOGO_VRA.png" width="220"></p-image>
+      </div>
+      <br>
+      <div class="centrado">
+        <h1 class=""><strong>Iniciar Sesión</strong></h1>
+        <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+          <div>
+            <br>
+            <input type="email" id="login-correo" [(ngModel)]="correo" name="correo" #correoInput="ngModel" pInputText
+              placeholder="Correo Electrónico *" maxlength="50" required="true" [style]="{'width':'80%'}"
+              required="email" />
+            @if (correoInput.invalid && correoInput.touched && correo !== 'Administrador-SIGDD') {
+            <div class="">
+            </div>
+            }
+            <br>
+          </div>
+          <div>
+            <p-password type="password" id="password" [(ngModel)]="contrasena" name="password" #passwordInput="ngModel"
+              [minlength]="8" [maxlength]="50" inputStyleClass="largos" placeholder="Contraseña *"
+              [style]="{'width':'80%'}" required="true" [toggleMask]="true" [feedback]="false" />
+          </div>
+          <br>
+          <p-button type="submit" styleClass="largo" [disabled]="loading || !correoInput.valid || !passwordInput.valid"
+            [label]="loading ? 'Cargando...' : (errorMessage || 'Iniciar Sesión')">
+          </p-button>
+        </form>
+        <br>
+
+        <br />
+        <p-button styleClass="link-button" (onClick)="onOlvidasteContrasena()" [rounded]="true" [text]="true">¿Olvidaste
+          tu contraseña?</p-button>
+        <br />
+        <br />
+      </div>
+    </div>
+    }
+
+    <!-- Recuperar contraseña (Formulario para enviar código al correo) -->
+    @if (mostrarOtp && !mostrarOtpInput && !mostrarResetPassword) {
+    <div class="login-container">
+      <br>
+      <div class="boton-container">
+        <p-button icon="pi pi-angle-double-left" (click)="regresarLogin()" variant="outlined" />
+      </div>
+      <br>
+      <div class="login-images">
+        <p-image src="LOGO_VRA.png" width="220"></p-image>
+      </div>
+      <br>
+      <div class="centrado">
+        <h1 class=""><strong>Restablecer Contraseña</strong></h1>
+        <br>
+        <form (ngSubmit)="onVerificarCorreo()" #otpForm="ngForm">
+          <!-- Campo de correo, se esconde cuando el OTP ha sido enviado -->
+          @if (!codigoEnviado) {
+          <div>
+            <input type="email" id="otp-correo" [(ngModel)]="correo" name="correo" #correoInput="ngModel" pInputText
+              placeholder="Correo Electrónico *" maxlength="50" required="true" required="email"
+              tooltipPosition="bottom" [style]="{'width':'80%'}" />
+
+            @if (correoInput.invalid && correoInput.touched) {
+            <div class="">
+              ** Ingresa un valor en este campo.
+            </div>
+            }
+          </div>
+          }
+          <br>
+          <!-- Botón para enviar código, se esconde cuando el OTP ha sido enviado -->
+          @if (!codigoEnviado) {
+          <p-button type="submit" styleClass="largo" [disabled]="otpForm.invalid || loading"
+            [label]="loading ? 'Cargando...' : (errorMessage || 'Buscar')">
+          </p-button>
+          }
+        </form>
+
+        <!-- Sección que aparece cuando el OTP ha sido enviado -->
+        @if (codigoEnviado) {
+        <div>
+          <h4 style="white-space: pre-wrap;" class="centrado-otp">
+            Escribe el código enviado a tu dirección de correo electrónico.
+          </h4>
+
+          <div class="flex justify-center" style="margin-top: 20px;">
+            <p-inputOtp [length]="6" [integerOnly]="true" id="codigo-otp" [(ngModel)]="codigoOtp"
+              #codigoOtpInput="ngModel" name="codigoOtp" required="true" />
+          </div>
+
+          <br>
+
+          <p-button (click)="onVerificarOTP()" type="submit" styleClass="largo"
+            [disabled]="!codigoOtp || codigoOtp.length < 6 || loading"
+            [label]="loading ? 'Cargando...' : (errorMessage || 'Verificar')">
+          </p-button>
+          <br />
+          <br />
+
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Cambiar contraseña (Solo se muestra si el OTP es verificado) -->
+    @if (otpVerificado && !mostrarResetPassword) {
+    <div class="login-container">
+      <br>
+      <div class="login-images">
+        <p-image src="LOGO_VRA.png" width="220"></p-image>
+      </div>
+      <br>
+      <div class="centrado">
+        <br>
+        <a class="back-arrow">
+          <i class="pi pi-times"></i>
+        </a>
+
+        <h1 class=""><strong>Cambiar Contraseña</strong></h1>
+        <form (ngSubmit)="onCambiarContrasena()" #changePasswordForm="ngForm">
+          <div>
+            <br>
+            <p-password type="password" id="nueva-contrasena" [(ngModel)]="nuevaContrasena" name="nuevaContrasena"
+              #passwordInput="ngModel" [minlength]="8" [maxlength]="50" placeholder="Nueva Contraseña *"
+              (ngModelChange)="validarContrasena()" promptLabel="Elige una contraseña" [feedback]="false"
+              [style]="{'width':'80%'}" required="true" tooltipPosition="top" inputStyleClass="largos"
+              [toggleMask]="true" />
+            <br>
+            <br>
+            @if (passwordInput.invalid && (passwordInput.touched || passwordInput.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              Ingresa un valor en este campo.
+            </div>
+            }
+
+            @if (nuevaContrasenaLargo && (passwordInput.touched || passwordInput.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              La contraseña debe tener un mínimo de 8 caracteres.
+            </div>
+            }
+
+            @if (nuevaContrasenaMayuscula && (passwordInput.touched || passwordInput.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              La contraseña debe incluir al menos una letra en mayúscula.
+            </div>
+            }
+
+            @if (nuevaContrasenaNumero && (passwordInput.touched || passwordInput.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              La contraseña debe contener al menos un dígito numérico.
+            </div>
+            }
+
+            @if (nuevaContrasenaEspecial && (passwordInput.touched || passwordInput.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              La contraseña debe tener al menos un símbolo especial.
+            </div>
+            }
+          </div>
+          <br>
+          <div>
+            <p-password type="password" #passwordInputs="ngModel" id="confirmar-contrasena" [feedback]="false"
+              [(ngModel)]="confirmarContrasena" name="confirmarContrasena" placeholder="Confirmar Nueva Contraseña *"
+              required [minlength]="8" [maxlength]="50" promptLabel="Elige una contraseña"
+              (ngModelChange)="validarContrasenas()" [style]="{'width':'80%'}" required="true" tooltipPosition="bottom"
+              inputStyleClass="largos" [toggleMask]="true" />
+            <br>
+            <br>
+            @if (passwordInputs.invalid && (passwordInputs.touched || passwordInputs.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              Ingresa un valor en este campo.
+            </div>
+            }
+
+            @if (confirmarNuevaContrasenaLargo && (passwordInputs.touched || passwordInputs.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              La confirmación de la contraseña debe tener un mínimo de 8 caracteres.
+            </div>
+            }
+
+            @if (confirmarNuevaContrasenaMayuscula && (passwordInputs.touched || passwordInputs.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              La confirmación de la contraseña debe incluir al menos una letra en mayúscula.
+            </div>
+            }
+
+            @if (confirmarNuevaContrasenaNumero && (passwordInputs.touched || passwordInputs.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              La confirmación de la contraseña debe contener al menos un dígito numérico.
+            </div>
+            }
+
+            @if (confirmarNuevaContrasenaEspecial && (passwordInputs.touched || passwordInputs.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              La confirmación de la contraseña debe tener al menos un símbolo especial.
+            </div>
+            }
+
+            @if (confirmarContrasena !== nuevaContrasena && (passwordInputs.touched || passwordInputs.dirty)) {
+            <div class="error-messages">
+              <span>**</span>
+              Las contraseñas no coinciden.
+            </div>
+            }
+          </div>
+          <br>
+
+          <p-button type="submit" styleClass="largo" [disabled]="
+              changePasswordForm.invalid || loading || !nuevaContrasena || !confirmarContrasena || 
+              (nuevaContrasena !== confirmarContrasena) || nuevaContrasenaLargo || nuevaContrasenaMayuscula || 
+              nuevaContrasenaNumero || nuevaContrasenaEspecial ||confirmarNuevaContrasenaLargo || confirmarNuevaContrasenaMayuscula || 
+              confirmarNuevaContrasenaNumero ||  confirmarNuevaContrasenaEspecial"
+            [label]="loading ? 'Cargando...' : (errorMessage || 'Cambiar Contraseña')">
+          </p-button>
+          <br />
+          <br />
+
+        </form>
+      </div>
+    </div>
+    }
+
+  </div>
+
+</div>

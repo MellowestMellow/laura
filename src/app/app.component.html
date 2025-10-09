@@ -1,0 +1,36 @@
+<div class="main-container">
+
+  @if (showHeaderFooter) {
+    <app-header></app-header>
+  }
+
+  <main>
+    <app-spinner></app-spinner>
+    <router-outlet></router-outlet>
+  </main>
+
+  @if (showHeaderFooter) {
+    <app-footer></app-footer>
+  }
+
+</div>
+
+
+<!-- <div class="main-container">
+
+  @if (showHeaderFooter) {
+    <app-header></app-header>
+  }
+
+  <main>
+    @if (isLoadingPage) {
+      <app-spinner></app-spinner>
+    }
+    <router-outlet (activate)="onChildComponentActivated($event)"></router-outlet>
+  </main>
+
+  @if (showHeaderFooter) {
+    <app-footer></app-footer>
+  }
+
+</div> -->
