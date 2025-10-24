@@ -123,8 +123,8 @@
           <td class="centered-cell">{{ bitacora.accion || 'No proporcionado' }}</td>
           <td class="centered-cell">{{ bitacora.IPAddress || 'No proporcionado' }}</td>
           <td class="centered-cell">
-            {{ bitacora.fechaRegistro ? (bitacora.fechaRegistro | date: "dd 'de' MMMM 'del' yyyy" : 'es') : 'No
-            proporcionado' }}
+{{ bitacora.fechaRegistro ? (bitacora.fechaRegistro | date: 'dd/MM/yyyy HH:mm:ss' : 'es') : 'No proporcionado' }}
+
           </td>
 
         </tr>
