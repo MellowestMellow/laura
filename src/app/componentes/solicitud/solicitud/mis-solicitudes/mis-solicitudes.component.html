@@ -1,0 +1,713 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+
+@if (loadingtable) {
+<div class="flex flex-col items-center justify-center text-center h-full p-4" style="background-color: transparent;">
+  <div class="custom-spinner mb-4"></div>
+</div>
+}
+
+
+@if (!loadingtable) {
+<div class="custom-container">
+  <p-panel class="transparente">
+    <ng-template pTemplate="header">
+      <div class="header-container title-header gap-2">
+        <span> Mis Solicitudes </span>
+      </div>
+    </ng-template>
+    <br />
+
+    <p-table #dt [value]="solicitud" [paginator]="true" columnResizeMode="expand" showGridlines
+      [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [rowsPerPageOptions]="[5, 10, 25]" dataKey="id"
+      [globalFilterFields]="[
+        'ticket',
+        'nombreSolicitud',
+        'estadoSolicitud',
+        'fechaFormateada'
+      ]">
+      <ng-template pTemplate="caption">
+        <div class="toolbar">
+          <!-- Botones a la izquierda -->
+          <div class="centraciones">
+            <!-- Contenedor de los botones a la izquierda -->
+            <div class="left-buttons">
+              <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder" label="Reportes"
+                variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised text />
+              <p-popover #op>
+                <div class="flex flex-col gap-4">
+                  <div>
+                    <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                      styleClass="btn fw-bolder custom-2-1 w-full" (click)="exportarPDF()" raised text>
+                    </p-button>
+                  </div>
+                  <div>
+                    <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                      styleClass="btn fw-bolder custom-2-2 w-full" (click)="exportarExcel()" raised text>
+                    </p-button>
+                  </div>
+                </div>
+              </p-popover>
+            </div>
+
+            <!-- Contenedor de los botones a la derecha -->
+            <div class="right-search">
+              <p-button label="Limpiar" (click)="clear(dt)" icon="pi pi-filter-slash" [outlined]="true"
+                styleClass="btn custom-slash" class="responsive" />
+
+              <p-iconField iconPosition="right">
+                <p-inputIcon class="pi pi-search" />
+                <input pInputText type="text" class="custom-search-input" placeholder="Buscar Solicitud"
+                  [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dt)" />
+              </p-iconField>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <!-- Primera fila de encabezado -->
+        <tr>
+          <th style="width: 3rem" rowspan="2">N°</th>
+          <th class="centered-header" style="min-width: 10rem" rowspan="2">
+            <div class="flex items-center">
+              Ticket
+              <p-columnFilter type="text" field="ticket" display="menu" />
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 15rem" rowspan="2">
+            <div class="flex items-center">
+              Nombre de la Solicitud
+              <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 12rem" rowspan="2">
+            <div class="flex items-center">
+              Estado de la Solicitud
+              <p-columnFilter type="text" field="estadoSolicitud" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 12rem" rowspan="2">
+            <div class="flex items-center">
+              Fecha de Registro
+              <p-columnFilter type="date" field="fechaRegistro" display="menu"></p-columnFilter>
+            </div>
+          </th>
+
+          <th class="centered-header" style="min-width: 8rem" [attr.colspan]="mostrarColumnaSalida ? 2 : 1">
+            <div class="flex items-center">Archivos</div>
+          </th>
+          <th class="centered-header" style="min-width: 8rem" rowspan="2">
+            <div class="flex align-items-center">Acciones</div>
+          </th>
+        </tr>
+
+        <!-- Segunda fila con subcolumnas -->
+        <tr>
+          <th class="centered-header">Enviados</th>
+          @if (mostrarColumnaSalida) {
+          <th class="centered-header">Recibidos</th>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+        <tr>
+          <td class="text-center">{{ dt.first + rowIndex + 1 }}</td>
+          <td class="centered-cell">{{ item.ticket }}</td>
+          <td class="centered-cell">{{ item.nombreSolicitud }}</td>
+          <td class="centered-cell">
+            <div style="display: flex; flex-direction: column; align-items: center">
+              <p-button styleClass="icon-button" [rounded]="true" [outlined]="true" icon="bi bi-ui-checks"
+                [disabled]="loadingEtapa" [icon]="
+                  loadingEtapa ? 'pi pi-spin pi-spinner' : 'bi bi-ui-checks'
+                " pTooltip="Ver estados por etapa" tooltipStyleClass="tooltip-custom-7"
+                (onClick)="mostrarDetalleEstados(item)">
+              </p-button>
+
+              <small class="font-semibold text-[#253a69] text-center" style="font-size: 0.8rem; margin-top: 10px">
+                Estados
+              </small>
+            </div>
+          </td>
+
+          <td class="centered-cell">{{ item.fechaFormateada }}</td>
+
+          <td class="centered-cell">
+            <div class="flex justify-center items-center gap-2">
+              @for (archivo of item.archivosEntrada; track archivo) {
+              <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+                [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-arrow-up'"
+                (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+              </p-button>
+              <p-popover #filePopover>
+                <div [ngClass]="{
+                  'grid-cols-1': archivos.length === 1,
+                  'grid-cols-2': archivos.length === 2,
+                  'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': archivos.length === 3,
+                  'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': archivos.length >= 4
+                }" class="grid gap-4 p-4">
+                  @if (archivos && archivos.length > 0) {
+                  @for (archivo of archivos; track archivo) {
+                  <div
+                    class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                    (click)="descargarArchivo(archivo.url, archivo.nombre)">
+                    <p-button styleClass="icon-button" [rounded]="true" [outlined]="true" [style.font-size]="'1.25rem'"
+                      [icon]="'bi bi-file-earmark-text'">
+                    </p-button>
+                    <span class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                      title="{{ archivo.nombre }}">
+                      {{ archivo.nombre }}
+                    </span>
+                  </div>
+                  }
+                  } @else {
+                  <p class="text-xs text-muted text-center col-span-2">
+                    No hay archivos disponibles.
+                  </p>
+                  }
+                </div>
+              </p-popover>
+              } 
+              @if (item.archivosEntrada && item.archivosEntrada.length === 0) {
+              <p-button styleClass="icon-button p-button-secondary" [outlined]="true" [rounded]="true"
+                icon="pi pi-times-circle" pTooltip="No disponible" tooltipPosition="top" 
+                tooltipStyleClass="tooltip-custom-7" disabled>
+              </p-button>
+              }
+            </div>
+          </td>
+
+
+          <!-- Columna: (Emitidos) -->
+          @if (mostrarColumnaSalida) {
+          <td class="centered-cell">
+            <div class="flex justify-center items-center gap-2">
+
+              @if (item.archivosSalida && item.archivosSalida.length > 0) {
+              @for (archivo of item.archivosSalida; track archivo) {
+              <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+                [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-arrow-down'"
+                (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+              </p-button>
+              <p-popover #filePopover>
+                <div [ngClass]="{
+                'grid-cols-1': archivos.length === 1,
+                'grid-cols-2': archivos.length === 2,
+                'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': archivos.length === 3,
+                'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': archivos.length >= 4
+              }" class="grid gap-4 p-4">
+                  @if (archivos && archivos.length > 0) {
+                  @for (archivo of archivos; track archivo) {
+                  <div
+                    class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                    (click)="descargarArchivo(archivo.url, archivo.nombre)">
+                    <p-button styleClass="icon-button" [rounded]="true" [outlined]="true" [style.font-size]="'1.25rem'"
+                      [icon]="'bi bi-file-earmark-text'">
+                    </p-button>
+                    <span class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                      title="{{ archivo.nombre }}">
+                      {{ archivo.nombre }}
+                    </span>
+                  </div>
+                  }
+                  } @else {
+                  <p class="text-xs text-muted text-center col-span-2">
+                    No hay archivos disponibles.
+                  </p>
+                  }
+                </div>
+              </p-popover>
+              }
+              } @else {
+              <p-button styleClass="icon-button p-button-secondary" [outlined]="true" [rounded]="true"
+                icon="pi pi-times-circle" pTooltip="No disponible" tooltipPosition="top" 
+                tooltipStyleClass="tooltip-custom-7" disabled>
+              </p-button>
+              }
+            </div>
+          </td>
+          }
+
+
+          <td class="centered-cell">
+            <div class="flex justify-center items-center">
+              <p-button (onClick)="op.toggle($event)" [icon]="
+                  tieneEstado(item, [8, 11, 14, 17])
+                    ? 'pi pi-bell'
+                    : 'pi pi-angle-double-down pi-fw'
+                " [styleClass]="
+                  'btn fw-bolder custom-8 ' +
+                  (tieneEstado(item, [8, 11, 14, 17]) ? 'glow' : '')
+                " raised text>
+              </p-button>
+
+              <p-popover #op>
+                <div class="flex flex-col gap-4">
+                  <p-button [badge]="
+                      tieneEstado(item, [8, 11, 14, 17]) ? '!' : undefined
+                    " [loading]="loadingHistorial" [disabled]="loadingHistorial" badgeSeverity="warn"
+                    label="Seguimiento" icon="bi bi-hourglass-split"
+                    (onClick)="mostrarHistorials(item.idSolicitud, item.ticket)"
+                    styleClass="btn fw-bolder custom-7 w-full"></p-button>
+
+                  <p-button label="Seguimiento Archivos" [disabled]="loadingDialogGeneral"
+                    [icon]="loadingDialogGeneral ? 'pi pi-spin pi-spinner' : 'pi pi-folder fw-medium'"
+                    styleClass="btn fw-bolder custom-1 w-full" (click)="abrirHistorial(item.idSolicitud, item.ticket)">
+                  </p-button>
+
+                </div>
+                @if(tieneAsignado(item.idSolicitud)){
+                  <br>
+                  <div class="flex flex-col gap-4">
+                    <p-button [disabled]="isLoadingAsignado" badgeSeverity="warn"
+                        label="Asignado" icon="pi pi-user-plus"
+                        (onClick)="mostrarAsignado(item.idSolicitud)"
+                        styleClass="btn fw-bolder custom-1 w-full"></p-button>
+                  </div>
+                }
+              </p-popover>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="centered-cell">No se encontraron datos.</td>
+        </tr>
+      </ng-template>
+    </p-table>
+    <br />
+  </p-panel>
+</div>
+}
+
+<!-------------- Dialog de Revision de Ticket Antiguo---------- -->
+<!-- <p-dialog header="Header" [(visible)]="visibleRevision" [modal]="true" focusOnShow="false"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false" [blockScroll]="true" [contentStyle]="{ 'max-height': '70vh', 'overflow-y': 'auto' }"
+  (onHide)="hideModalRevision()">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">
+        Revisión {{ tipoRevision === "PRE" ? "Preliminar" : "Final" }}
+      </h2>
+    </div>
+  </ng-template>
+
+  <form>
+    <p-panel>
+      <div style="text-align: justify; padding: 0 1rem">
+        El ticket <strong>{{ solicitudestado.ticket }}</strong>, identificado bajo el título
+        <strong>{{ solicitudestado.nombreSolicitud }}</strong>. <br /><br />
+      </div>
+      <div style="
+          padding: 0;
+          height: auto;
+          width: 100%;
+          position: relative;
+          text-align: center;
+        ">
+        <strong>¿Desea proceder con el envío para su evaluación formal en este
+          momento?</strong>
+      </div>
+
+      
+      <div style="text-align: justify; padding: 0 1rem">
+        <br />
+
+        @if (tipoRevision === 'PRE') {
+        <p>
+          El responsable designado realizará una revisión preliminar para
+          asegurarse de que la solicitud esté debidamente completada. Esta
+          etapa no constituye aún una evaluación final del contenido.
+        </p>
+        <br />
+        <p>
+          Si se detectan inconsistencias o datos faltantes, se le notificará
+          para que realice las correcciones necesarias antes de la revisión
+          final.
+        </p>
+        }
+
+        @if (tipoRevision === 'FIN') {
+        @if (idestadoActual === 8) {
+        <p>
+          Este ticket se encuentra actualmente en estado de
+          <strong>Corrección</strong> en todas las etapas del proceso.
+        </p>
+        <br />
+        <p>
+          Al confirmar esta acción,
+          <strong>se enviarán las 3 etapas</strong> (Diagnóstico, Plan de
+          Estudios y Factibilidad) a revisión formal.
+        </p>
+        <br />
+        <p>
+          Asegúrese de que todas las observaciones han sido consideradas
+          antes de continuar, ya que no se podrán hacer más modificaciones
+          hasta que se emita una resolución formal.
+        </p>
+        } @else {
+        <p>
+          Esta es la revisión final del ticket. El responsable evaluará si
+          cumple con todos los requisitos establecidos.
+        </p>
+        <br />
+        <p>
+          Una vez enviado, no se podrán hacer más modificaciones hasta que
+          se emita una resolución formal sobre el estado de la solicitud.
+        </p>
+        }
+        }
+      </div>
+
+      <div class="space"></div>
+
+      <app-contador [(texto)]="observacion" [limite]="limiteCaracteres" [showError]="showError"></app-contador>
+
+      
+      <p-footer style="display: flex; justify-content: center; gap: 10px">
+        <button pButton type="button" [disabled]="loadingRevision || observacion.length > limiteCaracteres" [icon]="
+            loadingRevision ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'
+          " label="Enviar" class="btn fw-bolder custom-1 w-full" (click)="confirmarEnvioRevision()"></button>
+
+        <button pButton type="button" [disabled]="loadingRevision" [icon]="
+            loadingRevisionCancelar ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle'
+          " label="Cancelar" class="btn fw-bolder custom-2-1 w-full" (click)="visibleRevision = false"></button>
+      </p-footer>
+    </p-panel>
+  </form>
+</p-dialog> -->
+
+
+<!-------------- Dialog de Revision de Ticket---------- -->
+<p-dialog header="Header" [(visible)]="visibleRevision" [modal]="true" focusOnShow="false"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false" [blockScroll]="true" [contentStyle]="{ 'max-height': '70vh', 'overflow-y': 'auto' }"
+  (onHide)="hideModalRevision()">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">
+        Revisión {{ tipoRevision === "PRE" ? "Preliminar" : "Final" }}
+      </h2>
+    </div>
+  </ng-template>
+
+  <form>
+    <p-panel>
+      <div style="text-align: justify; padding: 0 1rem">
+        El ticket <strong>{{ solicitudestado.ticket }}</strong>, identificado bajo el título
+        <strong>{{ solicitudestado.nombreSolicitud }}</strong>. <br /><br />
+      </div>
+      <div style="
+          padding: 0;
+          height: auto;
+          width: 100%;
+          position: relative;
+          text-align: center;
+        ">
+        <strong>¿Desea proceder con el envío para su evaluación formal en este
+          momento?</strong>
+      </div>
+
+      <!-- Contenido dinámico según tipo de revisión -->
+      <div style="text-align: justify; padding: 0 1rem">
+        <br />
+
+        @if (tipoRevision === 'PRE') {
+        <p>
+          El responsable designado realizará una revisión preliminar para
+          asegurarse de que la solicitud esté debidamente completada. Esta
+          etapa no constituye aún una evaluación final del contenido.
+        </p>
+        <br />
+        <p>
+          Si se detectan inconsistencias o datos faltantes, se le notificará
+          para que realice las correcciones necesarias antes de la revisión
+          final.
+        </p>
+        }
+
+        @if (tipoRevision === 'FIN') {
+        @if (idestadoActual === 8) {
+        <p>
+          Este ticket se encuentra actualmente en estado de
+          <strong>Corrección</strong> en todas las etapas del proceso.
+        </p>
+        <br />
+        <p>
+          Al confirmar esta acción,
+          <strong>se enviarán las 3 etapas</strong> (Diagnóstico, Plan de
+          Estudios y Factibilidad) a revisión formal.
+        </p>
+        <br />
+        <p>
+          Asegúrese de que todas las observaciones han sido consideradas
+          antes de continuar, ya que no se podrán hacer más modificaciones
+          hasta que se emita una resolución formal.
+        </p>
+        } @else {
+        <p>
+          Esta es la revisión final del ticket. El responsable evaluará si
+          cumple con todos los requisitos establecidos.
+        </p>
+        <br />
+        <p>
+          Una vez enviado, no se podrán hacer más modificaciones hasta que
+          se emita una resolución formal sobre el estado de la solicitud.
+        </p>
+        }
+        }
+      </div>
+
+      <div class="space"></div>
+
+      <app-contador [(texto)]="observacion" [limite]="limiteCaracteres" [showError]="showError"></app-contador>
+
+      <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+        <p-iftalabel class="sm:col-span-2">
+          <div style="width: 100%; margin-top: 16px;">
+            <p-fileUpload name="archivos[]" [multiple]="false" accept=".pdf,.doc,.docx" [disabled]="loadingRevision"
+              [class.form-sent]="loadingRevision" (onSelect)="getfiles($event)" chooseStyleClass="custom-button-file"
+              (onRemove)="removeFile($event)" chooseLabel="Subir Archivo" [auto]="true"
+              removeStyleClass="custom-button-1">
+            </p-fileUpload>
+          </div>
+        </p-iftalabel>
+      </div>
+
+      <!-- Botones de decisión -->
+      <p-footer style="display: flex; justify-content: center; gap: 10px">
+        <button pButton type="button"
+          [disabled]="loadingRevision || observacion.length > limiteCaracteres || !archivoSubido || !observacion ||  observacion.trim().length === 0"
+          [icon]="loadingRevision ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Enviar"
+          class="btn fw-bolder custom-1 w-full" (click)="confirmarEnvioRevision()"></button>
+
+        <button pButton type="button" [disabled]="loadingRevision" [icon]="
+            loadingRevisionCancelar ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle'
+          " label="Cancelar" class="btn fw-bolder custom-2-1 w-full" (click)="visibleRevision = false"></button>
+      </p-footer>
+    </p-panel>
+  </form>
+</p-dialog>
+
+<!-------------- Dialog de Historial de Solicitud---------- -->
+<app-historial-modal [(visible)]="vibleHistorial" [historialEstados]="historialEstados"
+  [ticket]="nombreTicketSeleccionado">
+</app-historial-modal>
+
+<!-------------- Dialog de Historial de Archivo---------- -->
+<app-historial-archivo #historialHijo [(visible)]="historialVisible" [idSolicitud]="idSolicitudSeleccionada"
+  [ticket]="ticketSeleccionado">
+</app-historial-archivo>
+
+<!-------------- Dialog de Estados por Etapa---------- -->
+<p-dialog header="Header" [(visible)]="modalVisible" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '70vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">
+        Etapas del Ticket {{ solicitudSeleccionada?.ticket }}
+      </h2>
+    </div>
+  </ng-template>
+
+  <p-table [value]="estadosSeleccionados" columnResizeMode="expand" showGridlines
+    [tableStyle]="{ 'min-width': '50rem' }">
+    <ng-template pTemplate="header">
+      <!-- Fila superior -->
+      <tr>
+        <th class="centered-header">Etapa</th>
+        <th class="centered-header">Estado</th>
+        <th class="centered-header">Seguimiento</th>
+        <!-- <th class="centered-header">Enlace</th> -->
+        <th class="centered-header">Plantillas</th>
+        <th class="centered-header">Documentos Enviados</th>
+        @if (mostrarColumnaAccion()) {
+        <th class="centered-header" rowspan="2">Acción</th>
+        }
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-rowData let-i="rowIndex">
+      <tr>
+        <!-- Etapa -->
+        <td class="centered-cell">{{ rowData.etapa }}</td>
+
+        <!-- Estado -->
+        <td class="centered-cell">
+          <span class="px-2 py-1 rounded-full text-sm font-medium shadow-sm inline-block" [ngStyle]="{
+          backgroundColor: srvHistorial.getColorFondo(rowData.idEstadoSolicitud),
+          color: srvHistorial.getColorTexto(rowData.idEstadoSolicitud)
+        }">
+            {{ rowData.estadoSolicitud }}
+          </span>
+        </td>
+        @if (permisoActualizar && !todasLasEtapasEnEstado8()) {
+        <td class="centered-cell">
+          <div class="flex justify-center items-center">
+            <p-button [badge]="tieneEstado(solicitudSeleccionada, [8, 11, 14, 17]) ? '!': undefined  "
+              [loading]="loadingHistorial" [disabled]="loadingHistorial" badgeSeverity="warn"
+              [label]="'Seguimiento - ' + rowData.etapa" icon="bi bi-hourglass-split"
+              (onClick)="mostrarHistorials(solicitudSeleccionada?.idSolicitud, solicitudSeleccionada?.ticket, rowData.idEtapa)"
+              styleClass="btn fw-bolder custom-7 w-full btn-small-text">
+            </p-button>
+          </div>
+        </td>
+        }
+        <!-- Columna para las plantillas originales -->
+        <td class="centered-cell">
+          <div class="flex justify-center items-center gap-2">
+            @for (plantilla of getPlantillasPorEtapa(rowData.idEtapa).plantillas; track plantilla) {
+            <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+              [disabled]="(loadingBtnKey && loadingBtnKey !== plantilla.keys) || rowData.idEstadoSolicitud === 1"
+              [icon]="loadingBtnKey === plantilla.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+              (click)="cargarArchivos($event, plantilla.nombreArchivo, plantilla.keys, plantilla.bucket)"
+              [pTooltip]="'Plantilla: ' + plantilla.nombreArchivo" tooltipStyleClass="tooltip-custom-7">
+            </p-button>
+            }
+          </div>
+        </td>
+
+        <!-- Columna para los archivos subidos -->
+        <td class="centered-cell">
+          <div class="flex justify-center items-center gap-2">
+            @if (getPlantillasPorEtapa(rowData.idEtapa).archivosSubidos.length === 0) {
+            @for (plantilla of getPlantillasPorEtapa(rowData.idEtapa).plantillas; track plantilla) {
+            <p-button styleClass="icon-button-secondary" [rounded]="true" [outlined]="true" [disabled]="true"
+              icon="bi bi-file-earmark-text" [pTooltip]="'Sin documento subido para: ' + plantilla.nombreArchivo"
+              tooltipStyleClass="tooltip-custom-7">
+            </p-button>
+            }
+            } @else {
+            @for (archivo of getPlantillasPorEtapa(rowData.idEtapa).archivosSubidos; track archivo) {
+            <p-button styleClass="icon-button-secondary" [rounded]="true" [outlined]="true"
+              [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+              [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-text'"
+              (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)"
+              [pTooltip]="'Documento trabajado: ' + archivo.nombreArchivo" tooltipStyleClass="tooltip-custom-7">
+            </p-button>
+            }
+            }
+          </div>
+        </td>
+
+        @if (permisoActualizar && todasLasEtapasEnEstado8() && i === 0) {
+        <td class="centered-cell" [attr.rowspan]="estadosSeleccionados.length">
+          <div class="flex flex-col justify-center items-center gap-2">
+            <p-button label="Revisión Final" icon="bi bi-send-check" styleClass="btn fw-bolder custom-1"
+              (onClick)="mostrarmodalRevision(rowData, 'FIN')">
+            </p-button>
+          </div>
+        </td>
+        }
+
+        <!-- Botones por fila si NO están todas en estado 8 -->
+        @if(mostrarColumnaAccion()){
+          @if (permisoActualizar && !todasLasEtapasEnEstado8()){<!--&& tieneAccionesDisponibles(rowData)-->
+          <td class="centered-cell">
+            <div class="flex justify-center items-center">
+              <p-button [pTooltip]="!tieneAccionesDisponibles(rowData) ? 'Sin acciones disponibles' : ''" (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                [disabled]="!tieneAccionesDisponibles(rowData)" tooltipStyleClass="tooltip-custom-7"  
+                styleClass="btn fw-bolder custom-8" raised text>
+              </p-button>
+
+              <p-popover #op>
+                <div class="flex flex-col gap-4">
+                  @if ([9, 11, 12, 14, 15, 17, 8].includes(rowData.idEstadoSolicitud)) {
+                  @if ([9, 12, 15].includes(rowData.idEstadoSolicitud)) {
+                  <p-button label="Revisión Preliminar" icon="bi bi-clock-history"
+                    styleClass="btn fw-bolder custom-7 w-full" (onClick)="mostrarmodalRevision(rowData, 'PRE')">
+                  </p-button>
+                  }
+                  <p-button label="Revisión Final" icon="bi bi-send-check" styleClass="btn fw-bolder custom-1 w-full"
+                    (onClick)="mostrarmodalRevision(rowData, 'FIN')">
+                  </p-button>
+                  }
+                </div>
+              </p-popover>
+            </div>
+          </td>
+          }
+        }
+      </tr>
+    </ng-template>
+
+  </p-table>
+</p-dialog>
+
+<!-------------- Dialog de Asignados ---------- -->
+<p-dialog header="Header" [(visible)]="visibleAsignados" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '75vw' }" [draggable]="false"
+  [resizable]="false">
+
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">
+        Contacto del Responsable de Seguimiento
+      </h2>
+    </div>
+  </ng-template>
+
+  <form>
+    <p-panel>
+
+      <p-fluid>
+        <div>
+          <div class="toolbar" style=" margin-bottom: 1rem;">
+
+            <p-table [value]="infoAsignadoFiltrado" showGridlines [tableStyle]="{ 'min-width': '50rem' }" dataKey="nombreAsignador"
+              rowGroupMode="rowspan" groupRowsBy="nombreSolicitud,nombreAsignador" sortField="nombreSolicitud"
+              sortMode="single"> <!-- Ordenar por fecha -->
+
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 10rem">Responsable Asignado</th>
+                  <th class="centered-header" style="min-width: 10rem">Correo</th>
+                  <th class="centered-header" style="min-width: 10rem">Teléfono</th>
+                  <th class="centered-header" style="min-width: 10rem">Fecha de Asignación</th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-asignado let-rowgroup="rowgroup" let-rowspan="rowspan">
+                <tr>
+                  <td class="centered-cell">
+                    {{ asignado.nombreCompleto || 'No proporcionado' }}
+                  </td>
+
+                  <td class="centered-cell">
+                    {{ asignado.correoElectronico || 'No proporcionado' }}
+                  </td>
+
+                  <td class="centered-cell">{{ asignado.telefono || 'No proporcionado' }}</td>
+
+
+                  <!-- Mostrar solo si es rowgroup para aplicar rowspan (fechaFinalizacion) -->
+                  <td class="centered-cell">
+                    {{ asignado.fechaAsignacion ? (asignado.fechaAsignacion | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a") : 'No proporcionado' }}
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="4" class="centered-cell">No hay personas asignadas a esta solicitud
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+          </div>
+        </div>
+      </p-fluid>
+
+    </p-panel>
+  </form>
+
+</p-dialog>

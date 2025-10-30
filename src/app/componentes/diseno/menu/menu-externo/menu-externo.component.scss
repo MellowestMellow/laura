@@ -1,0 +1,405 @@
+// Variables de colores
+$primary-color: #003578;
+$secondary-color: #253a69;
+$accent-color: #229bb9;
+$gradient-bg: linear-gradient(270deg, #229bb9, #253a69, #336699, #229bb9);
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4); /* fondo oscuro semitransparente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+
+
+
+.external-dashboard {
+  padding: 1rem 0.5rem;
+  max-width: 95vw;
+  width: 100%;
+  margin: 0 auto;
+  min-height: 100vh;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.25rem;
+    max-width: 98vw;
+  }
+
+  .dashboard-header {
+    margin-bottom: 2rem;
+
+    .header-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .header-card {
+        .card-content {
+          display: flex;
+          align-items: flex-start;
+          gap: 1rem;
+          padding: 0.5rem;
+
+          .counter-icon, .stage-icon {
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+
+            i {
+              font-size: 2rem;
+              color: $primary-color;
+            }
+          }
+
+          .counter-info, .stage-info {
+            flex: 1;
+
+            h3 {
+              margin: 0 0 0.5rem 0;
+              color: $primary-color;
+              font-size: 1.1rem;
+              font-weight: 600;
+              text-align: center;
+            }
+
+            .countdown {
+              display: flex;
+              gap: 0.5rem;
+              align-items: baseline;
+              margin-bottom: 0.5rem;
+              justify-content: center;
+
+              .time-value {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: $accent-color;
+              }
+
+              .time-label {
+                font-size: 0.875rem;
+                color: $secondary-color;
+              }
+            }
+
+            .time-summary {
+              color: $secondary-color;
+              font-size: 0.75rem;
+              text-align: center;
+            }
+
+            .stage-name {
+              font-size: 1.25rem;
+              font-weight: 600;
+              color: $accent-color;
+              margin: 0 0 0.25rem 0;
+              text-align: center;
+            }
+
+            .stage-description {
+              color: $secondary-color;
+              margin: 0 0 0.5rem 0;
+              font-size: 0.875rem;
+              text-align: center;
+            }
+
+            .stage-progress {
+              margin-top: 0.5rem;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .progress-section {
+    margin-bottom: 2rem;
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      h4 {
+        margin: 0;
+        color: $primary-color;
+        font-weight: 600;
+        text-align: center;
+        flex: 1;
+         font-size: 1.2rem;
+      }
+
+      .progress-percentage {
+        font-size: 1.5rem;
+        font-weight: bold;
+         color:#f8fafc;
+      }
+    }
+
+    .custom-progress {
+      margin-bottom: 2rem;
+      height: 12px;
+    }
+
+    .stages-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      .timeline-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+
+        &.stage-completed {
+          background-color: rgba(34, 155, 185, 0.1);
+          border-left: 4px solid $accent-color;
+
+          .timeline-marker {
+            background-color: $accent-color;
+            color: white;
+          }
+        }
+
+        &.stage-current {
+          background: rgba(37, 58, 105, 0.1);
+          border-left: 4px solid $secondary-color;
+
+          .timeline-marker {
+            background: $gradient-bg;
+            color: white;
+          }
+        }
+
+        &.stage-pending {
+          background-color: #f9fafb;
+          border-left: 4px solid #e5e7eb;
+
+          .timeline-marker {
+            background-color: #e5e7eb;
+            color: #9ca3af;
+          }
+        }
+
+        .timeline-marker {
+          flex-shrink: 0;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+          i {
+            font-size: 1.1rem;
+          }
+        }
+
+        .timeline-content {
+          flex: 1;
+
+          .stage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+
+            h5 {
+              margin: 0;
+              color: $primary-color;
+              font-weight: 600;
+              font-size: 1.1rem;
+            }
+
+            .stage-duration {
+              background-color: rgba(0, 53, 120, 0.1);
+              color: $primary-color;
+              padding: 0.25rem 0.5rem;
+              border-radius: 12px;
+              font-size: 0.75rem;
+              font-weight: 500;
+            }
+          }
+
+          p {
+            margin: 0 0 0.75rem 0;
+            color: $secondary-color;
+            font-size: 0.875rem;
+          }
+
+          .stage-details {
+            small {
+              display: flex;
+              align-items: center;
+              gap: 0.25rem;
+              color: #9ca3af;
+              font-size: 0.75rem;
+
+              i {
+                font-size: 0.75rem;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .charts-section {
+    margin-bottom: 2rem;
+
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+
+    .chart-card, .full-width-chart {
+      .chart-title {
+        text-align: center;
+
+        h4 {
+          margin: 0;
+          color: $primary-color;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  .additional-info {
+    .info-title {
+      text-align: center;
+
+      h4 {
+        margin: 0;
+        color: $primary-color;
+        font-weight: 600;
+      }
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+
+      .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        strong {
+          color: $primary-color;
+          font-size: 0.875rem;
+          font-weight: 600;
+        }
+
+        span {
+          color: $secondary-color;
+          font-size: 0.9rem;
+
+          &.priority-high {
+            color: #dc2626;
+            font-weight: 600;
+          }
+
+          &.priority-medium {
+            color: #f59e0b;
+            font-weight: 600;
+          }
+
+          &.priority-low {
+            color: $accent-color;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Estilos globales para PrimeNG
+:host ::ng-deep {
+  .p-card {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: none;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .p-card-header {
+    padding: 1rem 1rem 0.75rem 1rem;
+    background: $gradient-bg;
+    color: white;
+    border-bottom: none;
+
+    h4 {
+      color: white !important;
+    }
+  }
+
+  .p-card-content {
+    padding: 1rem;
+  }
+
+  // Estilos específicos para las cards del header
+  .header-card {
+    .p-card-content {
+      padding: 1.5rem 1rem; // Más padding para las cards del header
+    }
+  }
+
+  .p-progressbar {
+    height: 12px;
+    border-radius: 6px;
+    background-color: #e5e7eb;
+
+    .p-progressbar-value {
+      border-radius: 6px;
+      background: $gradient-bg;
+    }
+
+    &.mini-progress {
+      height: 20x;
+      margin-top: 0.5rem;
+
+      .p-progressbar-value {
+        background: linear-gradient(90deg, $secondary-color, $accent-color);
+      }
+    }
+  }
+
+  .p-chart {
+    canvas {
+      max-height: 300px !important;
+    }
+  }
+
+  // Responsive adjustments
+  @media (max-width: 768px) {
+    .external-dashboard {
+      padding: 0.5rem;
+    }
+  }
+}

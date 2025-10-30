@@ -1,0 +1,29 @@
+<section class="page_404">
+  <div class="container_404">
+    <div class="content_404">
+      <h1 class="text-center title-header">Hmm... algo salió mal</h1>
+      <div class="four_zero_four_bg">
+        <!-- Background image is set in CSS -->
+      </div>
+      <div class="contant_box_404">
+        <div class="space-y-4">
+          <h3 class="text-xl font-semibold">¡Oops! No pudimos encontrar la página</h3>
+          @if(visibleBtnMenu){
+            <p class="text-base">Es posible que haya sido movida o eliminada. Volvé al menú principal para seguir navegando.</p>
+            <button pButton type="button" label="Ir al Menú"
+              style="background-color: #ea6427; border-color: #ea6427; color: white"
+              routerLink="/menu">
+            </button>
+          }
+          @if(!visibleBtnMenu){
+            <p class="text-base">Es posible que haya sido movida o eliminada. Volvé al perfil para seguir navegando.</p>
+            <button pButton type="button" label="Ir a Perfil"
+              style="background-color: #ea6427; border-color: #ea6427; color: white"
+              routerLink="/persona/perfil">
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

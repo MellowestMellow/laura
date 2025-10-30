@@ -1,0 +1,128 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+<div class="custom-container">
+  <p-panel styleClass="transparente">
+
+    <ng-template pTemplate="header">
+      <div class="header-container title-header gap-2">
+        <span>
+          Plan Operativo Anual
+        </span>
+      </div>
+    </ng-template>
+
+    <br>
+
+    <p-table #dt [value]="planesOperativos" [columns]="selectedColumns" [paginator]="true" columnResizeMode="expand" showGridlines
+      [tableStyle]="{ 'min-width': '80rem' }" [rows]="5" [rowsPerPageOptions]="[10, 25, 50]" dataKey="id"
+      [globalFilterFields]="globalFields">
+
+      <ng-template pTemplate="caption">
+        <div class="toolbar">
+          <!-- Botones a la izquierda -->
+          <div class="centraciones">
+            <!-- Contenedor de los botones a la izquierda -->
+            <div class="left-buttons">
+              <p-button label="Registrar" icon="bi bi-plus-circle fw-bolder" styleClass="btn fw-bolder custom-1" raised
+                text>
+              </p-button>
+              <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder" label="Reportes"
+                variant="text" [raised]="true" styleClass="btn fw-bolder custom-7" raised text />
+              <p-popover #op>
+                <div class="flex flex-col gap-4">
+                  <div>
+                    <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                      styleClass="btn fw-bolder custom-2-1 w-full" raised text>
+                    </p-button>
+                  </div>
+                  <div>
+                    <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                      styleClass="btn fw-bolder custom-2-2 w-full" raised text>
+                    </p-button>
+                  </div>
+                </div>
+              </p-popover>
+            </div>
+
+            <!-- Contenedor de los botones a la derecha -->
+            <div class="right-search">
+              <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true" styleClass="btn custom-slash"
+                class="responsive" />
+
+              <p-iconField iconPosition="right">
+                <p-inputIcon styleClass="pi pi-search" />
+                <input pInputText type="text" class="custom-search-input" placeholder="Buscar usuario" />
+              </p-iconField>
+            </div>
+          </div>
+        </div>
+        <br>
+        <div class="toolbar">
+          <!-- Botones a la izquierda -->
+          <div class="centraciones">
+            <!-- Contenedor de los botones a la izquierda -->
+            <div class="left-buttons">
+              <p-multiSelect [options]="columns" [(ngModel)]="selectedColumns" optionLabel="header" display="chip"
+                placeholder="Seleccionar columnas" selectedItemsLabel="{0} columnas seleccionadas"
+                [style]="{ 'min-width': '250px' }" />
+            </div>
+
+            <!-- Contenedor de los botones a la derecha -->
+            <div class="right-search">
+
+            </div>
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <!-- Columnas normales -->
+          <ng-container *ngFor="let col of selectedColumns">
+            <th *ngIf="!col.parent" rowspan="2" class="centered-header" [style]="{'min-width': col.minWidth}">
+              <div class="flex items-center">
+                {{ col.header }}
+                <p-columnFilter [field]="col.field" [display]="'menu'" [type]="'text'" styleClass="ml-2" />
+              </div>
+            </th>
+          </ng-container>
+
+          <!-- Metas con colspan dinámico -->
+          <th *ngIf="hasMetasColumns()" [attr.colspan]="getMetasCount()" class="centered-header">
+            <div class="flex justify-center">Metas</div>
+          </th>
+        </tr>
+
+        <!-- Subcolumnas de Metas -->
+        <tr *ngIf="hasMetasColumns()">
+          <ng-container *ngFor="let col of selectedColumns">
+            <th *ngIf="col.parent === 'metas'" class="centered-header" [style]="{'min-width': col.minWidth}">
+              <div class="flex items-center">
+                {{ col.header }}
+                <p-columnFilter [field]="col.field" [display]="'menu'" [type]="'text'" styleClass="ml-2" />
+              </div>
+            </th>
+          </ng-container>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-rowData>
+        <tr>
+          <ng-container *ngFor="let col of selectedColumns">
+            <td class="text-center">{{ rowData[col.field] }}</td>
+          </ng-container>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="centered-cell">
+            No se encontraron datos.
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+    <br>
+
+  </p-panel>
+</div>

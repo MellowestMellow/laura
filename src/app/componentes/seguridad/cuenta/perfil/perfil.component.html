@@ -1,0 +1,448 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+
+@if (loadingtable) {
+<div class="flex flex-col items-center justify-center text-center h-full p-4" style="background-color: transparent;">
+  <div class="custom-spinner mb-4"></div>
+</div>
+}
+@if (!loadingtable) {
+<div class="custom-container">
+
+  <p-card>
+    <div class="header-container">
+      <h2 class="header-titles"> {{ nombreUsuario || 'Bienvenido' }}</h2>
+    </div>
+    <form [formGroup]="ActualizarForm">
+
+      <p-fluid>
+        <br>
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel>
+            <input pInputText id="firstName" formControlName="primerNombre" appCapitalizable appValidaciones
+              [nameValidation]="true" maxlength="20" />
+            <label for="firstName">1. Primer Nombre *</label>
+            @if (ActualizarForm.get('primerNombre')?.hasError('required') &&
+            ActualizarForm.get('primerNombre')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              El primer nombre es obligatorio *.
+            </div>
+            }
+
+            @if (ActualizarForm.get('primerNombre')?.hasError('pattern') && ActualizarForm.get('primerNombre')?.touched)
+            {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              Solo se permiten letras.
+            </div>
+            }
+          </p-iftalabel>
+          <p-iftalabel>
+            <input pInputText id="secondName" formControlName="segundoNombre" appCapitalizable appValidaciones
+              [nameValidationTwoWords]="true" maxlength="30" />
+            <label for="blockspace">2. Segundo Nombre</label>
+            @if (ActualizarForm.get('segundoNombre')?.hasError('pattern') &&
+            ActualizarForm.get('segundoNombre')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              Solo se permiten letras y un espacio.
+            </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel>
+            <input pInputText id="lastName" formControlName="primerApellido" appCapitalizable appValidaciones
+              [nameValidation]="true" maxlength="20" />
+            <label for="blockspace">3. Primer Apellido *</label>
+            @if (ActualizarForm.get('primerApellido')?.hasError('required') &&
+            ActualizarForm.get('primerApellido')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              El primer apellido es obligatorio *.
+            </div>
+            }
+
+            @if (ActualizarForm.get('primerApellido')?.hasError('pattern') &&
+            ActualizarForm.get('primerApellido')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              Solo se permiten letras.
+            </div>
+            }
+          </p-iftalabel>
+          <p-iftalabel>
+            <input pInputText id="secondLastName" formControlName="segundoApellido" appCapitalizable appValidaciones
+              [nameValidationTwoWords]="true" maxlength="30" />
+            <label for="secondLastName">4. Segundo Apellido</label>
+            @if (ActualizarForm.get('segundoApellido')?.hasError('pattern') &&
+            ActualizarForm.get('segundoApellido')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              Solo se permiten letras y un espacio.
+            </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-select formControlName="idGenero" [options]="genero" optionLabel="genero" optionValue="idGenero"
+              [showClear]="true" [showClear]="true" [filter]="true" filterBy="genero" appendTo="body" class="w-full" />
+            <label for="dd-city">5. Género *</label>
+            @if (ActualizarForm.get('idGenero')?.hasError('required') && ActualizarForm.get('idGenero')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              El genero es obligatorio *.
+            </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel>
+            <input pInputText id="phone" placeholder="+504 9999-9999" formControlName="telefonoCelular" appValidaciones
+              [phoneValidation]="true" maxlength="20" />
+            <label for="phone">6. Teléfono *</label>
+            @if (ActualizarForm.get('telefonoCelular')?.hasError('required') &&
+            ActualizarForm.get('telefonoCelular')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              El numero de teléfono es obligatorio *.
+            </div>
+            }
+          </p-iftalabel>
+          <p-iftalabel>
+            <input pInputText id="altPhone" placeholder="2216-6100 - Ext. 110207" appValidaciones
+              [phoneValidation]="true" formControlName="telefonoAlterno" maxlength="20" />
+            <label for="altPhone">7. Teléfono Alterno</label>
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid gap-4"
+          [ngClass]="{'grid-cols-1': correoOculto, 'sm:grid-cols-2 grid-cols-1': !correoOculto}">
+
+          <p-iftalabel>
+            <input pInputText id="email" placeholder="251026" formControlName="numEmpleado" appValidaciones
+              [onlyNumbersValidation]="true" maxlength="10" />
+            <label for="email">8. Número de Empleado *</label>
+            @if (ActualizarForm.get('numEmpleado')?.hasError('required') && ActualizarForm.get('numEmpleado')?.touched)
+            {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              El numero de empleado es obligatorio *.
+            </div>
+            }
+
+            @if (ActualizarForm.get('numEmpleado')?.hasError('pattern') && ActualizarForm.get('numEmpleado')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              Solo se aceptan números.
+            </div>
+            }
+          </p-iftalabel>
+          @if (!correoOculto) {
+          <p-iftalabel>
+            <input pInputText id="email" placeholder="direccion@unah.edu.hn" formControlName="correo" appValidaciones
+              [emailValidation]="true" maxlength="50" />
+            <label for="email">9. Correo Electrónico *</label>
+
+            @if (ActualizarForm.get('correo')?.hasError('required') && ActualizarForm.get('correo')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              El correo electrónico es obligatorio *.
+            </div>
+            }
+
+            @if (ActualizarForm.get('correo')?.hasError('dominioInvalido') && ActualizarForm.get('correo')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              Solo se aceptan correos que terminen en &#64;unah.hn o &#64;unah.edu.hn *
+            </div>
+            }
+          </p-iftalabel>
+          }
+        </div>
+
+        <div class="space"></div>
+
+        <!-- <div class="pt-4">
+            <p-button label="Enviar" type="submit" [disabled]="ActualizarForm.invalid || isLoadingRegistrar"
+              [icon]="'pi pi-spin pi-spinner' : 'bi bi-send'"
+              styleClass="btn fw-bolder custom-1 w-full">
+            </p-button>
+          </div> -->
+
+        @if (!modoEdicion) {
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-button label="Actualizar Datos" type="submit" (click)="habilitarCampos()" [icon]="'pi pi-user-edit'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+
+          <p-button label="Actualizar Contraseña" type="submit" [icon]="'bi bi-copy'" (click)="showDialog('Actualizar')"
+            styleClass="btn fw-bolder custom-6 w-full">
+          </p-button>
+        </div>
+        }
+
+        @if (modoEdicion) {
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-button label="Enviar" type="submit" [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full" [disabled]="ActualizarForm.invalid || isLoadingActualizar"
+            (click)="actualizarPerfil();">
+          </p-button>
+
+          <p-button label="Cancelar" type="submit" [icon]="'bi bi-x-circle'" (click)="cancelarEdicion()"
+            [disabled]="isLoadingActualizar" styleClass="btn fw-bolder custom-2-1 w-full">
+          </p-button>
+        </div>
+        }
+      </p-fluid>
+    </form>
+  </p-card>
+
+
+
+  <p-dialog header="Header" [(visible)]="visibleActualizar" [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+      <div class="header-container title-header">
+        <h2 class="header-titles">Actualización de Contraseña</h2>
+      </div>
+    </ng-template>
+    <p-panel>
+      <p-stepper [value]="1" class="w-full max-w-4xl mx-auto" [linear]="true" #stepper>
+
+        <p-step-item [value]="1">
+          <p-step>Autenticar Usuario</p-step>
+          <p-step-panel>
+            <ng-template #content let-activateCallback="activateCallback">
+              <form (ngSubmit)="autenticarPerfil(activateCallback)" #otpForm="ngForm">
+                <div class="col align-items-center justify-content-center">
+                  <div class="flex flex-column">
+                    <p-fluid>
+                      <div
+                        class="border-2 border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 p-4">
+
+                        <ul class="mb-4" style="font-size: 0.875rem; list-style-type: disc; padding-left: 20px;">
+                          <li>Para cambiar su contraseña, ingrese su correo electrónico y la contraseña actual para
+                            verificar su identidad.</li>
+                        </ul>
+
+
+                        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <p-iftalabel>
+                            <input pInputText id="firstName" [(ngModel)]="correo" name="correo" #correoInput="ngModel"
+                              maxlength="50" required />
+                            <label for="firstName">1. Corrreo *</label>
+
+                          </p-iftalabel>
+                          <p-iftalabel>
+                            <input pInputText id="secondName" #contrasenaInput="ngModel" [(ngModel)]="contrasena"
+                              name="contrasena" maxlength="50" required />
+                            <label for="secondName">2. Contraseña *</label>
+                          </p-iftalabel>
+                        </div>
+                        <div class="pt-4">
+                          <p-button label="Autenticar" type="submit"
+                            [icon]="isLoadingAutenticar ? 'pi pi-spin pi-spinner' : 'bi bi-check-circle'"
+                            [disabled]="isLoadingAutenticar || !correoInput.valid || !contrasenaInput.valid"
+                            styleClass="btn fw-bolder custom-1 w-full">
+                          </p-button>
+                        </div>
+                      </div>
+
+                    </p-fluid>
+                  </div>
+                </div>
+              </form>
+            </ng-template>
+          </p-step-panel>
+        </p-step-item>
+
+        <p-step-item [value]="2">
+          <p-step>Codigo OTP</p-step>
+          <p-step-panel>
+            <ng-template #content let-activateCallback="activateCallback">
+              <div class="flex flex-col items-center justify-center min-h-full">
+                <div class="flex flex-column">
+                  <p-fluid>
+                    <div
+                      class="border-2 border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 p-4">
+                      <ul class="mb-3" style="font-size: 0.875rem; list-style-type: disc; padding-left: 20px;">
+                        <li>Ingrese el código que le ha sido enviado por correo electrónico para continuar con la
+                          verificación.</li>
+                      </ul>
+
+                      <div class="grid grid-cols-1 gap-4">
+                        <div class="w-full flex justify-center">
+                          <p-inputOtp [length]="6" styleClass="custom-otp w-full" [integerOnly]="true" id="codigo-otp"
+                            [(ngModel)]="codigoOtp" #codigoOtpInput="ngModel" name="codigoOtp" required="true"
+                            styleClass="w-full"></p-inputOtp>
+                        </div>
+                      </div>
+
+                      <!-- Nota en texto pequeño -->
+                      <p class="mt-3 text-xs text-center text-color-secondary">
+                        Nota: Si el correo con su código ha superado los 15 minutos de validez, deberá ingresarlo
+                        igualmente para que el sistema le envíe un nuevo codigo.
+                      </p>
+
+                      <div class="pt-4">
+                        <p-button label="Verificar" type="submit"
+                          [disabled]="!codigoOtp || codigoOtp.length < 6 || isLoadingOTP"
+                          [icon]="isLoadingOTP ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                          (click)="onVerifyOtp(activateCallback)" styleClass="btn fw-bolder custom-1 w-full"></p-button>
+                      </div>
+                    </div>
+                  </p-fluid>
+                </div>
+              </div>
+            </ng-template>
+
+          </p-step-panel>
+        </p-step-item>
+
+        <p-step-item [value]="3">
+          <p-step>Confirmar Contraseña</p-step>
+          <p-step-panel>
+            <ng-template #content let-activateCallback="activateCallback">
+              <form #changePasswordForm="ngForm" (ngSubmit)="onCambiarContrasena()">
+                <div class="col align-items-center justify-content-center">
+                  <div class="flex flex-column">
+                    <p-fluid>
+                      <div
+                        class="border-2 border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 p-4">
+                        <!-- Instrucción principal con viñeta -->
+                        <ul class="mb-3" style="font-size: 0.875rem; list-style-type: disc; padding-left: 20px;">
+                          <li>Ingrese y confirme su nueva contraseña. Ambas deben coincidir y contener al menos una
+                            letra
+                            mayúscula, un número y un carácter especial.</li>
+                        </ul>
+
+                        <div>
+
+                          <p-password type="password" id="nueva-contrasena" [(ngModel)]="nuevaContrasena"
+                            name="nuevaContrasena" #passwordInput="ngModel" [minlength]="8" [maxlength]="50"
+                            placeholder="Nueva Contraseña *" (ngModelChange)="validarContrasena()"
+                            promptLabel="Elige una contraseña" [feedback]="false" [style]="{'width':'100%'}"
+                            required="true" tooltipPosition="top" inputStyleClass="largos" [toggleMask]="true" />
+                          <br>
+                          @if (passwordInput.invalid && (passwordInput.touched || passwordInput.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            Ingresa un valor en este campo.
+                          </div>
+                          }
+
+                          @if (nuevaContrasenaLargo && (passwordInput.touched || passwordInput.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            La contraseña debe tener un mínimo de 8 caracteres.
+                          </div>
+                          }
+
+                          @if (nuevaContrasenaMayuscula && (passwordInput.touched || passwordInput.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            La contraseña debe incluir al menos una letra en mayúscula.
+                          </div>
+                          }
+
+                          @if (nuevaContrasenaNumero && (passwordInput.touched || passwordInput.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            La contraseña debe contener al menos un dígito numérico.
+                          </div>
+                          }
+
+                          @if (nuevaContrasenaEspecial && (passwordInput.touched || passwordInput.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            La contraseña debe tener al menos un símbolo especial.
+                          </div>
+                          }
+                        </div>
+                        <br>
+                        <div>
+                          <p-password type="password" #passwordInputs="ngModel" id="confirmar-contrasena"
+                            [feedback]="false" [(ngModel)]="confirmarContrasena" name="confirmarContrasena"
+                            placeholder="Confirmar Nueva Contraseña *" required [minlength]="8" [maxlength]="50"
+                            promptLabel="Elige una contraseña" (ngModelChange)="validarContrasenas()"
+                            [style]="{'width':'100%'}" required="true" tooltipPosition="bottom" inputStyleClass="largos"
+                            [toggleMask]="true" />
+                          <br>
+                          @if (passwordInputs.invalid && (passwordInputs.touched || passwordInputs.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            Ingresa un valor en este campo.
+                          </div>
+                          }
+
+                          @if (confirmarNuevaContrasenaLargo && (passwordInputs.touched || passwordInputs.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            La confirmación de la contraseña debe tener un mínimo de 8 caracteres.
+                          </div>
+                          }
+
+                          @if (confirmarNuevaContrasenaMayuscula && (passwordInputs.touched || passwordInputs.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            La confirmación de la contraseña debe incluir al menos una letra en mayúscula.
+                          </div>
+                          }
+
+                          @if (confirmarNuevaContrasenaNumero && (passwordInputs.touched || passwordInputs.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            La confirmación de la contraseña debe contener al menos un dígito numérico.
+                          </div>
+                          }
+
+                          @if (confirmarNuevaContrasenaEspecial && (passwordInputs.touched || passwordInputs.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            La confirmación de la contraseña debe tener al menos un símbolo especial.
+                          </div>
+                          }
+
+                          @if (confirmarContrasena !== nuevaContrasena && (passwordInputs.touched ||
+                          passwordInputs.dirty)) {
+                          <div class="error-messages">
+                            <span>**</span>
+                            Las contraseñas no coinciden.
+                          </div>
+                          }
+                        </div>
+
+                        <!-- Nota de seguridad -->
+                        <p class="mt-3 text-xs text-center text-color-secondary">
+                          Nota: Por motivos de seguridad, no debe reutilizar contraseñas anteriores.
+                        </p>
+
+
+
+                        <div class="pt-4">
+                          <p-button label="Cambiar Contraseña" type="submit" [disabled]="
+                          changePasswordForm.invalid || isLoadingContrasena || !nuevaContrasena || !confirmarContrasena || 
+                          (nuevaContrasena !== confirmarContrasena) || nuevaContrasenaLargo || nuevaContrasenaMayuscula || 
+                          nuevaContrasenaNumero || nuevaContrasenaEspecial ||confirmarNuevaContrasenaLargo || confirmarNuevaContrasenaMayuscula || 
+                          confirmarNuevaContrasenaNumero ||  confirmarNuevaContrasenaEspecial"
+                            [icon]="isLoadingContrasena ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                            styleClass="btn fw-bolder custom-1 w-full">
+                          </p-button>
+                        </div>
+                      </div>
+
+                    </p-fluid>
+                  </div>
+                </div>
+              </form>
+            </ng-template>
+          </p-step-panel>
+        </p-step-item>
+      </p-stepper>
+    </p-panel>
+  </p-dialog>
+
+</div>
+}

@@ -1,0 +1,980 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+@if (!loadingtable) {
+<div class="custom-container">
+    <p-panel class="transparente">
+
+        <ng-template pTemplate="header">
+            <div class="boton-container">
+                <p-button icon="pi pi-angle-double-left" (click)="regresarPanel()" variant="outlined"
+                    pTooltip="Regresar a Ajustes de Estructura Académica" tooltipStyleClass="tooltip-custom-1" />
+            </div>
+            <div class="header-container title-header gap-2">
+                <span>
+                    Mantenimiento de Organización Académica
+                </span>
+            </div>
+        </ng-template>
+
+        <br>
+        <br>
+
+        <p-tabs value="0" scrollable [(value)]="activeTab" (valueChange)="onTabChange($event)">
+            <p-tablist>
+                <p-tab [value]="0">Campus Académicos</p-tab>
+                <p-tab [value]="1">Distribución Departamental</p-tab>
+                <p-tab [value]="2">Oferta Académica</p-tab>
+            </p-tablist>
+
+            <p-tabpanels>
+
+                <p-tabpanel [value]="0">
+                    @if (loadingCampus) {
+                    <div class="flex flex-col items-center justify-center text-center h-full p-4"
+                        style="background-color: transparent;">
+                        <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+                        <p class="font-semibold text-gray-700 text-lg">
+                            Estamos cargando los campus institucionales, por favor espera...
+                        </p>
+                    </div>
+                    }
+
+                    @if (!loadingCampus) {
+                    <p-panel class="transparente">
+
+
+                        <p-table #dtCampus [value]="campus" [paginator]="true" columnResizeMode="expand" showGridlines
+                            class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+                            [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+                            [globalFilterFields]="['numero','nombreCampus', 'fechaModifico']">
+
+                            <ng-template pTemplate="caption">
+                                <div class="toolbar">
+                                    <!-- Botones a la izquierda -->
+                                    <div class="centraciones">
+                                        <!-- Contenedor de los botones a la izquierda -->
+                                        <div class="left-buttons">
+
+                                            @if (permisoInsertar) {
+                                            <p-button label="Registrar" (click)="showDialog('RegistrarCampus')"
+                                                icon="bi bi-plus-circle" styleClass="btn fw-bolder custom-1 w-full"
+                                                raised text>
+                                            </p-button>
+                                            }
+                                        </div>
+
+
+                                        <!-- Contenedor de los botones a la derecha -->
+                                        <div class="right-search">
+                                            <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                                                styleClass="btn custom-slash" class="responsive"
+                                                (click)="clear(dtCampus)" />
+
+                                            <p-iconField iconPosition="right">
+                                                <p-inputIcon class="pi pi-search" />
+                                                <input pInputText type="text" class="custom-search-input"
+                                                    placeholder="Buscar Campus" [(ngModel)]="searchValue"
+                                                    (input)="applyFilterGlobal($event, dtCampus)" />
+                                            </p-iconField>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-template>
+
+
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th class="centered-header" style="min-width: 6rem">
+                                        <div class="flex items-center">
+                                            N°
+                                            <p-columnFilter type="text" field="numero" display="menu" />
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 15rem">
+                                        <div class="flex items-center">
+                                            Campus Académico
+                                            <p-columnFilter type="text" field="nombreCampus"
+                                                display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                                        <div class="flex items-center">
+                                            Ultima Fecha de Modificación
+                                            <p-columnFilter type="date" dateFormat="dd 'de' MMMM 'del' yyyy, h:mm:ss a"
+                                                field="fechaModifico" display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <th class="centered-header" style="min-width: 8rem">
+                                        <div class="flex align-items-center">Acciones</div>
+                                    </th>
+                                    }
+
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-campus>
+                                <tr>
+                                    <td class="centered-cell">{{ campus.numero || 'No proporcionado' }}</td>
+                                    <td class="centered-cell">{{ campus.nombreCampus || 'No proporcionado' }}</td>
+                                    <td class="centered-cell">{{ campus.fechaModifico ? (campus.fechaModifico | date:
+                                        "dd 'de' MMMM
+                                        'del' yyyy, h:mm:ss a") :'No proporcionado' }}
+                                    </td>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <td class="centered-cell">
+                                        <div class="flex justify-center items-center">
+                                            <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                                                styleClass="btn fw-bolder custom-8" raised text></p-button>
+                                            <p-popover #op>
+                                                <div class="flex flex-col gap-4">
+
+                                                    @if (permisoActualizar) {
+                                                    <p-button label="Actualizar"
+                                                        (click)="cargarDatos(campus, 'ModificarCampus', 'Campus')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogActualizarCampus ? 'pi pi-spin pi-spinner' : 'bi bi-arrow-counterclockwise fw-medium'"
+                                                        styleClass="btn fw-bolder custom-1 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                    @if (permisoEliminar) {
+                                                    <p-button label="Eliminar"
+                                                        (click)="cargarDatos(campus, 'EliminarCampus', 'Campus')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogEliminarCampus ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle fw-medium'"
+                                                        styleClass="btn fw-bolder custom-7 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                </div>
+                                            </p-popover>
+                                        </div>
+                                    </td>
+                                    }
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="emptymessage">
+
+                                <tr>
+                                    <td colspan="3" class="centered-cell">
+                                        No se encontraron datos.
+                                    </td>
+                                </tr>
+                            </ng-template>
+
+                        </p-table>
+                        <br>
+
+                    </p-panel>
+                    }
+                </p-tabpanel>
+
+                <p-tabpanel [value]="1">
+                    @if (loadingCampusDepto) {
+                    <div class="flex flex-col items-center justify-center text-center h-full p-4"
+                        style="background-color: transparent;">
+                        <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+                        <p class="font-semibold text-gray-700 text-lg">
+                            Estamos cargando la distribución departamental, por favor espera...
+                        </p>
+                    </div>
+                    }
+
+                    @if (!loadingCampusDepto) {
+                    <p-panel class="transparente">
+
+
+                        <p-table #dtCampusDepto [value]="campusdepartamento" [paginator]="true"
+                            columnResizeMode="expand" showGridlines class="rounded-table"
+                            [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [rowsPerPageOptions]="[5, 15, 25]"
+                            dataKey="id" [globalFilterFields]="['numero','nombreDepartamento','nombreCampus']">
+
+                            <ng-template pTemplate="caption">
+                                <div class="toolbar">
+                                    <!-- Botones a la izquierda -->
+                                    <div class="centraciones">
+                                        <!-- Contenedor de los botones a la izquierda -->
+                                        <div class="left-buttons">
+
+                                            @if (permisoInsertar) {
+                                            <p-button label="Registrar" (click)="showDialog('RegistrarCampusDepto')"
+                                                icon="bi bi-plus-circle" styleClass="btn fw-bolder custom-1 w-full"
+                                                raised text>
+                                            </p-button>
+                                            }
+
+                                        </div>
+
+
+                                        <!-- Contenedor de los botones a la derecha -->
+                                        <div class="right-search">
+                                            <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                                                styleClass="btn custom-slash" class="responsive"
+                                                (click)="clear(dtCampusDepto)" />
+
+                                            <p-iconField iconPosition="right">
+                                                <p-inputIcon class="pi pi-search" />
+                                                <input pInputText type="text" class="custom-search-input"
+                                                    placeholder="Buscar Distribución" [(ngModel)]="searchValue"
+                                                    (input)="applyFilterGlobal($event, dtCampusDepto)" />
+                                            </p-iconField>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-template>
+
+
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th class="centered-header" style="min-width: 6rem">
+                                        <div class="flex items-center">
+                                            N°
+                                            <p-columnFilter type="text" field="numero" display="menu" />
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 15rem">
+                                        <div class="flex items-center">
+                                            Campus Académico
+                                            <p-columnFilter type="text" field="nombreCampus"
+                                                display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 15rem">
+                                        <div class="flex items-center">
+                                            Departamento Académico
+                                            <p-columnFilter type="text" field="nombreDepartamento"
+                                                display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                                        <div class="flex items-center">
+                                            Ultima Fecha de Modificación
+                                            <p-columnFilter type="date" dateFormat="dd 'de' MM 'del' yy"
+                                                field="fechaModifico" display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <th class="centered-header" style="min-width: 8rem">
+                                        <div class="flex align-items-center">Acciones</div>
+                                    </th>
+                                    }
+
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-campus>
+                                <tr>
+                                    <td class="centered-cell">{{ campus.numero || 'No proporcionado' }}</td>
+                                    <td class="centered-cell">{{ campus.nombreCampus || 'No proporcionado' }}</td>
+                                    <td class="centered-cell">{{ campus.nombreDepartamento || 'No proporcionado' }}</td>
+                                    <td class="centered-cell">{{ campus.fechaModifico ? (campus.fechaModifico | date:
+                                        "dd 'de' MMMM
+                                        'del' yyyy, h:mm:ss a") :'No proporcionado' }}
+                                    </td>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <td class="centered-cell">
+                                        <div class="flex justify-center items-center">
+                                            <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                                                styleClass="btn fw-bolder custom-8" raised text></p-button>
+                                            <p-popover #op>
+                                                <div class="flex flex-col gap-4">
+
+                                                    @if (permisoActualizar) {
+                                                    <p-button label="Actualizar"
+                                                        (click)="cargarDatos(campus, 'ModificarCampusDepto', 'CampusDepto')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogActualizarCampusDepto ? 'pi pi-spin pi-spinner' : 'bi bi-arrow-counterclockwise fw-medium'"
+                                                        styleClass="btn fw-bolder custom-1 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                    @if (permisoEliminar) {
+                                                    <p-button label="Eliminar"
+                                                        (click)="cargarDatos(campus, 'EliminarCampusDepto', 'CampusDepto')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogEliminarCampusDepto ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle fw-medium'"
+                                                        styleClass="btn fw-bolder custom-7 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                </div>
+                                            </p-popover>
+                                        </div>
+                                    </td>
+                                    }
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="emptymessage">
+
+                                <tr>
+                                    <td colspan="4" class="centered-cell">
+                                        No se encontraron datos.
+                                    </td>
+                                </tr>
+                            </ng-template>
+
+                        </p-table>
+                        <br>
+
+                    </p-panel>
+                    }
+                </p-tabpanel>
+
+                <p-tabpanel [value]="2">
+                    @if (loadingCampusTitulo) {
+                    <div class="flex flex-col items-center justify-center text-center h-full p-4"
+                        style="background-color: transparent;">
+                        <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+                        <p class="font-semibold text-gray-700 text-lg">Estamos cargando la oferta académica, por favor
+                            espera...</p>
+                    </div>
+                    }
+
+
+                    @if (!loadingCampusTitulo) {
+                    <p-panel class="transparente">
+                        <p-table #dtCampusTitulo [value]="campustitulo" [paginator]="true" columnResizeMode="expand"
+                            showGridlines class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+                            [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+                            [globalFilterFields]="['numero','nombreTituloAcademico', 'nombreCampus']">
+
+                            <ng-template pTemplate="caption">
+                                <div class="toolbar">
+                                    <!-- Botones a la izquierda -->
+                                    <div class="centraciones">
+                                        <!-- Contenedor de los botones a la izquierda -->
+                                        <div class="left-buttons">
+                                            @if (permisoInsertar) {
+                                            <p-button label="Registrar" (click)="showDialog('RegistrarCampusTitulo')"
+                                                icon="bi bi-plus-circle" styleClass="btn fw-bolder custom-1 w-full"
+                                                raised text>
+                                            </p-button>
+                                            }
+                                        </div>
+
+
+                                        <!-- Contenedor de los botones a la derecha -->
+                                        <div class="right-search">
+                                            <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                                                styleClass="btn custom-slash" class="responsive"
+                                                (click)="clear(dtCampusTitulo)" />
+
+                                            <p-iconField iconPosition="right">
+                                                <p-inputIcon class="pi pi-search" />
+                                                <input pInputText type="text" class="custom-search-input"
+                                                    placeholder="Buscar Oferta" [(ngModel)]="searchValue"
+                                                    (input)="applyFilterGlobal($event, dtCampusTitulo)" />
+                                            </p-iconField>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-template>
+
+
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th class="centered-header" style="min-width: 6rem">
+                                        <div class="flex items-center">
+                                            N°
+                                            <p-columnFilter type="text" field="idTipoNotificacion" display="menu" />
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 15rem">
+                                        <div class="flex items-center">
+                                            Campus Académico
+                                            <p-columnFilter type="text" field="tipoNotificacion"
+                                                display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 15rem">
+                                        <div class="flex items-center">
+                                            Título Académico
+                                            <p-columnFilter type="text" field="tipoNotificacion"
+                                                display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                                        <div class="flex items-center">
+                                            Ultima Fecha de Modificación
+                                            <p-columnFilter type="date" dateFormat="dd 'de' MM 'del' yy"
+                                                field="fechaModifico" display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <th class="centered-header" style="min-width: 8rem">
+                                        <div class="flex align-items-center">Acciones</div>
+                                    </th>
+                                    }
+
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-campus>
+                                <tr>
+                                    <td class="centered-cell">{{ campus.numero || 'No proporcionado' }}</td>
+                                    <td class="centered-cell">{{ campus.nombreCampus || 'No proporcionado' }}</td>
+                                    <td class="centered-cell">{{ campus.nombreTituloAcademico || 'No proporcionado' }}
+                                    </td>
+                                    <td class="centered-cell">{{ campus.fechaModifico ? (campus.fechaModifico | date:
+                                        "dd 'de' MMMM
+                                        'del' yyyy, h:mm:ss a") :'No proporcionado' }}
+                                    </td>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <td class="centered-cell">
+                                        <div class="flex justify-center items-center">
+                                            <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                                                styleClass="btn fw-bolder custom-8" raised text></p-button>
+                                            <p-popover #op>
+                                                <div class="flex flex-col gap-4">
+
+                                                    @if (permisoActualizar) {
+                                                    <p-button label="Actualizar"
+                                                        (click)="cargarDatos(campus, 'ModificarCampusTitulo', 'CampusTitulo')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogActualizarCampus ? 'pi pi-spin pi-spinner' : 'bi bi-arrow-counterclockwise fw-medium'"
+                                                        styleClass="btn fw-bolder custom-1 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                    @if (permisoEliminar) {
+                                                    <p-button label="Eliminar"
+                                                        (click)="cargarDatos(campus, 'EliminarCampusTitulo', 'CampusTitulo')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogEliminarCampus ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle fw-medium'"
+                                                        styleClass="btn fw-bolder custom-7 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                </div>
+                                            </p-popover>
+                                        </div>
+                                    </td>
+                                    }
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="emptymessage">
+
+                                <tr>
+                                    <td colspan="4" class="centered-cell">
+                                        No se encontraron datos.
+                                    </td>
+                                </tr>
+                            </ng-template>
+
+                        </p-table>
+                        <br>
+                    </p-panel>
+                    }
+                </p-tabpanel>
+            </p-tabpanels>
+        </p-tabs>
+    </p-panel>
+</div>
+}
+
+
+<!-------------- Dialog de Registro de Campus ---------- -->
+<p-dialog header="Header" [(visible)]="visibleRegistrarCampus" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Registro de Campus Universitario</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="insertarCampus()" [formGroup]="RegistrarCampusForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <textarea pTextarea rows="1" [autoResize]="true" formControlName="nombreCampus" appCapitalizable
+                            appValidaciones [normalTextValidation]="true" [blockSpecialChars]="true"
+                            [blockEmojis]="true" [blockSQLInjection]="true"
+                            [invalid]="isInvalid(RegistrarCampusForm, 'nombreCampus')"
+                            [ngClass]="{ 'ng-invalid': showError && 
+                            (!RegistrarCampusForm.get('nombreCampus')?.value || RegistrarCampusForm.get('nombreCampus')?.value.length > limiteCaracteres) }"
+                            (input)="verificarLimiteCaracteres(RegistrarCampusForm, 'nombreCampus')"
+                            maxlength="{{limiteCaracteres}}"></textarea>
+                        <label>
+                            <span>
+                                1. Nombre Campus <span style="color: red;">*</span>
+                            </span>
+                            <small
+                                [ngStyle]="{ color: RegistrarCampusForm.get('nombreCampus')?.value?.length > limiteCaracteres ? 'red' : '#555','margin-left': '12px' }">
+                                {{ RegistrarCampusForm.get('nombreCampus')?.value?.length || 0 }} / {{
+                                limiteCaracteres }}
+                            </small>
+                        </label>
+                        @if (isInvalid(RegistrarCampusForm, 'nombreCampus')) {
+                        <p-message severity="error" size="small" variant="simple">El nombre del campus es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit"
+                        [disabled]="RegistrarCampusForm.invalid || isLoadingRegistrar"
+                        [icon]="isLoadingRegistrar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Actualizacion de Campus ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificarCampus" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Actualización de {{ nombreCampus }}</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="actualizarCampus()" [formGroup]="ActualizarCampusForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <textarea pTextarea rows="1" [autoResize]="true" id="firstName" formControlName="nombreCampus"
+                            appCapitalizable appValidaciones [normalTextValidation]="true" [blockSpecialChars]="true"
+                            [blockEmojis]="true" [blockSQLInjection]="true"
+                            [invalid]="isInvalid(ActualizarCampusForm, 'nombreCampus')"
+                            [ngClass]="{ 'ng-invalid': showError && 
+                            (!ActualizarCampusForm.get('nombreCampus')?.value || ActualizarCampusForm.get('nombreCampus')?.value.length > limiteCaracteres) }"
+                            (input)="verificarLimiteCaracteres(ActualizarCampusForm, 'nombreCampus')"
+                            maxlength="{{limiteCaracteres}}"></textarea>
+                        <label>
+                            <span>
+                                1. Nombre Campus <span style="color: red;">*</span>
+                            </span>
+                            <small
+                                [ngStyle]="{ color: ActualizarCampusForm.get('nombreCampus')?.value?.length > limiteCaracteres ? 'red' : '#555','margin-left': '12px' }">
+                                {{ ActualizarCampusForm.get('nombreCampus')?.value?.length || 0 }} / {{
+                                limiteCaracteres }}
+                            </small>
+                        </label>
+                        @if (isInvalid(ActualizarCampusForm, 'nombreCampus')) {
+                        <p-message severity="error" size="small" variant="simple">El nombre del campus es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit"
+                        [disabled]="ActualizarCampusForm.invalid || isLoadingActualizar"
+                        [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Diálogo de Eliminación de Campus ---------- -->
+<p-dialog header="Header" [(visible)]="visibleEliminarCampus" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Eliminación de {{ nombreCampus }}</h2>
+        </div>
+    </ng-template>
+
+    <form [formGroup]="EliminarCampusform">
+        <p-panel>
+            <div style="width: 100%; text-align: center; padding: 0;">
+                Estás a punto de eliminar el campus académico con nombre <strong>{{ nombreCampus }}</strong>.
+            </div>
+
+            <br>
+
+            <div style="text-align: justify; padding: 0 1rem;">
+                Esta acción eliminará permanentemente el campus académico del sistema. Una vez eliminado, no se podrá
+                recuperar.
+                <br><br>
+                <strong>Advertencia:</strong> Si este campus académico aún está asociado a uno o más registros, no podrá
+                ser eliminado.
+                Para poder continuar, asegúrate de reasignar un nuevo campus a todos los registros que actualmente lo
+                tienen asociado.
+                <br><br>
+                Por favor, asegúrate de comprender las implicaciones de esta acción antes de continuar.
+            </div>
+
+            <div style="text-align: center; padding-top: 1rem;">
+                ¿Estás seguro de que deseas eliminar este campus académico?
+            </div>
+
+            <p-footer style="display: flex; justify-content: center; gap: 10px;">
+                <button pButton type="button" [disabled]="isLoadingEliminar"
+                    [icon]="isLoadingEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+                    class="btn fw-bolder custom-1 w-full" (click)="eliminarCampus()"></button>
+
+                <button pButton type="button" icon="bi bi-x-circle" label="Cancelar"
+                    class="btn fw-bolder custom-2-1 w-full" [disabled]="isLoadingEliminar"
+                    (click)="visibleEliminarCampus = false"></button>
+            </p-footer>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Registro de Campus Departamento ---------- -->
+<p-dialog header="Header" [(visible)]="visibleRegistrarCampusDepto" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Registro de Distribución Departamental</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="insertarCampusDepto()" [formGroup]="RegistrarCampusDeptoForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idCampus" [options]="campus" optionLabel="nombreCampus"
+                            optionValue="idCampus" [showClear]="true" [showClear]="true" [filter]="true"
+                            filterBy="nombreCampus" appendTo="body" class="w-full"
+                            [invalid]="isInvalid(RegistrarCampusDeptoForm, 'idCampus')" />
+                        <label for="dd-city">1. Campus Académico Asociado *</label>
+                        @if (isInvalid(RegistrarCampusDeptoForm, 'idCampus')) {
+                        <p-message severity="error" size="small" variant="simple">El campus académico asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idDepartamento" [options]="departamentos"
+                            optionLabel="nombreDepartamento" optionValue="idDepartamento" [showClear]="true"
+                            [showClear]="true" [filter]="true" filterBy="nombreDepartamento" appendTo="body"
+                            class="w-full" [invalid]="isInvalid(RegistrarCampusDeptoForm, 'idDepartamento')" />
+                        <label for="dd-city">2. Departamento Asociado *</label>
+                        @if (isInvalid(RegistrarCampusDeptoForm, 'idDepartamento')) {
+                        <p-message severity="error" size="small" variant="simple">El departamento académico asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit"
+                        [disabled]="RegistrarCampusDeptoForm.invalid || isLoadingRegistrar"
+                        [icon]="isLoadingRegistrar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Actualizar Campus Departamento ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificarCampusDepto" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Actualización de Distribución Departamental </h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="actualizarCampusDepto()" [formGroup]="ActualizarCampusDeptoForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idCampus" [options]="campus" optionLabel="nombreCampus"
+                            optionValue="idCampus" [showClear]="true" [showClear]="true" [filter]="true"
+                            filterBy="nombreCampus" appendTo="body" class="w-full"
+                            [invalid]="isInvalid(ActualizarCampusDeptoForm, 'idCampus')" />
+                        <label for="dd-city">1. Campus Académico Asociado *</label>
+                        @if (isInvalid(ActualizarCampusDeptoForm, 'idCampus')) {
+                        <p-message severity="error" size="small" variant="simple">El campus académico asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idDepartamento" [options]="departamentos"
+                            optionLabel="nombreDepartamento" optionValue="idDepartamento" [showClear]="true"
+                            [showClear]="true" [filter]="true" filterBy="nombreDepartamento" appendTo="body"
+                            class="w-full" [invalid]="isInvalid(ActualizarCampusDeptoForm, 'idDepartamento')" />
+                        <label for="dd-city">2. Departamento Asociado *</label>
+                        @if (isInvalid(ActualizarCampusDeptoForm, 'idDepartamento')) {
+                        <p-message severity="error" size="small" variant="simple">El departamento académico asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit"
+                        [disabled]="ActualizarCampusDeptoForm.invalid || isLoadingActualizar"
+                        [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Diálogo de Eliminación de Campus ---------- -->
+<p-dialog header="Header" [(visible)]="visibleEliminarCampusDepto" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Eliminación de Distribución Departamental</h2>
+        </div>
+    </ng-template>
+
+    <form [formGroup]="EliminarCampusDeptoform">
+        <p-panel>
+            <div style="width: 100%; text-align: center; padding: 0;">
+                Estás a punto de eliminar la distribución departamental del <strong>{{ nombreCampus }} y el
+                    {{nombreDepartamento}}</strong>.
+            </div>
+
+            <br>
+
+            <div style="text-align: justify; padding: 0 1rem;">
+                Esta acción eliminará permanentemente esta distribución departamental del sistema. Una vez eliminado, no
+                se podrá
+                recuperar.
+                <br><br>
+                <strong>Advertencia:</strong> Si esta distribución departamental aún está asociado a uno o más
+                registros, no podrá
+                ser eliminado.
+                Para poder continuar, asegúrate de reasignar esta distribución departamental a todos los registros que
+                actualmente lo
+                tienen asociado.
+                <br><br>
+                Por favor, asegúrate de comprender las implicaciones de esta acción antes de continuar.
+            </div>
+
+            <div style="text-align: center; padding-top: 1rem;">
+                ¿Estás seguro de que deseas eliminar esta distribución departamental?
+            </div>
+
+            <p-footer style="display: flex; justify-content: center; gap: 10px;">
+                <button pButton type="button" [disabled]="isLoadingEliminar"
+                    [icon]="isLoadingEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+                    class="btn fw-bolder custom-1 w-full" (click)="eliminarCampusDepto()"></button>
+
+                <button pButton type="button" icon="bi bi-x-circle" label="Cancelar"
+                    class="btn fw-bolder custom-2-1 w-full" [disabled]="isLoadingEliminar"
+                    (click)="visibleEliminarCampusDepto = false"></button>
+            </p-footer>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Registro de Campus Titulo Academico ---------- -->
+<p-dialog header="Header" [(visible)]="visibleRegistrarCampusTitulo" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Registro de Oferta Académica</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="insertarCampusTitulo()" [formGroup]="RegistrarCampusTituloForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idCampus" [options]="campus" optionLabel="nombreCampus"
+                            optionValue="idCampus" [showClear]="true" [showClear]="true" [filter]="true"
+                            filterBy="nombreCampus" appendTo="body" class="w-full"
+                            [invalid]="isInvalid(RegistrarCampusTituloForm, 'idCampus')" />
+                        <label for="dd-city">1. Campus Académico Asociado *</label>
+                        @if (isInvalid(RegistrarCampusTituloForm, 'idCampus')) {
+                        <p-message severity="error" size="small" variant="simple">El campus académico asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idTituloAcademico" [options]="titulo"
+                            optionLabel="nombreTituloAcademico" optionValue="idTituloAcademico" [showClear]="true"
+                            [showClear]="true" [filter]="true" filterBy="nombreTituloAcademico" appendTo="body"
+                            class="w-full" [invalid]="isInvalid(RegistrarCampusTituloForm, 'idTituloAcademico')" />
+                        <label for="dd-city">2. Título Académico Asociado *</label>
+                        @if (isInvalid(RegistrarCampusTituloForm, 'idTituloAcademico')) {
+                        <p-message severity="error" size="small" variant="simple">El titulo académico asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit"
+                        [disabled]="RegistrarCampusTituloForm.invalid || isLoadingRegistrar"
+                        [icon]="isLoadingRegistrar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Actualizar  Titulo Academico ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificarCampusTitulo" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Actualización de Oferta Académica </h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="actualizarCampusTitulo()" [formGroup]="ActualizarCampusTituloForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idCampus" [options]="campus" optionLabel="nombreCampus"
+                            optionValue="idCampus" [showClear]="true" [showClear]="true" [filter]="true"
+                            filterBy="nombreCampus" appendTo="body" class="w-full"
+                            [invalid]="isInvalid(RegistrarCampusTituloForm, 'idCampus')" />
+                        <label for="dd-city">1. Campus Académico Asociado *</label>
+                        @if (isInvalid(ActualizarCampusTituloForm, 'idCampus')) {
+                        <p-message severity="error" size="small" variant="simple">El campus académico asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idTituloAcademico" [options]="titulo"
+                            optionLabel="nombreTituloAcademico" optionValue="idTituloAcademico" [showClear]="true"
+                            [showClear]="true" [filter]="true" filterBy="nombreTituloAcademico" appendTo="body"
+                            class="w-full" [invalid]="isInvalid(RegistrarCampusTituloForm, 'idTituloAcademico')" />
+                        <label for="dd-city">2. Título Académico Asociado *</label>
+                        @if (isInvalid(ActualizarCampusTituloForm, 'idTituloAcademico')) {
+                        <p-message severity="error" size="small" variant="simple">El titulo académico asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit"
+                        [disabled]="ActualizarCampusTituloForm.invalid || isLoadingActualizar"
+                        [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Diálogo de Eliminación de  Titulo Academico  ---------- -->
+<p-dialog header="Header" [(visible)]="visibleEliminarCampusTitulo" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Eliminación de Oferta Académica </h2>
+        </div>
+    </ng-template>
+
+    <form [formGroup]="EliminarCampusTituloform">
+        <p-panel>
+            <div style="width: 100%; text-align: center; padding: 0;">
+                Estás a punto de eliminar la oferta académica del <strong>{{ nombreCampus }} con su
+                    {{nombreTituloAcademico}}</strong>.
+            </div>
+
+            <br>
+
+            <div style="text-align: justify; padding: 0 1rem;">
+                Esta acción eliminará permanentemente esta oferta académica del sistema. Una vez eliminado, no se podrá
+                recuperar.
+                <br><br>
+                <strong>Advertencia:</strong> Si esta oferta académica aún está asociado a uno o más registros, no podrá
+                ser eliminado.
+                Para poder continuar, asegúrate de reasignar esta oferta académica a todos los registros que actualmente
+                lo
+                tienen asociado.
+                <br><br>
+                Por favor, asegúrate de comprender las implicaciones de esta acción antes de continuar.
+            </div>
+
+            <div style="text-align: center; padding-top: 1rem;">
+                ¿Estás seguro de que deseas eliminar esta oferta académica?
+            </div>
+
+            <p-footer style="display: flex; justify-content: center; gap: 10px;">
+                <button pButton type="button" [disabled]="isLoadingEliminar"
+                    [icon]="isLoadingEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+                    class="btn fw-bolder custom-1 w-full" (click)="eliminarCampusTitulo()"></button>
+
+                <button pButton type="button" icon="bi bi-x-circle" label="Cancelar"
+                    class="btn fw-bolder custom-2-1 w-full" [disabled]="isLoadingEliminar"
+                    (click)="visibleEliminarCampusTitulo = false"></button>
+            </p-footer>
+        </p-panel>
+    </form>
+
+</p-dialog>

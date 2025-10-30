@@ -1,0 +1,215 @@
+.page-title {
+    color: #fff;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.container {
+    position: relative;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center; // Centra horizontalmente
+    align-items: center; // Puedes usar center si quieres alineación vertical también
+    flex-wrap: wrap; // Permite que se acomoden en varias filas
+    gap: 20px; // Espacio entre tarjetas
+    padding: 30px 20px;
+}
+
+.big-icon {
+    font-size: 2rem;
+    /* Puedes ajustar este valor: 3rem, 5rem, etc. */
+    color: #253a69;
+    /* Opcional: cambia el color del ícono */
+}
+
+@keyframes gradientBorder {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+.card {
+    position: relative;
+    width: 320px;
+    height: 200px;
+    background-color: #FFF;
+    margin: 25px 15px;
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    transition: 0.3s ease-in-out;
+    cursor: pointer;
+    border-radius: 16px; // Para esquinas suaves
+    z-index: 1;
+
+    &:hover {
+        height: 380px;
+
+        .content {
+            visibility: visible;
+            opacity: 1;
+            margin-top: 10px;
+            transition-delay: 0.2s;
+        }
+    }
+
+    // Pseudo-elemento para el borde animado
+    &::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        z-index: -1;
+        background: linear-gradient(270deg, #229bb9, #253a69, #336699, #229bb9);
+        background-size: 400% 100%;
+        animation: gradientBorder 4s ease infinite;
+        border-radius: 18px;
+    }
+
+    // Fondo blanco interno para que no tape contenido
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        z-index: -1;
+        border-radius: 16px;
+    }
+
+
+}
+
+.card .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+}
+
+.iconBx {
+    font-size: 4rem; // Ícono más grande
+    color: #229bb9;
+    margin-bottom: 15px;
+    z-index: 1;
+}
+
+.card-titles {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #111;
+    text-align: center;
+    margin-bottom: 10px;
+    z-index: 2;
+}
+
+.content {
+    visibility: hidden;
+    opacity: 0;
+    text-align: center;
+    font-size: 0.95rem;
+    padding: 10px;
+    transition: 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* Angular PrimeNG button styling */
+:host ::ng-deep {
+    .p-button.Sixe {
+        background-color: #229bb9 !important;
+        border-color: #229bb9 !important;
+        padding: 0.75rem 1.5rem !important;
+        margin-top: 15px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        letter-spacing: 1px;
+        font-weight: 500;
+
+        &:hover {
+            background-color: #1a7d95 !important;
+            border-color: #1a7d95 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .p-button-label {
+            padding: 0 5px;
+            /* Add internal padding to the button text */
+        }
+    }
+}
+
+/* Media Queries for Responsiveness */
+@media screen and (max-width: 1200px) {
+    .container {
+        padding: 20px;
+    }
+
+
+}
+
+@media screen and (max-width: 768px) {
+    .page-title {
+        font-size: 1.8rem;
+    }
+
+    .container {
+        flex-direction: column;
+        padding: 15px;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 350px;
+        margin: 30px 0;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .page-title {
+        font-size: 1.5rem;
+        padding: 0 10px;
+    }
+
+    .card {
+        max-width: 280px;
+    }
+
+    .card:hover {
+        height: 400px;
+        /* mayor crecimiento para pantallas pequeñas */
+    }
+
+    .imgBx {
+        width: 220px;
+        height: 220px;
+        left: 10px;
+    }
+}
+
+@media screen and (min-width: 481px) and (max-width: 768px) {
+    .card {
+        width: calc(50% - 20px);
+        /* Dos cards por fila con margen */
+        margin: 10px;
+    }
+}

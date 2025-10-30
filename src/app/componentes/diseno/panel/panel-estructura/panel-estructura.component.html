@@ -1,0 +1,54 @@
+<div class="panel">
+
+    <div class="custom-container">
+        <p-panel class="transparente">
+
+            <ng-template pTemplate="header">
+                <div class="boton-container">
+                    <p-button icon="pi pi-angle-double-left" (click)="regresarPanel()" variant="outlined"
+                        pTooltip="Regresar a Ajustes del Sistema" tooltipStyleClass="tooltip-custom-1" />
+                </div>
+                <div class="header-container title-header gap-2">
+
+                    <span>
+                        Módulo de Catálogos de Estructura Académica
+                    </span>
+                </div>
+            </ng-template>
+
+
+
+        <div class="container" [class.mobile-view]="isMobileOrTablet">
+
+                @for (card of cards; track card.id) {
+                <div class="card" [class.expanded]="card.isExpanded"
+                    [class.hidden]="(isMobile && !activeCardIds.includes(card.id)) || (isTablet && !activeCardIds.includes(card.id))"
+                    (click)="toggleCard(card.id)">
+
+                    <div class="iconBx">
+                        <i [ngClass]="card.iconClass + ' big-icon'"></i>
+                    </div>
+
+                    <h1 class="card-titles">{{ card.title }}</h1>
+
+                    <div class="content">
+                        <p>{{ card.description }}</p>
+                        <br>
+                        <p-button [label]="card.buttonLabel" [routerLink]="card.routerLink" routerLinkActive="active"
+                            styleClass="btn fw-bolder custom-1 w-full" (click)="$event.stopPropagation()">
+                        </p-button>
+                        <br>
+
+                        @if (isMobile && card.isExpanded) {
+                        <p-button styleClass="close-btn" (click)="closeActiveCard(); $event.stopPropagation()"
+                            icon="pi pi-times" [rounded]="true" severity="danger" />
+                        }
+                    </div>
+                </div>
+                }
+            </div>
+
+        </p-panel>
+    </div>
+</div>
+<br>

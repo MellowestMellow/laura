@@ -1,0 +1,555 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+<div class="custom-container">
+  <p-panel styleClass="transparente">
+
+    <ng-template pTemplate="header">
+      <div class="boton-container">
+        <p-button icon="pi pi-angle-double-left" (click)="regresarPanel()" variant="outlined"
+          pTooltip="Regresar a Ajustes del Sistema" tooltipStyleClass="tooltip-custom-1" />
+      </div>
+      <div class="header-container title-header gap-2">
+        <span>
+          Mantenimiento de Solicitudes
+        </span>
+      </div>
+    </ng-template>
+    <p-tabs value="0" scrollable [(value)]="tabActivoIndex" (valueChange)="onTabChange($event)">
+      <p-tablist>
+        <p-tab [value]="0">Categorías</p-tab>
+        <p-tab [value]="1">Tipos</p-tab>
+        <p-tab [value]="2">Etapas</p-tab>
+        <p-tab [value]="3">Estados</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <p-tabpanel [value]="0">
+          <div *ngIf="isCategoriaSolicitudLoaded"
+            class="flex flex-col items-center justify-center text-center h-full p-4"
+            style="background-color: transparent;">
+            <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+            <p class="font-semibold text-gray-700 text-lg">Cargando categorías de solicitudes, por favor
+              espera...</p>
+          </div>
+
+          <p-panel *ngIf="!isCategoriaSolicitudLoaded" styleClass="transparente">
+
+            <p-table #dtCategoria [value]="categoriasSolicitud" [paginator]="true" columnResizeMode="expand"
+              showGridlines class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+              [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+              [globalFilterFields]="['idCategoriaTipoSolicitud','categoriaTipoSolicitud']">
+
+              <ng-template pTemplate="caption">
+                <div class="toolbar">
+                  <!-- Botones a la izquierda -->
+                  <div class="centraciones">
+                    <!-- Contenedor de los botones a la izquierda -->
+                    <div class="left-buttons">
+                      <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder"
+                        label="Reportes" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised
+                        text />
+                      <p-popover #op>
+                        <div class="flex flex-col gap-4">
+                          <div>
+                            <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-1 w-full" raised text>
+                            </p-button>
+                          </div>
+                          <div>
+                            <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-2 w-full" raised text>
+                            </p-button>
+                          </div>
+                        </div>
+                      </p-popover>
+                    </div>
+
+                    <!-- Contenedor de los botones a la derecha -->
+                    <div class="right-search">
+                      <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                        styleClass="btn custom-slash" class="responsive" (click)="clear(dtCategoria)" />
+
+                      <p-iconField iconPosition="right">
+                        <p-inputIcon styleClass="pi pi-search" />
+                        <input pInputText type="text" class="custom-search-input" placeholder="Buscar ticket"
+                          [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dtCategoria)" />
+                      </p-iconField>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                    <div class="flex items-center">
+                      N°
+                      <p-columnFilter type="text" field="idCategoriaTipoSolicitud" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                    <div class="flex items-center">
+                      Categoría de Solicitud
+                      <p-columnFilter type="text" field="ticket" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                    <div class="flex items-center">
+                      Tipos de Solicitud Relacionados
+                      <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                    <div class="flex items-center">
+                      Ultima Fecha de Modificación
+                      <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 8rem" rowspan="2">
+                    <div class="flex align-items-center">Acciones</div>
+                  </th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-categoria>
+                <tr>
+                  <td class="centered-cell">{{ categoria.idCategoriaTipoSolicitud || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ categoria.categoriaTipoSolicitud || 'No proporcionado' }}</td>
+                  <!-- Columna de tipos de solicitudes -->
+                  <td class="centered-cell">
+                    <ng-container *ngIf="tiposPorCategorias[categoria.idCategoriaTipoSolicitud]?.length; else noTipos">
+                      <!--div *ngFor="let tipo of tiposPorCategorias[categoria.idCategoriaTipoSolicitud]">
+                      {{ tipo }}
+                    </div-->
+                      <ol style="list-style-type: decimal; padding-left: 1.5rem;">
+                        <li *ngFor="let tipo of tiposPorCategorias[categoria.idCategoriaTipoSolicitud]">
+                          {{ tipo }}
+                        </li>
+                      </ol>
+                    </ng-container>
+                    <ng-template #noTipos>No proporcionado</ng-template>
+                  </td>
+
+                  <td class="centered-cell">
+                    {{ categoria.fechaModifico ? (categoria.fechaModifico | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a")
+                    :
+                    'No proporcionado' }}
+                  </td>
+                  <!-- Columna de acciones -->
+                  <td class="centered-cell">
+                    <div class="flex justify-center items-center">
+                      <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                        styleClass="btn fw-bolder custom-8" raised text></p-button>
+                      <p-popover #op>
+
+                        <div class="flex flex-col gap-4">
+
+                          <!--p-button label="Actualizar" (click)="cargarDatosCategoria(categoria)"
+                          icon="pi pi-user-edit fw-medium" styleClass="btn fw-bolder custom-1 w-full" text
+                          *ngIf="permisoActualizar && rolesUsuario.includes([1, 2])">
+                        </p-button-->
+                        </div>
+                      </p-popover>
+
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+
+                <tr>
+                  <td colspan="11" class="centered-cell">
+                    No se encontraron datos.
+                  </td>
+                </tr>
+              </ng-template>
+
+            </p-table>
+            <br>
+
+          </p-panel>
+        </p-tabpanel>
+
+        <p-tabpanel [value]="1">
+          <div *ngIf="isTipoSolicitudLoaded" class="flex flex-col items-center justify-center text-center h-full p-4"
+            style="background-color: transparent;">
+            <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+            <p class="font-semibold text-gray-700 text-lg">Cargando tipos de solicitudes, por favor
+              espera...</p>
+          </div>
+
+          <p-panel *ngIf="!isTipoSolicitudLoaded" styleClass="transparente">
+
+            <p-table #dtTipo [value]="tiposSolicitud" [paginator]="true" columnResizeMode="expand" showGridlines
+              class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+              [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+              [globalFilterFields]="['idTipoSolicitud', 'categoriaTipoSolicitud', 'tipoSolicitud']">
+
+              <ng-template pTemplate="caption">
+                <div class="toolbar">
+                  <!-- Botones a la izquierda -->
+                  <div class="centraciones">
+                    <!-- Contenedor de los botones a la izquierda -->
+                    <div class="left-buttons">
+                      <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder"
+                        label="Reportes" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised
+                        text />
+                      <p-popover #op>
+                        <div class="flex flex-col gap-4">
+                          <div>
+                            <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-1 w-full" raised text>
+                            </p-button>
+                          </div>
+                          <div>
+                            <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-2 w-full" raised text>
+                            </p-button>
+                          </div>
+                        </div>
+                      </p-popover>
+                    </div>
+
+                    <!-- Contenedor de los botones a la derecha -->
+                    <div class="right-search">
+                      <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                        styleClass="btn custom-slash" class="responsive" (click)="clear(dtTipo)" />
+
+                      <p-iconField iconPosition="right">
+                        <p-inputIcon styleClass="pi pi-search" />
+                        <input pInputText type="text" class="custom-search-input" placeholder="Buscar ticket"
+                          [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dtTipo)" />
+                      </p-iconField>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                    <div class="flex items-center">
+                      N°
+                      <p-columnFilter type="text" field="idTipoSolicitud" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                    <div class="flex items-center">
+                      Categoría de Solicitud
+                      <p-columnFilter type="text" field="ticket" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                    <div class="flex items-center">
+                      Tipo de Solicitud
+                      <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 8rem" rowspan="2">
+                    <div class="flex align-items-center">Acciones</div>
+                  </th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-tipo>
+                <tr>
+                  <td class="centered-cell">{{ tipo.idTipoSolicitud || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ tipo.categoriaTipoSolicitud || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ tipo.tipoSolicitud || 'No proporcionado' }}</td>
+
+                  <!-- Columna de acciones -->
+                  <td class="centered-cell">
+                    <div class="flex justify-center items-center">
+                      <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                        styleClass="btn fw-bolder custom-8" raised text></p-button>
+                      <p-popover #op>
+
+                        <div class="flex flex-col gap-4">
+
+                          <!--p-button label="Actualizar" (click)="cargarDatosTipo(tipo)" icon="pi pi-user-edit fw-medium"
+                          styleClass="btn fw-bolder custom-1 w-full" text
+                          *ngIf="permisoActualizar && rolesUsuario.includes([1, 2])">
+                        </p-button-->
+                        </div>
+                      </p-popover>
+
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+
+                <tr>
+                  <td colspan="11" class="centered-cell">
+                    No se encontraron datos.
+                  </td>
+                </tr>
+              </ng-template>
+
+            </p-table>
+            <br>
+
+          </p-panel>
+        </p-tabpanel>
+
+        <p-tabpanel [value]="2">
+          <div *ngIf="isEtapaSolicitudLoaded" class="flex flex-col items-center justify-center text-center h-full p-4"
+            style="background-color: transparent;">
+            <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+            <p class="font-semibold text-gray-700 text-lg">Cargando etapas de solicitudes, por favor
+              espera...</p>
+          </div>
+
+          <p-panel *ngIf="!isEtapaSolicitudLoaded" styleClass="transparente">
+
+            <p-table #dtEtapa [value]="etapasSolicitud" [paginator]="true" columnResizeMode="expand" showGridlines
+              class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+              [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+              [globalFilterFields]="['idEtapa', 'etapa', 'fechaModifico']">
+
+              <ng-template pTemplate="caption">
+                <div class="toolbar">
+                  <!-- Botones a la izquierda -->
+                  <div class="centraciones">
+                    <!-- Contenedor de los botones a la izquierda -->
+                    <div class="left-buttons">
+                      <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder"
+                        label="Reportes" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised
+                        text />
+                      <p-popover #op>
+                        <div class="flex flex-col gap-4">
+                          <div>
+                            <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-1 w-full" raised text>
+                            </p-button>
+                          </div>
+                          <div>
+                            <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-2 w-full" raised text>
+                            </p-button>
+                          </div>
+                        </div>
+                      </p-popover>
+                    </div>
+
+                    <!-- Contenedor de los botones a la derecha -->
+                    <div class="right-search">
+                      <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                        styleClass="btn custom-slash" class="responsive" (click)="clear(dtEtapa)" />
+
+                      <p-iconField iconPosition="right">
+                        <p-inputIcon styleClass="pi pi-search" />
+                        <input pInputText type="text" class="custom-search-input" placeholder="Buscar ticket"
+                          [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dtEtapa)" />
+                      </p-iconField>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                    <div class="flex items-center">
+                      N°
+                      <p-columnFilter type="text" field="idEtapa" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                    <div class="flex items-center">
+                      Etapa de Solicitud
+                      <p-columnFilter type="text" field="ticket" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                    <div class="flex items-center">
+                      Fecha de Última Modificación
+                      <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 8rem" rowspan="2">
+                    <div class="flex align-items-center">Acciones</div>
+                  </th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-etapa>
+                <tr>
+                  <td class="centered-cell">{{ etapa.idEtapa || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ etapa.etapa || 'No proporcionado' }}</td>
+                  <td class="centered-cell">
+                    {{ etapa.fechaModifico ? (etapa.fechaModifico | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a") :
+                    'No proporcionado' }}
+                  </td>
+
+                  <!-- Columna de acciones -->
+                  <td class="centered-cell">
+                    <div class="flex justify-center items-center">
+                      <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                        styleClass="btn fw-bolder custom-8" raised text></p-button>
+                      <p-popover #op>
+
+                        <div class="flex flex-col gap-4">
+
+                          <!--p-button label="Actualizar" (click)="cargarDatosEtapa(etapa)" icon="pi pi-user-edit fw-medium"
+                          styleClass="btn fw-bolder custom-1 w-full" text
+                          *ngIf="permisoActualizar && rolesUsuario.includes([1, 2])">
+                        </p-button-->
+                        </div>
+                      </p-popover>
+
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+
+                <tr>
+                  <td colspan="11" class="centered-cell">
+                    No se encontraron datos.
+                  </td>
+                </tr>
+              </ng-template>
+
+            </p-table>
+            <br>
+
+          </p-panel>
+        </p-tabpanel>
+
+        <p-tabpanel [value]="3">
+          <div *ngIf="isEstadoSolicitudLoaded" class="flex flex-col items-center justify-center text-center h-full p-4"
+            style="background-color: transparent;">
+            <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+            <p class="font-semibold text-gray-700 text-lg">Cargando estados de solicitudes, por favor
+              espera...</p>
+          </div>
+
+          <p-panel *ngIf="!isEstadoSolicitudLoaded" styleClass="transparente">
+
+            <p-table #dtEstado [value]="estadosSolicitud" [paginator]="true" columnResizeMode="expand" showGridlines
+              class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+              [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+              [globalFilterFields]="['idEstadoSolicitud', 'estadoSolicitud', 'fechaModifico']">
+
+              <ng-template pTemplate="caption">
+                <div class="toolbar">
+                  <!-- Botones a la izquierda -->
+                  <div class="centraciones">
+                    <!-- Contenedor de los botones a la izquierda -->
+                    <div class="left-buttons">
+                      <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder"
+                        label="Reportes" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised
+                        text />
+                      <p-popover #op>
+                        <div class="flex flex-col gap-4">
+                          <div>
+                            <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-1 w-full" raised text>
+                            </p-button>
+                          </div>
+                          <div>
+                            <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-2 w-full" raised text>
+                            </p-button>
+                          </div>
+                        </div>
+                      </p-popover>
+                    </div>
+
+                    <!-- Contenedor de los botones a la derecha -->
+                    <div class="right-search">
+                      <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                        styleClass="btn custom-slash" class="responsive" (click)="clear(dtEstado)" />
+
+                      <p-iconField iconPosition="right">
+                        <p-inputIcon styleClass="pi pi-search" />
+                        <input pInputText type="text" class="custom-search-input" placeholder="Buscar ticket"
+                          [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dtEstado)" />
+                      </p-iconField>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                    <div class="flex items-center">
+                      N°
+                      <p-columnFilter type="text" field="numero" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                    <div class="flex items-center">
+                      Estado de Solicitud
+                      <p-columnFilter type="text" field="ticket" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                    <div class="flex items-center">
+                      Fecha de Última Modificación
+                      <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 8rem" rowspan="2">
+                    <div class="flex align-items-center">Acciones</div>
+                  </th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-estado>
+                <tr>
+                  <td class="centered-cell">{{ estado.idEstadoSolicitud || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ estado.estadoSolicitud || 'No proporcionado' }}</td>
+                  <td class="centered-cell">
+                    {{ estado.fechaModifico ? (estado.fechaModifico | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a") :
+                    'No proporcionado' }}
+                  </td>
+
+                  <!-- Columna de acciones -->
+                  <td class="centered-cell">
+                    <div class="flex justify-center items-center">
+                      <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                        styleClass="btn fw-bolder custom-8" raised text></p-button>
+                      <p-popover #op>
+
+                        <div class="flex flex-col gap-4">
+
+                          <!--p-button label="Actualizar" (click)="cargarDatosEstado(estado)"
+                          icon="pi pi-user-edit fw-medium" styleClass="btn fw-bolder custom-1 w-full" text
+                          *ngIf="permisoActualizar && rolesUsuario.includes([1, 2])">
+                        </p-button-->
+                        </div>
+                      </p-popover>
+
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+
+                <tr>
+                  <td colspan="11" class="centered-cell">
+                    No se encontraron datos.
+                  </td>
+                </tr>
+              </ng-template>
+
+            </p-table>
+            <br>
+
+          </p-panel>
+        </p-tabpanel>
+
+      </p-tabpanels>
+    </p-tabs>
+  </p-panel>
+</div>

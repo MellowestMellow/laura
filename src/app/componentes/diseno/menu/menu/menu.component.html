@@ -1,0 +1,318 @@
+@if (loadingtable) {
+<div class="flex flex-col items-center justify-center text-center h-full p-4 loading-overlay">
+  <div class="custom-spinner mb-4"></div>
+</div>
+}
+
+
+@if (!loadingtable && requestStatus && requestTypes && tieneRolGeneral) {
+<div class="internal-dashboard">
+
+  <!-- MÉTRICAS GENERALES -->
+  <p-card>
+    <ng-template pTemplate="header">
+      <h3 class="section-title">
+        Métricas Generales
+        @if (trimestreActual) {
+        <span> - Trimestre {{ trimestreActual }}</span>
+        }
+      </h3>
+    </ng-template>
+
+    <div class="metrics-container">
+      <!-- ESTADO DE SOLICITUDES -->
+      <div class="metric-block">
+        <h4 class="metric-title">Estado de Solicitudes</h4>
+        <div class="metric-items">
+        <div class="metric-card" (click)="irA('/solicitud')" style="cursor: pointer;">
+          <i class="pi pi-file metric-icon icon-yellow"></i>
+          <div>
+            <div class="metric-value">{{ requestStatus.registered || 0 }}</div>
+            <div class="metric-label">Registradas</div>
+          </div>
+        </div>
+
+        <div class="metric-card" (click)="irA('/solicitud/historial')" style="cursor: pointer;">
+          <i class="pi pi-times-circle metric-icon icon-red"></i>
+          <div>
+            <div class="metric-value">{{ requestStatus.denied || 0 }}</div>
+            <div class="metric-label">Denegadas</div>
+          </div>
+        </div>
+
+          <div class="metric-card" (click)="irA('/solicitud/historial')" style="cursor: pointer;">
+            <i class="pi pi-check-circle metric-icon icon-green"></i>
+            <div>
+              <div class="metric-value">{{ requestStatus.dictated || 0 }}</div>
+              <div class="metric-label">Dictaminadas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIPO DE SOLICITUDES -->
+      <div class="metric-block">
+        <h4 class="metric-title">Tipo de Solicitudes</h4>
+        <div class="metric-items">
+          <div class="metric-card" (click)="irA('/solicitud')" style="cursor: pointer;">
+            <i class="pi pi-sitemap metric-icon icon-blue"></i>
+            <div>
+              <div class="metric-value">{{ requestTypes.strategic || 0 }}</div>
+              <div class="metric-label">Estratégicas</div>
+            </div>
+          </div>
+
+          <div class="metric-card" (click)="irA('/solicitud')" style="cursor: pointer;">
+            <i class="pi pi-book metric-icon icon-navy"></i>
+            <div>
+              <div class="metric-value">{{ requestTypes.curricular || 0 }}</div>
+              <div class="metric-label">Curriculares</div>
+            </div>
+          </div>
+
+          <div class="metric-card" (click)="irA('/solicitud')" style="cursor: pointer;">
+            <i class="pi pi-briefcase metric-icon icon-cyan"></i>
+            <div>
+              <div class="metric-value">{{ requestTypes.administrative || 0 }}</div>
+              <div class="metric-label">Administrativas</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </p-card>
+
+  <br>
+
+  @if (monthlyMetrics.length) {
+
+  <div class="charts-grid-2x2">
+    <p-card>
+      <ng-template pTemplate="header">
+        <h4 class="section-title">Distribución por Tipo de Solicitudes</h4>
+      </ng-template>
+      <p-chart type="pie" [data]="requestTypesChartData" [options]="requestTypesChartOptions" />
+    </p-card>
+
+    <p-card>
+      <ng-template pTemplate="header">
+        <h4 class="section-title">Distribución por Estado de Solicitudes</h4>
+      </ng-template>
+      <p-chart type="doughnut" [data]="requestStatusChartData" [options]="requestStatusChartOptions" />
+    </p-card>
+  </div>
+  <br>
+
+  <div class="charts-grid-2x2">
+    <p-card>
+      <ng-template pTemplate="header">
+        <h4 class="section-title">Solicitudes Curriculares por Subtipo</h4>
+      </ng-template>
+      <p-chart type="doughnut" [data]="curricularSubtypeDistributionChartData"
+        [options]="curricularSubtypeDistributionChartOptions" />
+    </p-card>
+
+    <p-card>
+      <ng-template pTemplate="header">
+        <h4 class="section-title">Distribución: Estratégicas vs Administrativas</h4>
+      </ng-template>
+      <p-chart type="pie" [data]="combinedStrategicAdministrativeDistributionChartData"
+        [options]="combinedStrategicAdministrativeDistributionChartOptions" />
+    </p-card>
+  </div>
+
+  <br>
+
+  <p-card>
+    <ng-template pTemplate="header">
+      <h4 class="section-title">Evolución Mensual de Solicitudes</h4>
+    </ng-template>
+    <p-chart type="bar" [data]="monthlyMetricsChartData" [options]="monthlyMetricsChartOptions" />
+  </p-card>
+  <br>
+  }
+
+
+  <br>
+
+  <p-card>
+    <ng-template pTemplate="header">
+      <h3 class="section-title">Resumen Ejecutivo</h3>
+    </ng-template>
+
+    <div class="executive-summary-grid">
+      <!-- tarjetas resumen -->
+      <div class="summary-card" (click)="irA('/solicitud')" style="cursor: pointer;">
+        <i class="pi pi-inbox summary-icon icon-blue"></i>
+        <div class="summary-content">
+          <div class="summary-label">Total Activas</div>
+          <div class="summary-value">
+            {{ (requestStatus.registered || 0) - (requestStatus.dictated || 0) - (requestStatus.denied || 0) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <i class="pi pi-percentage summary-icon icon-green"></i>
+        <div class="summary-content">
+          <div class="summary-label">Tasa Aprobación</div>
+          <div class="summary-value">
+            {{ requestStatus.registered ? ((requestStatus.dictated / requestStatus.registered) * 100).toFixed(1) : 0
+            }}%
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card" (click)="irA('/solicitud')" style="cursor: pointer;">
+        <i class="pi pi-clock summary-icon icon-orange"></i>
+        <div class="summary-content">
+          <div class="summary-label">Pendientes de Dictamen</div>
+          <div class="summary-value">
+            {{ (requestStatus.registered || 0) - (requestStatus.dictated || 0) - (requestStatus.denied || 0) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="summary-card" (click)="irA('/solicitud/historial')" style="cursor: pointer;">
+        <i class="pi pi-check-circle summary-icon icon-teal"></i>
+        <div class="summary-content">
+          <div class="summary-label">Completadas</div>
+          <div class="summary-value">{{ totalCompletedRequests || 0 }}</div>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <i class="pi pi-calendar summary-icon icon-purple"></i>
+        <div class="summary-content">
+          <div class="summary-label">Tiempo Promedio General</div>
+          <div class="summary-value">
+            {{ (generalAvgResponseTime || 0).toFixed(1) }} días
+          </div>
+        </div>
+      </div>
+    </div>
+    <br>
+
+    <div class="button-container" style="margin-top: auto; gap: 12px; padding-top: 12px;">
+      <div class="trimestre-group">
+        <p-select id="trimestreSelect" class="p-inputtext-sm" [(ngModel)]="trimestreSeleccionado"
+          (onChange)="onPeriodoChange()" [options]="trimestresDisponibles" optionLabel="label" optionValue="value">
+        </p-select>
+      </div>
+
+      @if (esAnual) {
+      <div class="anio-group">
+        <label for="anioSelect" class="mb-0">Año:</label>
+        <p-select id="anioSelect" class="p-inputtext-sm" [(ngModel)]="anioSeleccionado" [options]="aniosOptions">
+        </p-select>
+      </div>
+      }
+
+      <div class="exportar-group">
+        <p-button label="Exportar Datos" variant="text" icon="pi pi-download" [raised]="true"
+          styleClass="btn fw-bolder custom-1" (click)="descargarDatos()">
+        </p-button>
+      </div>
+    </div>
+
+
+
+  </p-card>
+
+</div>
+}
+
+@if (rolvra && metricasPorUnidad?.length) {
+  <br>
+  <p-card>
+    <ng-template pTemplate="header">
+      <h3 class="section-title text-2xl font-bold text-center mb-4">
+        Métricas por Unidad Académica
+      </h3>
+    </ng-template>
+
+    <div class="unidad-metricas-container space-y-10">
+      @for (unidad of metricasPorUnidad; track unidad.idUnidad) {
+        <div class="unidad-row border rounded-lg shadow-md p-6 bg-white">
+          
+          <!-- Nombre de la unidad -->
+          <h2 class="text-2xl font-extrabold text-center text-black mb-6 uppercase tracking-wide">
+            {{ unidad.nombre }}
+          </h2>
+
+          <!-- Gráfico -->
+          <div class="unidad-chart w-full  justify-center mb-3">
+            <p-chart 
+              type="doughnut" 
+              [data]="unidad.chartData" 
+              [options]="{ responsive: true }">
+            </p-chart>
+          </div>
+
+          <!-- Tabla debajo -->
+          <div class="unidad-table w-full">
+            <p-table [value]="unidad.solicitudes" [paginator]="true" [rows]="5" class="p-datatable-sm">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Ticket</th>
+                  <th>Nombre Solicitud</th>
+                  <th>Tipo Solicitud</th>
+                  <th>Estado</th>
+                  <th>Fecha Registro</th>
+                  <th>Última Modificación</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-s>
+                <tr>
+                  <td>{{ s.ticket }}</td>
+                  <td class="font-medium">{{ s.nombreSolicitud }}</td>
+                  <td>
+                  <span
+                    class="px-1 py-1 rounded-md text-s font-semibold"
+                    [ngStyle]="{
+                      'background-color': getTipoColor(s.tipoSolicitud, true),
+                      'color': getTipoColor(s.tipoSolicitud, false)
+                    }"
+                  >
+                    {{ s.tipoSolicitud }}
+                  </span>
+
+                </td>
+
+                 <td>
+                    <span 
+                      class="px-1 py-1 rounded-md text-s font-semibold"
+                      [ngClass]="{
+                        'bg-green-100 text-green-700': [3,5,26].includes(s.idEstadoSolicitud),
+                        'bg-red-100 text-red-700': s.idEstadoSolicitud === 4,
+                        'bg-yellow-100 text-yellow-700': ![3,4,5,26].includes(s.idEstadoSolicitud)
+                      }"
+                    >
+                      {{
+                        [3,5,26].includes(s.idEstadoSolicitud) ? 'Aprobado' :
+                        s.idEstadoSolicitud === 4 ? 'Denegado' :
+                        'En Proceso'
+                      }}
+                    </span>
+                  </td>
+
+                  <td>{{ s.fechaRegistro | date:'dd/MM/yyyy' }}</td>
+                  <td>
+                    @if (s.fechaUltimaModificacion) {
+                      {{ s.fechaUltimaModificacion | date:'dd/MM/yyyy' }}
+                    } @else {
+                      N/A
+                    }
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+      }
+    </div>
+  </p-card>
+} @else {
+  <p></p>
+}
+

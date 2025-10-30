@@ -1,0 +1,306 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+
+@if (loadingtable) {
+<div class="flex flex-col items-center justify-center text-center h-full p-4" style="background-color: transparent;">
+    <div class="custom-spinner mb-4"></div>
+</div>
+}
+
+
+@if (!loadingtable) {
+<div class="custom-container">
+    <p-panel class="transparente">
+
+        <ng-template pTemplate="header">
+            <div class="boton-container">
+                <p-button icon="pi pi-angle-double-left" (click)="regresarPanel()" variant="outlined"
+                    pTooltip="Regresar a Ajustes de Formación" tooltipStyleClass="tooltip-custom-1" />
+            </div>
+            <div class="header-container title-header gap-2">
+                <span>
+                    Modalidad
+                </span>
+            </div>
+        </ng-template>
+        <br>
+
+        <p-table #dt [value]="modalidad" [paginator]="true" columnResizeMode="expand" showGridlines
+            [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+            [globalFilterFields]="['numero','modalidad']">
+
+            <ng-template pTemplate="caption">
+                <div class="toolbar">
+                    <!-- Botones a la izquierda -->
+                    <div class="centraciones">
+                        <!-- Contenedor de los botones a la izquierda -->
+                        <div class="left-buttons">
+                            @if (permisoInsertar) {
+                            <p-button label="Registrar" (click)="showDialog('Registrar')" icon="bi bi-plus-circle"
+                                styleClass="btn fw-bolder custom-1 w-full" raised text>
+                            </p-button>
+                            }
+                        </div>
+
+                        <!-- Contenedor de los botones a la derecha -->
+                        <div class="right-search">
+                            <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                                styleClass="btn custom-slash" (click)="clear(dt)" class="responsive" />
+
+                            <p-iconField iconPosition="right">
+                                <p-inputIcon class="pi pi-search" />
+                                <input pInputText type="text" class="custom-search-input" placeholder="Buscar"
+                                    [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dt)" />
+                            </p-iconField>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th class="centered-header" style="min-width: 6rem">
+                        <div class="flex items-center">
+                            N°
+                            <p-columnFilter type="text" field="numero" display="menu" />
+                        </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 15rem">
+                        <div class="flex items-center">
+                            Modalidad
+                            <p-columnFilter type="text" field="modalidad" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                        <div class="flex items-center">
+                            Ultima Fecha de Modificación
+                            <p-columnFilter type="date" dateFormat="dd 'de' MMMM 'del' yyyy, h:mm:ss a"
+                                                field="fechaModifico" display="menu"></p-columnFilter>
+                        </div>
+                    </th>
+                    @if (permisoActualizar || permisoEliminar) {
+                    <th class="centered-header" style="min-width: 8rem">
+                        <div class="flex align-items-center">Acciones</div>
+                    </th>
+                    }
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-modalidad>
+                <tr>
+                    <td class="centered-cell">{{ modalidad.numero || 'No proporcionado' }}</td>
+                    <td class="centered-cell">{{ modalidad.modalidad || 'No proporcionado' }}</td>
+                    <td class="centered-cell">{{ modalidad.fechaModifico ? (modalidad.fechaModifico | date: "dd 'de'
+                        MMMM
+                        'del' yyyy, h:mm:ss a") :'No proporcionado' }}
+                    </td>
+                    @if (permisoActualizar || permisoEliminar) {
+                    <td class="centered-cell">
+                        <div class="flex justify-center items-center">
+                            <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                                styleClass="btn fw-bolder custom-8" raised text></p-button>
+                            <p-popover #op>
+                                <div class="flex flex-col gap-4">
+
+                                    @if (permisoActualizar) {
+                                    <p-button label="Actualizar" (click)="cargarDatos(modalidad, 'Modificar')"
+                                        [disabled]="loadingDialogGeneral"
+                                        [icon]="loadingDialogActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-arrow-counterclockwise fw-medium'"
+                                        styleClass="btn fw-bolder custom-1 w-full" text>
+                                    </p-button>
+                                    }
+
+                                    @if (permisoEliminar) {
+                                    <p-button label="Eliminar" (click)="cargarDatos(modalidad, 'Eliminar')"
+                                        [disabled]="loadingDialogGeneral"
+                                        [icon]="loadingDialogEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle fw-medium'"
+                                        styleClass="btn fw-bolder custom-7 w-full" text>
+                                    </p-button>
+                                    }
+
+                                </div>
+                            </p-popover>
+                        </div>
+                    </td>
+                    }
+
+
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+
+                <tr>
+                    <td colspan="4" class="centered-cell">
+                        No se encontraron datos.
+                    </td>
+                </tr>
+            </ng-template>
+
+        </p-table>
+        <br>
+
+    </p-panel>
+</div>
+}
+
+
+<!-------------- Dialog de Registro de Estado de Formación ------- -->
+<p-dialog header="Header" [(visible)]="visibleRegistrar" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Registro de Modalidad</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="insertarModalidad()" [formGroup]="RegistrarForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <textarea pTextarea rows="1" [autoResize]="true" id="firstName"
+                            formControlName="modalidad" appCapitalizable appValidaciones
+                            [normalTextValidation]="true" [blockSpecialChars]="true" [blockEmojis]="true"
+                            [blockSQLInjection]="true" [invalid]="isInvalid(RegistrarForm, 'modalidad')"
+                            [ngClass]="{ 'ng-invalid': showError && 
+                            (!RegistrarForm.get('modalidad')?.value || RegistrarForm.get('modalidad')?.value.length > limiteCaracteres) }"
+                            (input)="verificarLimiteCaracteres(RegistrarForm, 'modalidad')"
+                            maxlength="{{limiteCaracteres}}"></textarea>
+                        <label>
+                            <span>
+                                1. Nombre del Estado de Formación<span style="color: red;">*</span>
+                            </span>
+                            <small
+                                [ngStyle]="{ color: RegistrarForm.get('modalidad')?.value?.length > limiteCaracteres ? 'red' : '#555','margin-left': '12px' }">
+                                {{ RegistrarForm.get('modalidad')?.value?.length || 0 }} / {{
+                                limiteCaracteres }}
+                            </small>
+                        </label>
+                        @if (isInvalid(RegistrarForm, 'modalidad')) {
+                        <p-message severity="error" size="small" variant="simple">El nombre de la modalidad es
+                            requerida..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit" [disabled]="RegistrarForm.invalid || isLoadingRegistrar"
+                        [icon]="isLoadingRegistrar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Actualizacion de de Estado de Formación ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificar" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Actualización de {{ nombreModalidad }}</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="actualizarModalidad()" [formGroup]="ActualizarForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <textarea pTextarea rows="1" [autoResize]="true" id="firstName"
+                            formControlName="modalidad" appCapitalizable appValidaciones
+                            [normalTextValidation]="true" [blockSpecialChars]="true" [blockEmojis]="true"
+                            [blockSQLInjection]="true" [invalid]="isInvalid(ActualizarForm, 'modalidad')"
+                            [ngClass]="{ 'ng-invalid': showError && 
+                            (!ActualizarForm.get('modalidad')?.value || ActualizarForm.get('modalidad')?.value.length > limiteCaracteres) }"
+                            (input)="verificarLimiteCaracteres(ActualizarForm, 'modalidad')"
+                            maxlength="{{limiteCaracteres}}"></textarea>
+                        <label>
+                            <span>
+                                1. Nombre de la Modalidad<span style="color: red;">*</span>
+                            </span>
+                            <small
+                                [ngStyle]="{ color: ActualizarForm.get('modalidad')?.value?.length > limiteCaracteres ? 'red' : '#555','margin-left': '12px' }">
+                                {{ ActualizarForm.get('modalidad')?.value?.length || 0 }} / {{
+                                limiteCaracteres }}
+                            </small>
+                        </label>
+                        @if (isInvalid(ActualizarForm, 'modalidad')) {
+                        <p-message severity="error" size="small" variant="simple">El nombre de la modalidad es
+                            requerida..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit" [disabled]="ActualizarForm.invalid || isLoadingActualizar"
+                        [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Diálogo de Eliminación de Modalidad--------- -->
+<p-dialog header="Header" [(visible)]="visibleEliminar" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Eliminación de {{ nombreModalidad }}</h2>
+        </div>
+    </ng-template>
+
+    <form [formGroup]="Eliminarform">
+        <p-panel>
+            <div style="width: 100%; text-align: center; padding: 0;">
+                Estás a punto de eliminar la modalidad con nombre <strong>{{ nombreModalidad }}</strong>.
+            </div>
+
+            <br>
+
+            <div style="text-align: justify; padding: 0 1rem;">
+                Esta acción eliminará permanentemente la modalidad del sistema. Una vez eliminado, no se podrá
+                recuperar.
+                <br><br>
+                <strong>Advertencia:</strong> Si la modalidad aún está asociado a uno o más registros, no podrá
+                ser eliminado.
+                Para poder continuar, asegúrate de reasignar una nueva modalidad a todos los registros que actualmente
+                lo
+                tienen asociado.
+                <br><br>
+                Por favor, asegúrate de comprender las implicaciones de esta acción antes de continuar.
+            </div>
+
+            <div style="text-align: center; padding-top: 1rem;">
+                ¿Estás seguro de que deseas eliminar esta modalidad?
+            </div>
+
+            <p-footer style="display: flex; justify-content: center; gap: 10px;">
+                <button pButton type="button" [disabled]="isLoadingEliminar"
+                    [icon]="isLoadingEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+                    class="btn fw-bolder custom-1 w-full" (click)="eliminarModalidad()"></button>
+
+                <button pButton type="button" icon="bi bi-x-circle" label="Cancelar"
+                    class="btn fw-bolder custom-2-1 w-full" [disabled]="isLoadingEliminar"
+                    (click)="visibleEliminar = false"></button>
+            </p-footer>
+        </p-panel>
+    </form>
+
+</p-dialog>

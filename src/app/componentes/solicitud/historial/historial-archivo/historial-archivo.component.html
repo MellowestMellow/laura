@@ -1,0 +1,97 @@
+<p-dialog [(visible)]="visible" [modal]="true" (onHide)="resetHistorial()"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+
+
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">
+                Historial de Archivo del {{ ticket }}
+            </h2>
+        </div>
+    </ng-template>
+
+    @if (loadingHistorial) {
+    <div class="flex flex-col items-center justify-center text-center h-full p-4"
+        style="background-color: transparent;">
+        <div class="custom-spinner mb-4"></div>
+    </div>
+    }
+
+    @if (!loadingHistorial) {
+    <div #scrollContenedor [style]="{ 'max-height': '50vh', 'overflow-y': 'auto' }">
+
+        <p-timeline *ngIf="archivosOrdenados.length > 0" [value]="archivosOrdenados" align="alternate"
+            class="p-3 custom-timeline">
+
+            <ng-template let-item="item" let-i="index" pTemplate="marker">
+                <span [style.background-color]="coloresTimeline[i % coloresTimeline.length]"
+                    style="display:inline-block;width:14px;height:14px;border-radius:50%">
+                </span>
+            </ng-template>
+
+            <ng-template let-item pTemplate="marker">
+                <span
+                    style="display:inline-block;width:14px;height:14px;background-color:#0d6efd;border-radius:50%"></span>
+            </ng-template>
+
+            <ng-template let-item pTemplate="content">
+                <div class="mt-2 mb-4">
+                    <p-card>
+                        <ng-template pTemplate="header">
+                            <div class="p-2 font-bold rounded flex justify-between items-center text-center"
+                                style="color: #336699;">
+                                Archivos del {{ formatFecha(item.fechaRegistro) }}
+                                <p-button styleClass="ml-2" [loading]="loadingBtnKey === item.keys"
+                                    [icon]="'pi pi-cloud-download'" [outlined]="true"
+                                    (click)="cargarArchivos($event, item.nombreArchivo, item.keys, item.bucket)">
+                                </p-button>
+                            </div>
+                        </ng-template>
+
+                        <div class="text-sm mb-2">
+                            <i class="pi pi-calendar mr-2 text-blue-500"></i>
+                            {{ item.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}
+                        </div>
+
+                        <div class="text-sm mb-2">
+                            <i class="pi pi-user mr-2 text-green-600"></i>
+                            Subido por: <b>{{ item.nombreRegistro }}</b>
+                        </div>
+
+                        <!-- Archivos cargados -->
+                        <div *ngIf="archivosPopover[item.keys]?.length"
+                            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2 justify-items-center">
+
+                            <div *ngFor="let a of archivosPopover[item.keys]; let i = index"
+                                class="flex flex-col items-center cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                                (click)="descargarArchivo(a.url, a.nombre)">
+
+                                <!-- Icono centrado -->
+                                <p-button class="icon-button mb-2" [rounded]="true" [outlined]="true"
+                                    [style.font-size]="'1.5rem'" [style.width]="'3rem'" [style.height]="'3rem'"
+                                    [icon]="'bi bi-file-earmark-text'">
+                                </p-button>
+
+                                <!-- Nombre como máscara Archivo 1, Archivo 2... -->
+                                <span class="text-xs text-center font-bold truncate max-w-[120px]">
+                                    Archivo {{ i + 1 }}
+                                </span>
+                            </div>
+                        </div>
+                    </p-card>
+                </div>
+            </ng-template>
+
+        </p-timeline>
+
+        <div *ngIf="archivosOrdenados.length === 0" class="text-center text-muted p-4">
+            <i class="pi pi-info-circle text-2xl mb-2 d-block"></i>
+            No hay archivos disponibles para esta solicitud.
+        </div>
+
+    </div>
+    }
+
+
+</p-dialog>

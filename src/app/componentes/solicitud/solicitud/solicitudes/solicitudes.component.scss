@@ -1,0 +1,190 @@
+/* ------------------------------------------------------------------------------------------------- */
+/* Variables */
+/* ------------------------------------------------------------------------------------------------- */
+$primary-color: #003578;
+$secondary-color: #253a69;
+$light-gray: #d3d3d3;
+$border-color: #dee2e6;
+$error-color: red;
+$background-light: #f8f9fa;
+$background-header: #e9ecef;
+$text-dark: #495057;
+$text-black: #000;
+$text-white: #fff;
+
+
+::ng-deep .icon-button {
+    .p-button-icon {
+        font-size: 1.5rem; // Ajusta este valor según el tamaño que desees
+    }
+}
+
+:host ::ng-deep {
+    .icon-buttons.p-button {
+        border-color: #ea6427 !important;
+        color: #ea6427 !important;
+
+
+
+        .p-button-icon {
+            font-size: 1.5rem !important;
+            color: #ea6427 !important;
+        }
+    }
+}
+
+
+:host ::ng-deep .p-button.no-link-disabled:disabled {
+    opacity: 1 !important;
+    /* Mantiene el brillo */
+    pointer-events: none;
+    /* Sigue sin ser clickeable */
+    filter: none !important;
+    /* Elimina el efecto de "grisado" */
+}
+
+
+.file-container {
+    background-color: #ebfafc;
+    /* Azul claro */
+    padding: 10px;
+    border-radius: 8px;
+    /* Bordes redondeados */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* Sombra sutil */
+}
+
+.state-button {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.05); // un pequeño efecto al pasar el mouse
+    }
+}
+
+.no-efectos:hover {
+    background-color: none;
+    /* Elimina el efecto de hover */
+}
+
+.comision-list {
+    list-style-type: decimal;
+
+    li {
+        margin-bottom: 0.5rem;
+    }
+
+    .subcomision-list {
+        list-style-type: decimal;
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    .no-bullet {
+        list-style-type: none;
+        /* Asegura que estos elementos no tengan viñetas */
+    }
+}
+
+.centered-header {
+    text-align: center;
+    vertical-align: middle;
+
+    .flex {
+        justify-content: center;
+    }
+}
+
+.centered-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+:host {
+    ::ng-deep {
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .space {
+            margin-bottom: 25px !important;
+        }
+
+        .label-margin {
+            font-size: 11px !important;
+            margin-right: 50px !important;
+        }
+
+        .p-button.custom-button-centerss {
+            position: absolute;
+            left: 46.5%;
+            transform: translateX(-50%);
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid $light-gray !important;
+            border-radius: 0.50rem !important;
+            font-weight: 500 !important;
+            height: 41px;
+            white-space: nowrap;
+            background-color: $secondary-color !important;
+            color: $text-white !important;
+            justify-content: center;
+        }
+    }
+}
+
+/* Ocultar la imagen de vista previa */
+::ng-deep .p-fileupload-file-thumbnail {
+    display: none !important;
+}
+
+/* Ocultar el badge de estado pendiente */
+::ng-deep .p-fileupload-file-badge {
+    display: none !important;
+}
+
+::ng-deep .form-sent .p-fileupload-file-remove-button {
+    display: none !important;
+}
+
+:host ::ng-deep .p-inputtext:disabled,
+:host ::ng-deep textarea:disabled,
+:host ::ng-deep .p-inputtextarea.p-disabled {
+    background-color: #e9ecef !important;
+    color: #333 !important;
+    opacity: 1 !important;
+    border-color: #ced4da !important;
+    /* Estilo de borde estándar */
+}
+
+:host ::ng-deep .p-inputtext:disabled {
+    background-color: #e9ecef !important;
+    color: #333 !important;
+    opacity: 1 !important;
+}
+
+:host ::ng-deep .p-select.p-disabled {
+    background-color: #e9ecef !important;
+    color: #333 !important;
+    opacity: 1 !important;
+    border-color: #ced4da !important; // Estilo de borde estándar
+}
+
+:host ::ng-deep .p-select.p-disabled .p-select-label {
+    color: #333 !important;
+}
+
+:host ::ng-deep .btn-small-text {
+    font-size: 0.90rem !important;
+    /* ≈12px */
+}

@@ -1,0 +1,320 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+<div class="custom-container">
+  <p-panel class="transparente">
+    <div class="header-container title-header gap-2">
+      <span>
+        Calendario Académico Institucional - {{ tipoActual | titlecase }}
+      </span>
+    </div>
+
+    <br /><br />
+
+    <!-- 🔧 Toolbar ÚNICA (selector de mes + navegación) -->
+    <div class="custom-calendar-toolbar">
+      <!-- Izquierda: Registrar + Mes -->
+      <div class="toolbar-left">
+        <p-button
+          label="Registrar"
+          icon="bi bi-calendar2-event"
+          styleClass="btn fw-bolder custom-1"
+          (onClick)="abrirModal()"
+          raised
+          text>
+        </p-button>
+
+        <p-select
+          class="custom-search-input calendario__select"
+          [options]="meses"
+          [(ngModel)]="mesSeleccionado"
+          optionLabel="label"
+          optionValue="value"
+          (ngModelChange)="onMesSeleccionado($event)">
+        </p-select>
+      </div>
+
+      <!-- Centro: título dinámico del mes visible -->
+      <div class="toolbar-center">
+        <span class="mes-titulo">{{ tituloMes }}</span>
+      </div>
+
+      <!-- Derecha: navegación -->
+      <div class="toolbar-right">
+        <p-button
+          label="Hoy"
+          styleClass="btn fw-bolder custom-1"
+          (onClick)="irHoy()"
+          raised
+          text>
+        </p-button>
+        <p-button
+          icon="bi bi-caret-left-fill"
+          styleClass="btn fw-bolder custom-1"
+          (onClick)="navegarAnterior()"
+          raised
+          text>
+        </p-button>
+        <p-button
+          icon="bi bi-caret-right-fill"
+          styleClass="btn fw-bolder custom-1"
+          (onClick)="navegarSiguiente()"
+          raised
+          text>
+        </p-button>
+      </div>
+    </div>
+
+    <br />
+
+    <p-tabs scrollable [(value)]="activeTab" (valueChange)="onTabChange(+$event)">
+      <p-tablist>
+        <p-tab [value]="0">Calendario Trimestral</p-tab>
+        <p-tab [value]="1">Calendario Semestral</p-tab>
+        <p-tab [value]="2">Calendario Semestral Medicina</p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <!-- Trimestral -->
+        <p-tabpanel [value]="0">
+          <div class="calendario__contenido">
+            @if(activeTab === 0){
+              <full-calendar
+                #calendarioTrimestralRef
+                [options]="calendarOptions">
+              </full-calendar>
+            }
+          </div>
+        </p-tabpanel>
+
+        <!-- Semestral -->
+        <p-tabpanel [value]="1">
+          <div class="calendario__contenido">
+            @if(activeTab === 1){
+              <full-calendar
+                #calendarioSemestralRef
+                [options]="calendarOptions">
+              </full-calendar>
+            }
+          </div>
+        </p-tabpanel>
+
+        <!-- Medicina -->
+        <p-tabpanel [value]="2">
+          <div class="calendario__contenido">
+            @if(activeTab === 2){
+              <full-calendar
+                #calendarioMedicinaRef
+                [options]="calendarOptions">
+              </full-calendar>
+            }
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+
+    <!-- (tu template alterno queda igual si lo usas)
+    <ng-template #contenidoCalendario> ... </ng-template>
+    -->
+
+  </p-panel>
+</div>
+
+<!-- Modal Agregar -->
+<p-dialog header="Header" [(visible)]="mostrarModal" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '40vw' }" [draggable]="false"
+  [resizable]="false" (onHide)="cerrarModal()">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Agregar Evento al Calendario</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="formRegistro" class="calendario-modal">
+    <p-panel>
+      <p-fluid>
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <input pInputText id="tipoProceso" formControlName="tipoProceso" appCapitalizable appValidaciones maxlength="250" />
+            <label for="tipoProceso">1. Tipo de Proceso *</label>
+          </p-iftalabel>
+          <small
+            [ngStyle]="{
+              color: formRegistro.get('tipoProceso')?.errors?.['required'] && formRegistro.get('tipoProceso')?.touched ? 'red' : '#555',
+              'margin-left': '12px'
+            }">
+            {{ formRegistro.get('tipoProceso')?.errors?.['required']  && formRegistro.get('tipoProceso')?.touched ? 'Este campo es obligatorio.' : '' }}
+          </small>
+          <small
+            [ngStyle]="{
+              color: formRegistro.get('tipoProceso')?.errors?.['maxlength'] ? 'red' : '#555',
+              'margin-left': '12px'
+            }">
+            {{ formRegistro.get('tipoProceso')?.value?.length || 0 }} / {{ limiteCaracteresProceso }}
+          </small>
+        </div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <input pInputText id="firstName" formControlName="proceso" appCapitalizable appValidaciones maxlength="250" />
+            <label for="firstName">2. Proceso *</label>
+          </p-iftalabel>
+          <div>
+            <small
+              [ngStyle]="{
+                color: formRegistro.get('proceso')?.errors?.['required']  && formRegistro.get('proceso')?.touched ? 'red' : '#555',
+                'margin-left': '12px'
+              }">
+              {{ formRegistro.get('proceso')?.errors?.['required']  && formRegistro.get('proceso')?.touched ? 'Este campo es obligatorio.' : '' }}
+            </small>
+          </div>
+          <div>
+            <small
+              [ngStyle]="{
+                color: formRegistro.get('proceso')?.value?.length > limiteCaracteresProceso ? 'red' : '#555',
+                'margin-left': '12px'
+              }">
+              Número de caracteres ingresados {{ formRegistro.get('proceso')?.value?.length || 0 }} / {{ limiteCaracteresProceso }}
+            </small>
+          </div>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-datepicker formControlName="fechaInicio" appendTo="body" [showButtonBar]="true" inputId="date"
+              [iconDisplay]="'input'" [showIcon]="true" iconDisplay="input"></p-datepicker>
+            <label for="date">3. Fecha de Inicio *</label>
+          </p-iftalabel>
+          <small
+            [ngStyle]="{
+              color: formRegistro.get('fechaInicio')?.errors?.['required']  && formRegistro.get('fechaInicio')?.touched ? 'red' : '#555',
+              'margin-left': '12px'
+            }">
+            {{ formRegistro.get('fechaInicio')?.errors?.['required']  && formRegistro.get('fechaInicio')?.touched ? 'Este campo es obligatorio.' : '' }}
+          </small>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-datepicker formControlName="fechaFin" appendTo="body" [showButtonBar]="true" inputId="date"
+              [iconDisplay]="'input'" [showIcon]="true" iconDisplay="input"></p-datepicker>
+            <label for="date">4. Fecha de Finalización *</label>
+          </p-iftalabel>
+          <small
+            [ngStyle]="{
+              color: formRegistro.get('fechaFin')?.errors?.['required'] && formRegistro.get('fechaFin')?.touched ? 'red' : '#555',
+              'margin-left': '12px'
+            }">
+            {{ formRegistro.get('fechaFin')?.errors?.['required']  && formRegistro.get('fechaFin')?.touched ? 'Este campo es obligatorio.' : '' }}
+          </small>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-floatlabel variant="on" class="sm:col-span-2">
+            <textarea
+              pTextarea
+              autoResize="true"
+              rows="2"
+              appCapitalizable
+              style="min-height: 80px; max-height: 180px; overflow-y: auto;"
+              formControlName="descripcion"
+              [ngClass]="{
+                'ng-invalid': showError &&
+                (!formRegistro.get('descripcion')?.value || formRegistro.get('descripcion')?.value.length > limiteCaracteres)
+              }"
+              (input)="verificarLimiteCaracteres()"
+              maxlength="{{limiteCaracteres}}">
+            </textarea>
+
+            <label for="Descripción">
+              <span>5. Descripción <span style="color: red;">*</span></span>
+              <small
+                [ngStyle]="{
+                  color: formRegistro.get('descripcion')?.errors?.['required']  && formRegistro.get('descripcion')?.touched ? 'red' : '#555',
+                  'margin-left': '12px'
+                }">
+                {{ formRegistro.get('descripcion')?.errors?.['required']  && formRegistro.get('descripcion')?.touched ? 'Este campo es obligatorio.' : '' }}
+              </small>
+              <small
+                [ngStyle]="{
+                  color: formRegistro.get('descripcion')?.value?.length > limiteCaracteres ? 'red' : '#555',
+                  'margin-left': '12px'
+                }">
+                {{ formRegistro.get('descripcion')?.value?.length || 0 }} / {{ limiteCaracteres }}
+              </small>
+            </label>
+          </p-floatlabel>
+        </div>
+
+        <div class="pt-4">
+          <p-button
+            label="Enviar"
+            (click)="postProcesoAcademico()"
+            [disabled]="formRegistro.invalid || loadingRegistrar"
+            [icon]="'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+
+      </p-fluid>
+    </p-panel>
+  </form>
+</p-dialog>
+
+<!-- Modal Detalles -->
+<p-dialog header="Header" [(visible)]="mostrarVerDetalles" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '40vw' }" [draggable]="false"
+  [resizable]="false" (onHide)="cerrarDetalle()">
+
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Detalle del Evento del Calendario</h2>
+    </div>
+  </ng-template>
+
+  <p-panel>
+    <div *ngIf="eventoSeleccionado">
+      <p-table
+        [value]="[
+          { campo: 'Inicio', valor: (eventoSeleccionado.start | date: 'fullDate') },
+          { campo: 'Finalización', valor: (eventoSeleccionado.end | date: 'fullDate') },
+          { campo: 'Unidad Académica', valor: eventoSeleccionado.extendedProps?.producto || 'N/A' },
+          { campo: 'Descripción', valor: eventoSeleccionado.extendedProps?.descripcion || 'N/A' }
+        ]"
+        showGridlines
+        [tableStyle]="{ 'width': '100%' }"
+      >
+        <ng-template pTemplate="header">
+          <tr class="centered-cell">
+            <th class="centered-header" colspan="2">
+              {{ eventoSeleccionado.title }}
+            </th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-detalle>
+          <tr>
+            <td class="centered-cell">{{ detalle.campo }}</td>
+            <td class="centered-cell">{{ detalle.valor }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+
+      <div class="pt-4">
+        <p-button
+          label="Editar"
+          type="submit"
+          *ngIf="eventoSeleccionado.extendedProps?.idUnidadAcademica === idUnidadAcademicaUsuario"
+          [icon]="'pi pi-file-edit'"
+          styleClass="btn fw-bolder custom-1 w-full"
+          (onClick)="editarEvento(eventoSeleccionado)">
+        </p-button>
+      </div>
+    </div>
+  </p-panel>
+</p-dialog>

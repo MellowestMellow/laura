@@ -1,0 +1,1422 @@
+<app-header-panel></app-header-panel>
+<div>
+    <p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+    <div class="custom-container" *ngIf="!visibleReservacion">
+        <p-panel styleClass="transparente">
+            <ng-template pTemplate="header">
+                <div class="header-container title-header">
+                    <span>
+                        {{ categoriaSeleccionadaNombre ?
+                        'Tipo de Ticket: ' + categoriaSeleccionadaNombre :
+                        'Ticket' }}
+                    </span>
+                </div>
+            </ng-template>
+            <div class="space"></div>
+            <form [formGroup]="RegistrarForm">
+
+                <p-fluid>
+
+                    <div *ngIf="!isCategoriaSeleccionada">
+                        <div class="ticket-system">
+                            <h4>Bienvenido al Sistema de Tickets de Dirección de Docencia</h4>
+                            <p>Desde aquí podrás gestionar tickets relacionados con diferentes áreas de la
+                                Dirección, como:</p>
+                            <ul>
+                                <li><strong>Tickets Curriculares</strong>
+                                    <p>Creación, actualización o expansión de programas académicos.</p>
+                                </li>
+                                <li><strong>Tickets Estratégicas</strong>
+                                    <p>Gestión de convenios y alianzas nacionales e internacionales.</p>
+                                </li>
+
+                                <li><strong>Tickets de Reservación de Salón</strong>
+                                    <p>Reserva de espacios para actividades académicas o institucionales.</p>
+                                </li>
+
+                                <li><strong>Tickets Administrativas</strong>
+                                    <p>Trámites relacionados con documentos internos como memorándums y oficios.
+                                    </p>
+                                </li>
+                            </ul>
+                            <p>Este sistema facilita un flujo continuo de trabajo, asegurando que cada Tickets
+                                sea atendida de manera eficiente. Por favor, selecciona la categoría
+                                correspondiente a tu Tickets para comenzar.</p>
+                        </div>
+                    </div>
+
+                    <div class="custom-message" *ngIf="categoriaSeccionada === 2">
+                        <p-message severity="info" icon="pi pi-book"
+                            text="Recordatorio: El Tickets Curricular se utiliza para la creación, actualización o expansión de programas académicos. Es fundamental adjuntar toda la documentación solicitada para garantizar una evaluación rápida y precisa.">
+                        </p-message>
+                    </div>
+
+                    <div class="custom-message" *ngIf="categoriaSeccionada === 1">
+                        <p-message severity="info" icon="pi pi-briefcase"
+                            text="Recordatorio: El Tickets Estratégico se utiliza para gestionar convenios y alianzas tanto nacionales como internacionales. Es importante proporcionar toda la información requerida y validar que los documentos estén completos antes de enviar tu solicitud.">
+                        </p-message>
+                    </div>
+
+                    <div class="custom-message" *ngIf="categoriaSeccionada === 3">
+                        <p-message severity="info" icon="pi pi-calendar"
+                            text="Recordatorio: El Tickets de Reservación de Salón permite apartar espacios para actividades académicas o institucionales. Es importante indicar la fecha, el horario y el tipo de evento para garantizar la disponibilidad adecuada.">
+                        </p-message>
+                    </div>
+
+                    <div class="custom-message" *ngIf="categoriaSeccionada === 4">
+                        <p-message severity="info" icon="pi pi-file-edit"
+                            text="Recordatorio: El Tickets Administrativo se utiliza para gestionar trámites internos como memorándums, oficios y otros documentos oficiales. Asegúrate de que toda la información sea correcta y esté debidamente dirigida antes de enviar la solicitud.">
+                        </p-message>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <input pInputText id="email" formControlName="correo" placeholder="direccion@unah.edu.hn"
+                                [maxlength]="100" required
+                                [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('correo')?.invalid && RegistrarForm.get('correo')?.touched}">
+                            <label for="email">1. Correo Electrónico Institucional <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="RegistrarForm.get('correo')?.invalid && RegistrarForm.get('correo')?.touched"
+                            style="color: red;">
+                            <small *ngIf="RegistrarForm.get('correo')?.errors?.['required']">
+                                Este campo es obligatorio.
+                            </small>
+                            <small *ngIf="RegistrarForm.get('correo')?.errors?.['maxlength']">
+                                El campo no puede superar los {{
+                                RegistrarForm.get('correo')?.errors?.['maxlength'].requiredLength }} caracteres.
+                            </small>
+                            <small
+                                *ngIf="RegistrarForm.get('correo')?.errors?.['email'] || RegistrarForm.get('correo')?.errors?.['pattern']">
+                                El correo no tiene un formato válido.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-select #categoriaSel
+                                [options]="categoriaTicketFiltrada.length ? categoriaTicketFiltrada : [{ categoriaTipoSolicitud: 'Cargando categorías...', idCategoriaTipoSolicitud: -1 }]"
+                                formControlName="idCategoria" (onChange)="onSelectCategoria($event)"
+                                (onShow)="getCategoriaTicket()" optionLabel="categoriaTipoSolicitud" styleClass="w-full"
+                                optionValue="idCategoriaTipoSolicitud" [showClear]="true"
+                                [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idCategoria')?.invalid && RegistrarForm.get('idCategoria')?.touched}">
+                                <!-- Template para deshabilitar la opción con id -1 -->
+                                <ng-template let-option pTemplate="item">
+                                    <span
+                                        [ngStyle]="{ color: option.idCategoriaTipoSolicitud === -1 ? '#999' : 'inherit' }">
+                                        {{ option.categoriaTipoSolicitud }}
+                                    </span>
+                                </ng-template>
+                            </p-select>
+                            <label for="categoria">2. Categoría del Ticket <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="RegistrarForm.get('idCategoria')?.invalid && RegistrarForm.get('idCategoria')?.touched"
+                            style="color: red;">
+                            <small *ngIf="RegistrarForm.get('idCategoria')?.errors?.['required']">
+                                El campo es obligatorio.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div *ngIf="categoriaSeccionada !== 0" class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-select [options]="tipoSolicitud" formControlName="idTipoSolicitud"
+                                (onChange)="onTipoSolicitudChange($event)" optionLabel="tipoSolicitud"
+                                styleClass="w-full" optionValue="idTipoSolicitud" [showClear]="true" [filter]="true"
+                                filterBy="tipoSolicitud" appendTo="body"
+                                [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idTipoSolicitud')?.invalid && RegistrarForm.get('idTipoSolicitud')?.touched}">
+                            </p-select>
+                            <label for="email">3. Tipo de Solicitud <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="RegistrarForm.get('idTipoSolicitud')?.invalid && RegistrarForm.get('idTipoSolicitud')?.touched"
+                            style="color: red;">
+                            <small *ngIf="RegistrarForm.get('idTipoSolicitud')?.errors?.['required']">
+                                El campo es obligatorio.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <p-iftalabel class="sm:col-span-2" *ngIf="categoriaSeccionada  === 1">
+                        <input pInputText id="institucion" formControlName="institucion" [maxlength]="250"
+                            class="w-full" appCapitalizable
+                            [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('institucion')?.invalid && RegistrarForm.get('institucion')?.touched}">
+                        <label for="institucion">4. Institución <span style="color: red">*</span></label>
+                    </p-iftalabel>
+                    <div *ngIf="RegistrarForm.get('institucion')?.touched && RegistrarForm.get('institucion')?.invalid"
+                        style="color: red;">
+                        <small *ngIf="RegistrarForm.get('institucion')?.hasError('required')">
+                            El campo es obligatorio.
+                        </small>
+                        <small *ngIf="RegistrarForm.get('institucion')?.hasError('minlength')">
+                            Debe tener al menos {{
+                            RegistrarForm.get('institucion')?.errors?.['minlength'].requiredLength }}
+                            caracteres.
+                        </small>
+                        <small *ngIf="RegistrarForm.get('institucion')?.hasError('maxlength')">
+                            No debe superar los {{
+                            RegistrarForm.get('institucion')?.errors?.['maxlength'].requiredLength }}
+                            caracteres.
+                        </small>
+                        <small *ngIf="RegistrarForm.get('institucion')?.hasError('pattern')">
+                            Solo se permiten letras y espacios.
+                        </small>
+                        <small *ngIf="RegistrarForm.get('institucion')?.hasError('noInyeccionSQL')">
+                            El texto contiene caracteres inválidos.
+                        </small>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div *ngIf="[2,4].includes(categoriaSeccionada) && isEmailValid"
+                        class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-select [options]="campus" formControlName="idCampus" optionLabel="nombreCampus"
+                                styleClass="w-full" optionValue="idCampus" (onChange)="onCampusChange($event)"
+                                [showClear]="true" [filter]="true" filterBy="nombreCampus" appendTo="body"
+                                [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idCampus')?.invalid && RegistrarForm.get('idCampus')?.touched}">
+                            </p-select>
+                            <label for="dd-city">4. Campus <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="RegistrarForm.get('idCampus')?.touched && RegistrarForm.get('idCampus')?.invalid"
+                            style="color: red;">
+                            <small *ngIf="RegistrarForm.get('idCampus')?.hasError('required')">
+                                El campo es obligatorio.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="space"></div>
+
+                    <div *ngIf="categoriaSeccionada === 2 && isEmailValid">
+                        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4" *ngIf="visibleFacultad">
+                            <p-iftalabel class="sm:col-span-2">
+                                <p-select [options]="facultad" formControlName="idFacultad" styleClass="w-full"
+                                    optionLabel="nombreFacultad" styleClass="w-full" optionValue="idFacultad"
+                                    (onChange)="onFacultadChange($event)" [showClear]="true" [filter]="true"
+                                    filterBy="nombreFacultad" appendTo="body"
+                                    [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idFacultad')?.invalid && RegistrarForm.get('idFacultad')?.touched}" />
+                                <label for="dd-city">5. Facultad <span style="color: red">*</span></label>
+                            </p-iftalabel>
+                            <div *ngIf="RegistrarForm.get('idFacultad')?.touched && RegistrarForm.get('idFacultad')?.invalid"
+                                style="color: red;">
+                                <small *ngIf="RegistrarForm.get('idFacultad')?.hasError('required')">
+                                    El campo es obligatorio.
+                                </small>
+                            </div>
+                        </div>
+
+
+                        <div class="space"></div>
+
+                        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4" *ngIf="visibleDepartamento">
+                            <p-iftalabel class="sm:col-span-2">
+                                <p-select [options]="departamento" formControlName="idDepartamento" styleClass="w-full"
+                                    optionLabel="nombreDepartamento" styleClass="w-full" optionValue="idDepartamento"
+                                    [showClear]="true" [filter]="true" filterBy="nombreDepartamento" appendTo="body"
+                                    [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idDepartamento')?.invalid && RegistrarForm.get('idDepartamento')?.touched}" />
+                                <label for="dd-city"> <span>{{ visibleFacultad ? '6.' : '5.' }}</span>
+                                    Departamento <span style="color: red">*</span></label>
+                            </p-iftalabel>
+                            <div *ngIf="RegistrarForm.get('idDepartamento')?.touched && RegistrarForm.get('idDepartamento')?.invalid"
+                                style="color: red;">
+                                <small *ngIf="RegistrarForm.get('idDepartamento')?.hasError('required')">
+                                    El campo es obligatorio.
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="space"></div>
+
+                        <p-iftalabel class="sm:col-span-2" *ngIf="[5].includes(tipoSolicitudSeleccionadaId!)">
+                            <p-select [options]="gradosAcademicos" formControlName="idGrado" optionLabel="nombreGrado"
+                                styleClass="w-full" optionValue="idGrado" [showClear]="true" [filter]="true"
+                                filterBy="nombreGrado" appendTo="body"
+                                [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idGrado')?.invalid && RegistrarForm.get('idGrado')?.touched}">
+                            </p-select>
+                            <label for="idGrado"> <span>{{ visibleFacultad ? '7.' : '6.' }}</span>Grado
+                                Académico <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="RegistrarForm.get('idGrado')?.touched && RegistrarForm.get('idGrado')?.invalid"
+                            style="color: red;">
+                            <small *ngIf="RegistrarForm.get('idGrado')?.hasError('required')">
+                                El campo es obligatorio.
+                            </small>
+                        </div>
+
+                        <div class="space"></div>
+
+                        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4" *ngIf="selectedCampus">
+
+                            <p-iftalabel class="sm:col-span-2" *ngIf="disenio">
+                                <input pInputText id="carrera" formControlName="carrera" maxlength="250" class="w-full"
+                                    appCapitalizable />
+                                <label for="carrera">{{ visibleFacultad ? '8.' : '7.' }} Carrera <span style="color: red">*</span></label>
+                            </p-iftalabel>
+
+
+                            <!-- Si no, muestra -->
+                            <p-iftalabel class="sm:col-span-2" *ngIf="redisenio">
+                                <p-select [options]="carrera" formControlName="idCampusTituloAcademico"
+                                    optionLabel="nombreTituloAcademico" styleClass="w-full"
+                                    optionValue="idCampusTituloAcademico" (onChange)="onCarreraSelect($event)"
+                                    [showClear]="true" [filter]="true" filterBy="nombreTituloAcademico" appendTo="body"
+                                    [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idCampusTituloAcademico')?.invalid && RegistrarForm.get('idCampusTituloAcademico')?.touched}">
+                                </p-select>
+                                <label for="dd-city">{{ visibleFacultad ? '7.' : '6.' }} Carrera <span style="color: red">*</span></label>
+                            </p-iftalabel>
+                            <div *ngIf="RegistrarForm.get('idCampusTituloAcademico')?.touched && RegistrarForm.get('idCampusTituloAcademico')?.invalid"
+                                style="color: red;">
+                                <small *ngIf="RegistrarForm.get('idCampusTituloAcademico')?.hasError('required')">
+                                    El campo es obligatorio.
+                                </small>
+                            </div>
+
+                            <p-iftalabel class="sm:col-span-2" *ngIf="ampliacion">
+                                <p-select [options]="carrera" formControlName="idTituloAcademico"
+                                    optionLabel="nombreTituloAcademico" styleClass="w-full"
+                                    optionValue="idTituloAcademico" (onChange)="onCarreraSelect($event)"
+                                    [showClear]="true" [filter]="true" filterBy="nombreTituloAcademico" appendTo="body"
+                                    [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idTituloAcademico')?.invalid && RegistrarForm.get('idTituloAcademico')?.touched}">
+                                </p-select>
+                                <label for="dd-city">{{ visibleFacultad ? '7.' : '6.' }} Carrera <span style="color: red">*</span></label>
+                            </p-iftalabel>
+                            <div *ngIf="RegistrarForm.get('idTituloAcademico')?.touched && RegistrarForm.get('idTituloAcademico')?.invalid"
+                                style="color: red;">
+                                <small *ngIf="RegistrarForm.get('idTituloAcademico')?.hasError('required')">
+                                    El campo es obligatorio.
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="space"></div>
+
+                        <div *ngIf="this.carreraId !== -1 && integrantesCargados"
+                            class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4 ml-3">
+                            <small id="username-help">
+                                <span *ngIf="categoriaSeccionada === 2">
+                                    <span *ngIf="!visibleFacultad && !visibleDepartamento && !selectedCampus">5.</span>
+                                    <span *ngIf="visibleFacultad">8.</span>
+                                    <span *ngIf="!visibleFacultad && (visibleDepartamento || selectedCampus)">7.</span>
+                                </span>
+                                Integrantes de la Subcomisión *
+                            </small>
+                        </div>
+
+                        <div *ngIf="this.carreraId && this.carreraId !== -1 && this.carreraId !== 0">
+                            <p-table *ngIf="integrantesSubComision.length > 0" showGridlines
+                                [value]="integrantesSubComision" [tableStyle]="{ 'min-width': '30rem' }" dataKey="id">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th class="centered-header" style="min-width: 12rem">Nombre Completo
+                                        </th>
+                                        <th class="centered-header" style="min-width: 15rem">Correo</th>
+                                        <th class="centered-header" style="min-width: 10rem">Rol</th>
+                                        <th class="centered-header" style="min-width: 2rem">Eliminar</th>
+                                    </tr>
+                                </ng-template>
+
+                                <ng-template let-integrante pTemplate="body">
+                                    <tr>
+                                        <td class="centered-cell">
+                                            {{ integrante.nombreCompleto }}
+                                        </td>
+                                        <td class="centered-cell">
+                                            {{ integrante.correo }}
+                                        </td>
+                                        <td class="centered-cell">
+                                            {{ integrante.nombreRol }}
+                                        </td>
+                                        <td class="centered-cell">
+                                            <button type="button" pButton icon="pi pi-trash"
+                                                (click)="eliminarMiembro(1, integrante)"
+                                                class="p-button-rounded p-button-danger">
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+
+                            <div class="space"></div>
+
+                            <div *ngIf="integrantesSubComision.length === 0 && this.carreraId !== -1 && integrantesCargados && !visibleAgregarIntegrante"
+                                class="flex flex-col items-center justify-center text-center h-full p-4"
+                                style="background-color: transparent;">
+                                <p class="font-semibold text-gray-500 text-lg">No se encontró información sobre la
+                                    subcomisión.</p>
+                            </div>
+
+                            <div formArrayName="integrantes" class="table-container">
+                                <p-table [value]="integrantes.controls" showGridlines
+                                    [tableStyle]="{ 'min-width': '30rem' }" dataKey="id">
+                                    <ng-template pTemplate="header">
+                                        <ng-container
+                                            *ngIf="integrantesCargados && [6,10].includes(tipoSolicitudSeleccionadaId!)">
+                                            <tr>
+                                                <th class="centered-header" style="min-width: 12rem">Primer
+                                                    Nombre
+                                                </th>
+                                                <th class="centered-header" style="min-width: 12rem">Segundo
+                                                    Nombre
+                                                </th>
+                                                <th class="centered-header" style="min-width: 12rem">Primer
+                                                    Apellido
+                                                </th>
+                                                <th class="centered-header" style="min-width: 12rem">Segundo
+                                                    Apellido</th>
+                                                <th class="centered-header" style="min-width: 15rem">Correo</th>
+                                                <th class="centered-header" style="min-width: 12rem">Numero de
+                                                    Empleado
+                                                </th>
+                                                <th class="centered-header" style="min-width: 10rem">Teléfono
+                                                </th>
+                                                <th class="centered-header" style="min-width: 10rem">Rol</th>
+                                                <th class="centered-header" style="min-width: 10rem">Permiso</th>
+                                                <th class="centered-header" style="min-width: 2rem">Eliminar
+                                                </th>
+                                            </tr>
+                                        </ng-container>
+                                    </ng-template>
+
+                                    <ng-template let-rowData let-rowIndex="rowIndex" pTemplate="body">
+                                        <ng-container
+                                            *ngIf="integrantesCargados && [5, 6,10].includes(tipoSolicitudSeleccionadaId!)">
+                                            <tr [formGroupName]="rowIndex">
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="firstName"
+                                                            formControlName="miembroprimerNombre" appCapitalizable
+                                                            appValidaciones [nameValidation]="true" [maxlength]="25" />
+                                                        <label for="firstName">Primer Nombre <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="secondName"
+                                                            formControlName="miembrosegundoNombre" appCapitalizable
+                                                            appValidaciones [nameValidationTwoWords]="true"
+                                                            [maxlength]="25" />
+                                                        <label for="blockspace">Segundo Nombre</label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="lastName"
+                                                            formControlName="miembroprimerApellido" appCapitalizable
+                                                            appValidaciones [nameValidation]="true" [maxlength]="25" />
+                                                        <label for="blockspace">Primer Apellido <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="secondLastName"
+                                                            formControlName="miembrosegundoApellido" appCapitalizable
+                                                            appValidaciones [nameValidationTwoWords]="true"
+                                                            [maxlength]="25" />
+                                                        <label for="secondLastName">Segundo Apellido</label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="email" formControlName="miembroCorreo"
+                                                            placeholder="direccion@unah.edu.hn" [maxlength]="100" />
+                                                        <label for="email">Correo Electrónico <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="numEmpleado" placeholder="ej. 251026"
+                                                            formControlName="miembroNumEmpleado" appValidaciones
+                                                            [onlyNumbersValidation]="true" [maxlength]="10" />
+                                                        <label for="numEmpleado">Número de Empleado <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="telefono" placeholder="ej. 114532"
+                                                            formControlName="miembroTelefono" appValidaciones
+                                                            [onlyNumbersValidation]="true" [maxlength]="10" />
+                                                        <label for="telefono">Teléfono <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <p-select formControlName="miembroRol" optionLabel="rol"
+                                                            [options]="rolOptions" optionValue="idRol"
+                                                            [showClear]="true" [filter]="true" filterBy="rol"
+                                                            appendTo="body" styleClass="w-full"
+                                                            (onChange)="onRolChange($event, rowIndex)">
+                                                        </p-select>
+                                                        <label>Rol del Integrante <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <p-select formControlName="permiso" optionLabel="rol"
+                                                            [options]="permisoOptions" optionValue="idRol"
+                                                            [showClear]="true" [filter]="true" filterBy="rol"
+                                                            appendTo="body" styleClass="w-full">
+                                                        </p-select>
+                                                        <label>Permiso <span style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <button type="button" pButton icon="pi pi-trash"
+                                                        (click)="eliminarMiembro(2, rowIndex)"
+                                                        class="p-button-rounded p-button-danger">
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </ng-template>
+
+                                    <ng-template pTemplate="footer">
+                                        <tr
+                                            *ngIf="(integrantesCargados && [6,10,11].includes(tipoSolicitudSeleccionadaId!)) || (tipoSolicitudSeleccionadaId === 5 && isEmailValid === true)">
+                                            <td colspan="10">
+                                                <button type="button" pButton icon="pi pi-plus"
+                                                    (click)="agregarMiembro()" label="Agregar Integrante"
+                                                    class="p-button-text">
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </div>
+
+                        <div *ngIf="loadingintegrantes"
+                            class="flex flex-col items-center justify-center text-center h-full p-4"
+                            style="background-color: transparent;">
+                            <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+                            <p class="font-semibold text-gray-700 text-lg">Cargando información de la sub comisión...
+                            </p>
+                        </div>
+
+                        <div *ngIf="(tipoSolicitudSeleccionadaId === 5 && isEmailValid)">
+                            <div formArrayName="integrantes" class="table-container">
+                                <p-table [value]="integrantes.controls" showGridlines
+                                    [tableStyle]="{ 'min-width': '30rem' }" dataKey="id">
+                                    <ng-template pTemplate="header">
+                                        <ng-container>
+                                            <tr>
+                                                <th class="centered-header" style="min-width: 12rem">Primer
+                                                    Nombre
+                                                </th>
+                                                <th class="centered-header" style="min-width: 12rem">Segundo
+                                                    Nombre
+                                                </th>
+                                                <th class="centered-header" style="min-width: 12rem">Primer
+                                                    Apellido
+                                                </th>
+                                                <th class="centered-header" style="min-width: 12rem">Segundo
+                                                    Apellido</th>
+                                                <th class="centered-header" style="min-width: 15rem">Correo</th>
+                                                <th class="centered-header" style="min-width: 12rem">Numero de
+                                                    Empleado
+                                                </th>
+                                                <th class="centered-header" style="min-width: 10rem">Teléfono
+                                                </th>
+                                                <th class="centered-header" style="min-width: 10rem">Rol</th>
+                                                <th class="centered-header" style="min-width: 10rem">Permiso
+                                                </th>
+                                                <th class="centered-header" style="min-width: 2rem">Eliminar
+                                                </th>
+                                            </tr>
+                                        </ng-container>
+                                    </ng-template>
+
+                                    <ng-template let-rowData let-rowIndex="rowIndex" pTemplate="body">
+                                        <ng-container *ngIf="integrantesCargados">
+                                            <tr [formGroupName]="rowIndex">
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="firstName"
+                                                            formControlName="miembroprimerNombre" appCapitalizable
+                                                            appValidaciones [nameValidation]="true" [maxlength]="25" />
+                                                        <label for="firstName">Primer Nombre <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="secondName"
+                                                            formControlName="miembrosegundoNombre" appCapitalizable
+                                                            appValidaciones [nameValidationTwoWords]="true"
+                                                            [maxlength]="25" />
+                                                        <label for="blockspace">Segundo Nombre</label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="lastName"
+                                                            formControlName="miembroprimerApellido" appCapitalizable
+                                                            appValidaciones [nameValidation]="true" [maxlength]="25" />
+                                                        <label for="blockspace">Primer Apellido <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="secondLastName"
+                                                            formControlName="miembrosegundoApellido" appCapitalizable
+                                                            appValidaciones [nameValidationTwoWords]="true"
+                                                            [maxlength]="25" />
+                                                        <label for="secondLastName">Segundo Apellido</label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="email" formControlName="miembroCorreo"
+                                                            placeholder="direccion@unah.edu.hn" [maxlength]="100" />
+                                                        <label for="email">Correo Electrónico <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="numEmpleado" placeholder="ej. 251026"
+                                                            formControlName="miembroNumEmpleado" appValidaciones
+                                                            [onlyNumbersValidation]="true" [maxlength]="10" />
+                                                        <label for="numEmpleado">Número de Empleado <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <input pInputText id="telefono" placeholder="ej. 114532"
+                                                            formControlName="miembroTelefono" appValidaciones
+                                                            [onlyNumbersValidation]="true" [maxlength]="10" />
+                                                        <label for="telefono">Teléfono <span
+                                                                style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <p-select formControlName="miembroRol" optionLabel="rol"
+                                                            [options]="rolOptions" optionValue="idRol"
+                                                            [showClear]="true" [filter]="true" filterBy="rol"
+                                                            appendTo="body" styleClass="w-full">
+                                                        </p-select>
+                                                        <label>Rol del Usuario <span style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <p-iftalabel class="sm:col-span-2">
+                                                        <p-select formControlName="permiso" optionLabel="rol"
+                                                            [options]="permisoOptions" optionValue="idRol"
+                                                            [showClear]="true" [filter]="true" filterBy="rol"
+                                                            appendTo="body" styleClass="w-full">
+                                                        </p-select>
+                                                        <label>Permiso <span style="color: red">*</span></label>
+                                                    </p-iftalabel>
+                                                </td>
+                                                <td class="centered-cell">
+                                                    <button type="button" pButton icon="pi pi-trash"
+                                                        (click)="eliminarMiembro(2, rowIndex)"
+                                                        class="p-button-rounded p-button-danger">
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </ng-template>
+
+                                    <ng-template pTemplate="footer">
+                                        <tr>
+                                            <td colspan="10">
+                                                <button type="button" pButton icon="pi pi-plus"
+                                                    (click)="agregarMiembro()" label="Agregar Integrante"
+                                                    class="p-button-text">
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div *ngIf="categoriaSeccionada  === 2 && !isEmailValid">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-select [options]="universidades" formControlName="idUniversidad"
+                                optionLabel="nombreUniversidad" styleClass="w-full" optionValue="idUniversidad"
+                                [showClear]="true" [filter]="true" filterBy="nombreUniversidad" appendTo="body"
+                                [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idUniversidad')?.invalid && RegistrarForm.get('idUniversidad')?.touched}">
+                            </p-select>
+                            <label for="idUniversidad">4. Universidad <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="RegistrarForm.get('idUniversidad')?.touched && RegistrarForm.get('idUniversidad')?.invalid"
+                            style="color: red;">
+                            <small *ngIf="RegistrarForm.get('idUniversidad')?.hasError('required')">
+                                El campo es obligatorio.
+                            </small>
+                        </div>
+
+                        <div class="space"></div>
+
+                        <p-iftalabel class="sm:col-span-2" *ngIf="5 === tipoSolicitudSeleccionadaId">
+                            <p-select [options]="gradosAcademicos" formControlName="idGrado" optionLabel="nombreGrado"
+                                styleClass="w-full" optionValue="idGrado" [showClear]="true" [filter]="true"
+                                filterBy="nombreGrado" appendTo="body"
+                                [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('idGrado')?.invalid && RegistrarForm.get('idGrado')?.touched}">
+                            </p-select>
+                            <label for="idGrado">5. Grado Académico <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="RegistrarForm.get('idGrado')?.touched && RegistrarForm.get('idGrado')?.invalid"
+                            style="color: red;">
+                            <small *ngIf="RegistrarForm.get('idGrado')?.hasError('required')">
+                                El campo es obligatorio.
+                            </small>
+                        </div>
+
+                        <div class="space"></div>
+
+                        <p-iftalabel class="sm:col-span-2">
+                            <input pInputText id="carrera" formControlName="carrera" [maxlength]="250" class="w-full"
+                                appCapitalizable
+                                [ngClass]="{'ng-invalid ng-dirty': RegistrarForm.get('carrera')?.invalid && RegistrarForm.get('carrera')?.touched}">
+                            <label for="carrera">6. Carrera <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="RegistrarForm.get('carrera')?.touched && RegistrarForm.get('carrera')?.invalid"
+                            style="color: red;">
+                            <small *ngIf="RegistrarForm.get('carrera')?.hasError('required')">
+                                El campo es obligatorio.
+                            </small>
+                            <small *ngIf="RegistrarForm.get('carrera')?.hasError('minlength')">
+                                Debe tener al menos {{
+                                RegistrarForm.get('carrera')?.errors?.['minlength'].requiredLength }}
+                                caracteres.
+                            </small>
+                            <small *ngIf="RegistrarForm.get('carrera')?.hasError('maxlength')">
+                                No debe superar los {{
+                                RegistrarForm.get('carrera')?.errors?.['maxlength'].requiredLength }}
+                                caracteres.
+                            </small>
+                            <small *ngIf="RegistrarForm.get('carrera')?.hasError('pattern')">
+                                Solo se permiten letras y espacios.
+                            </small>
+                            <small *ngIf="RegistrarForm.get('carrera')?.hasError('noInyeccionSQL')">
+                                El texto contiene caracteres inválidos.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div *ngIf="categoriaSeccionada !== 0" class="space"></div>
+
+                    <div *ngIf="[1,2,4].includes(categoriaSeccionada)">
+                        <small id="username-help"
+                            style="width: 100%; display: block; white-space: normal; margin-bottom: 4px;">
+                            <strong *ngIf="isEmailValid"> El documento adjuntado a subir es:</strong>
+                            <label *ngIf="!isEmailValid"> Adjuntar documentos:</label>
+                            <ol *ngIf="isEmailValid"
+                                style="margin-top: 4px; margin-bottom: 10px; list-style-type: decimal; padding-left: 30px;">
+                                <li>Oficio <span class="tooltip-required">**</span></li>
+                            </ol>
+
+                            <span style="display: block; margin-top: 10px;">
+                                <strong *ngIf="isEmailValid">Requisitos para el documento:</strong>
+                                <strong *ngIf="!isEmailValid">Requisitos para los documentos:</strong>
+                                <ul style="list-style-type: disc; padding-left: 30px;">
+                                    <li>Formatos aceptados: PDF.</li>
+                                    <li>Tamaño máximo: 4 MB.</li>
+                                </ul>
+                            </span>
+
+                            <div style="color: red; font-weight: bold; margin-top: 8px;">
+                                <span *ngIf="isEmailValid">Advertencia: El documento que suba debe ser el oficio
+                                    correspondiente. Si no
+                                    es el documento correcto, su ticket será denegado.
+                                </span>
+                                <span *ngIf="!isEmailValid">Advertencia: Los documentos que suba deben ser los
+                                    correspondientes a la solicitud realizada. Si no
+                                    son los documentos correctos, su ticket será denegado.
+                                </span>
+                            </div>
+                        </small>
+                    </div>
+
+                    <div *ngIf="[1,2,4].includes(categoriaSeccionada)"
+                        class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <div style="width: 100%; margin-top: 16px;">
+                                <p-fileUpload #fileUploader name="demo[]" [multiple]="true" accept=".pdf"
+                                    (onSelect)="getfiles($event)" maxFileSize="100000000000"
+                                    chooseStyleClass="custom-button-file" (onRemove)="removeFile($event)"
+                                    [disabled]="loading" chooseLabel="Subir Archivo" [auto]="true"
+                                    removeStyleClass="custom-button-1">
+                                </p-fileUpload>
+                            </div>
+                        </p-iftalabel>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div *ngIf="categoriaSeccionada !== 0" class="pt-4">
+                        <p-button label="Enviar" type="submit" (click)="confirmarTipoTicket()"
+                            [disabled]="esBotonEnviarDeshabilitado()"
+                            [icon]="isLoadingRegistrarTicket ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                            styleClass="btn fw-bolder custom-1 w-full">
+                        </p-button>
+                    </div>
+
+                </p-fluid>
+
+
+                <!-------------- Dialog de Confirmación de Ticket Estratégico Administrativo ---------- -->
+                <p-dialog header="Header" [(visible)]="visibleEstrategicoAcademico" [modal]="true"
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }"
+                    [draggable]="false" [resizable]="false">
+                    <ng-template pTemplate="header">
+                        <div class="header-container title-header">
+                            <h2 class="header-titles">Confirmación de Ticket</h2>
+                        </div>
+                    </ng-template>
+                    <p-panel>
+                        <div style="text-align: justify; padding: 0 1rem;">
+                            Estás a punto de registrar una solicitud <strong>{{ categoriaSeleccionadaNombre }}</strong>.
+                            Este
+                            será
+                            evaluado por el área correspondiente, y su resolución puede ser <strong>favorable o no
+                                favorable</strong>, dependiendo del análisis técnico y administrativo de la
+                            solicitud.
+
+
+                            <br><br>
+                            La evaluación se realizará en un <strong>horario laboral</strong>. Durante este tiempo,
+                            se asignará un
+                            número único de ticket, el cual recibirás por
+                            <strong>correo electrónico</strong>.
+
+                            <br><br>
+                            En caso de que el resultado sea <strong>favorable</strong>, el ticket será atendido
+                            conforme a los
+                            procedimientos establecidos y recibirás <strong>notificaciones mediante su correo
+                                proporcionado</strong> cada
+                            vez que el estado del ticket cambie.
+
+
+                            <br><br>
+                            Por favor, asegúrate de que comprendes esta información antes de proceder. El registro
+                            del ticket inicia un
+                            proceso formal que no podrá ser modificado una vez confirmado.
+
+                            <!-- Checkbox con texto y botón "Ver más" -->
+                            <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                                <div style="display: flex; align-items: flex-start; gap: 0.5rem; max-width: 800px;">
+                                    <p-checkbox formControlName="aceptaTerminos" inputId="chkTerminos"
+                                        binary="true"></p-checkbox>
+                                    <label for="chkTerminos" style="margin: 0; text-align: justify;">
+                                        Se confirma que se han leído y aceptado voluntariamente los
+                                        <button type="button" (click)="verDialogoTerminos = true"
+                                            class="p-button-link p-0 m-0" style="font-weight: bold; color: #0d6efd;">
+                                            Términos y Condiciones
+                                        </button>
+                                        establecidos por parte de la Universidad Nacional Autónoma de Honduras
+                                        para el registro y gestión de tickets, reconociendo sus implicaciones
+                                        técnicas y administrativas.
+                                    </label>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+
+
+                        <div style="text-align: center; padding-top: 1rem;">
+                            ¿Estás seguro de que deseas continuar con el proceso de creación del ticket?
+                        </div>
+
+
+                        <p-footer style="display: flex; justify-content: center; gap: 10px;">
+                            <button pButton type="button"
+                                [disabled]="!RegistrarForm.get('aceptaTerminos')?.value || isLoadingRegistrarTicket"
+                                [icon]="isLoadingRegistrarTicket ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'"
+                                label="Aceptar" class="btn fw-bolder custom-1 w-full"
+                                (click)="ingresarTicketEstrategicoAdministrativa(); visibleEstrategicoAcademico = false"></button>
+
+                            <button pButton type="button" icon="bi bi-x-circle" label="Cancelar"
+                                class="btn fw-bolder custom-2-1 w-full" [disabled]="isLoadingRegistrarTicket"
+                                (click)="visibleEstrategicoAcademico = false"></button>
+                        </p-footer>
+                    </p-panel>
+                </p-dialog>
+
+                <!-------------- Dialog de Confirmación de Ticket Curricular ---------- -->
+                <p-dialog header="Header" [(visible)]="visibleCurricular" [modal]="true"
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }"
+                    [draggable]="false" [resizable]="false">
+                    <ng-template pTemplate="header">
+                        <div class="header-container title-header">
+                            <h2 class="header-titles">Confirmación de Ticket</h2>
+                        </div>
+                    </ng-template>
+                    <p-panel>
+                        <div style="text-align: justify; padding: 0 1rem;">
+                            Estás a punto de registrar una solicitud <strong>{{ categoriaSeleccionadaNombre }}</strong>.
+                            Este será
+                            evaluado por el área correspondiente, y su resolución puede ser <strong>favorable o no
+                                favorable</strong>, dependiendo del análisis técnico y administrativo de la
+                            solicitud.
+
+                            <br><br>
+                            La evaluación se realizará en un <strong>horario laboral</strong> a partir
+                            del registro del ticket. Durante ese tiempo, se asignará un número único de ticket, el
+                            cual recibirás por <strong>correo electrónico</strong>, junto con la confirmación de
+                            recepción.
+
+                            <br><br>
+                            Una vez enviada la solicitud, se enviará un correo electrónico a las direcciones asignadas a
+                            la Subcomisión Curricular con <strong>las credenciales de acceso</strong>. Estas incluyen
+                            una contraseña temporal y un código de verificación, que deberán utilizarse para completar
+                            los pasos necesarios para habilitar el acceso a las distintas funciones del sistema. Las
+                            credenciales se administran de forma segura y controlada.
+
+                            <br><br>
+                            Este tipo de tickets pasa por distintas <strong>etapas de gestión interna</strong>,
+                            administradas cuidadosamente dentro del sistema.
+
+                            <br><br>
+                            Durante el proceso se vela por la
+                            <strong>seguridad, confidencialidad y correcto acceso a las credenciales otorgadas</strong>.
+
+                            <br><br>
+                            Por favor, asegúrate de que comprendes esta información antes de proceder. El registro
+                            del ticket inicia un proceso formal que no podrá ser modificado una vez confirmado.
+
+                            <!-- Checkbox con texto y botón "Ver más" -->
+                            <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                                <div style="display: flex; align-items: flex-start; gap: 0.5rem; max-width: 800px;">
+                                    <p-checkbox formControlName="aceptaTerminos" inputId="chkTerminos"
+                                        binary="true"></p-checkbox>
+                                    <label for="chkTerminos" style="margin: 0; text-align: justify;">
+                                        Se confirma que se han leído y aceptado voluntariamente los
+                                        <button type="button" (click)="verDialogoTerminos = true"
+                                            class="p-button-link p-0 m-0" style="font-weight: bold; color: #0d6efd;">
+                                            Términos y Condiciones
+                                        </button>
+                                        establecidos por parte de la Universidad Nacional Autónoma de Honduras
+                                        para el registro y gestión de tickets, reconociendo sus implicaciones
+                                        técnicas y administrativas.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; padding-top: 1rem;">
+                            ¿Estás seguro de que deseas continuar con el proceso de creación del ticket?
+                        </div>
+
+                        <p-footer style="display: flex; justify-content: center; gap: 10px;">
+                            <button pButton type="button"
+                                [disabled]="!RegistrarForm.get('aceptaTerminos')?.value || isLoadingRegistrarTicket"
+                                [icon]="isLoadingRegistrarTicket ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'"
+                                label="Aceptar" class="btn fw-bolder custom-1 w-full"
+                                (click)="ingresarTicketCurricular(); visibleCurricular = false"></button>
+
+                            <button pButton type="button" icon="bi bi-x-circle" label="Cancelar"
+                                class="btn fw-bolder custom-2-1 w-full" [disabled]="isLoadingRegistrarTicket"
+                                (click)="visibleCurricular = false"></button>
+                        </p-footer>
+                    </p-panel>
+                </p-dialog>
+            </form>
+        </p-panel>
+    </div>
+    <div class="custom-container" *ngIf="visibleReservacion">
+        <p-panel styleClass="transparente">
+            <ng-template pTemplate="header">
+                <div class="header-container title-header">
+                    <span>
+                        Tipo de Reservación de Salón
+                    </span>
+                </div>
+            </ng-template>
+            <div class="space"></div>
+            <form [formGroup]="ReservacionForm">
+
+                <p-fluid>
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <input pInputText id="email" formControlName="correo" placeholder="direccion@unah.edu.hn"
+                                [maxlength]="100" required
+                                [ngClass]="{'ng-invalid ng-dirty': ReservacionForm.get('correo')?.invalid && ReservacionForm.get('correo')?.touched}">
+                            <label for="email">1. Correo Electrónico Institucional <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('correo')?.invalid && ReservacionForm.get('correo')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('correo')?.errors?.['required']">
+                                Este campo es obligatorio.
+                            </small>
+                            <small *ngIf="ReservacionForm.get('correo')?.errors?.['maxlength']">
+                                El campo no puede superar los {{
+                                ReservacionForm.get('correo')?.errors?.['maxlength'].requiredLength }}
+                                caracteres.
+                            </small>
+                            <small
+                                *ngIf="ReservacionForm.get('correo')?.errors?.['email'] || ReservacionForm.get('correo')?.errors?.['pattern']">
+                                El correo no tiene un formato válido.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <input pInputText id="nombre" formControlName="nombre" [maxlength]="140" required
+                                [ngClass]="{'ng-invalid ng-dirty': ReservacionForm.get('nombre')?.invalid && ReservacionForm.get('correo')?.touched}">
+                            <label for="nombre">2. Nombre Completo del Solicitante <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('nombre')?.invalid && ReservacionForm.get('nombre')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('nombre')?.errors?.['required']">
+                                Este campo es obligatorio.
+                            </small>
+                            <small *ngIf="ReservacionForm.get('nombre')?.errors?.['maxlength']">
+                                El campo no puede superar los {{
+                                ReservacionForm.get('nombre')?.errors?.['maxlength'].requiredLength }}
+                                caracteres.
+                            </small>
+                            <small
+                                *ngIf="ReservacionForm.get('nombre')?.errors?.['email'] || ReservacionForm.get('nombre')?.errors?.['pattern']">
+                                El correo no tiene un formato válido.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-select #categoriaSel
+                                [options]="categoriaTicketFiltrada.length ? categoriaTicketFiltrada : [{ categoriaTipoSolicitud: 'Cargando categorías...', idCategoriaTipoSolicitud: -1 }]"
+                                formControlName="idCategoria" (onChange)="onSelectCategoria($event)"
+                                (onShow)="getCategoriaTicket()" optionLabel="categoriaTipoSolicitud" styleClass="w-full"
+                                optionValue="idCategoriaTipoSolicitud" [showClear]="true" [filter]="true"
+                                filterBy="categoriaTipoSolicitud" appendTo="body"
+                                [ngClass]="{'ng-invalid ng-dirty': ReservacionForm.get('idCategoria')?.invalid && ReservacionForm.get('idCategoria')?.touched}">
+                                <!-- Template para deshabilitar la opción con id -1 -->
+                                <ng-template let-option pTemplate="item">
+                                    <span
+                                        [ngStyle]="{ color: option.idCategoriaTipoSolicitud === -1 ? '#999' : 'inherit' }">
+                                        {{ option.categoriaTipoSolicitud }}
+                                    </span>
+                                </ng-template>
+                            </p-select>
+                            <label for="categoria">3. Categoría del Ticket <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('idCategoria')?.invalid && ReservacionForm.get('idCategoria')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('idCategoria')?.errors?.['required']">
+                                El campo es obligatorio.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-select [options]="tipoSolicitud" formControlName="idTipoSolicitud"
+                                (onChange)="onTipoSolicitudChange($event)" optionLabel="tipoSolicitud"
+                                styleClass="w-full" optionValue="idTipoSolicitud" [showClear]="true" [filter]="true"
+                                filterBy="tipoSolicitud" appendTo="body"
+                                [ngClass]="{'ng-invalid ng-dirty': ReservacionForm.get('idTipoSolicitud')?.invalid && ReservacionForm.get('idTipoSolicitud')?.touched}">
+                            </p-select>
+                            <label for="email">4. Tipo de Solicitud <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('idTipoSolicitud')?.invalid && ReservacionForm.get('idTipoSolicitud')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('idTipoSolicitud')?.errors?.['required']">
+                                El campo es obligatorio.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <input pInputText id="responsable" formControlName="responsable" [maxlength]="140" required
+                                [ngClass]="{'ng-invalid ng-dirty': ReservacionForm.get('responsable')?.invalid && ReservacionForm.get('responsable')?.touched}">
+                            <label for="responsable">5. Responsable de la Reunión <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('responsable')?.invalid && ReservacionForm.get('responsable')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('responsable')?.errors?.['required']">
+                                Este campo es obligatorio.
+                            </small>
+                            <small *ngIf="ReservacionForm.get('responsable')?.errors?.['maxlength']">
+                                El campo no puede superar los {{
+                                ReservacionForm.get('responsable')?.errors?.['maxlength'].requiredLength }}
+                                caracteres.
+                            </small>
+                            <small
+                                *ngIf="ReservacionForm.get('responsable')?.errors?.['email'] || ReservacionForm.get('responsable')?.errors?.['pattern']">
+                                El correo no tiene un formato válido.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <input pInputText id="actividad" formControlName="actividad" [maxlength]="140" required
+                                [ngClass]="{'ng-invalid ng-dirty': ReservacionForm.get('actividad')?.invalid && ReservacionForm.get('actividad')?.touched}">
+                            <label for="actividad">6. Actividad <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('actividad')?.invalid && ReservacionForm.get('actividad')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('actividad')?.errors?.['required']">
+                                Este campo es obligatorio.
+                            </small>
+                            <small *ngIf="ReservacionForm.get('actividad')?.errors?.['maxlength']">
+                                El campo no puede superar los {{
+                                ReservacionForm.get('actividad')?.errors?.['maxlength'].requiredLength }}
+                                caracteres.
+                            </small>
+                            <small
+                                *ngIf="ReservacionForm.get('actividad')?.errors?.['email'] || ReservacionForm.get('actividad')?.errors?.['pattern']">
+                                El correo no tiene un formato válido.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-inputnumber formControlName="cantidadPersonas" mode="decimal" inputId="withoutgrouping"
+                                [useGrouping]="false" required
+                                [ngClass]="{'ng-invalid ng-dirty': ReservacionForm.get('cantidadPersonas')?.invalid && ReservacionForm.get('cantidadPersonas')?.touched}" />
+                            <label for="cantidadPersonas">7. Cantidad de Personas <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('cantidadPersonas')?.invalid && ReservacionForm.get('cantidadPersonas')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('cantidadPersonas')?.errors?.['required']">
+                                Este campo es obligatorio.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-datepicker *ngIf="calendarReady" [iconDisplay]="'input'" [showIcon]="true"
+                                inputId="icondisplay" [readonlyInput]="true" inputId="icondisplay"
+                                formControlName="fecha" dateFormat="dd 'de' MM 'del' yy" required appendTo="body"
+                                [ngClass]="{
+                                            'ng-invalid ng-dirty':
+                                            ReservacionForm.get('fecha')?.invalid &&
+                                            ReservacionForm.get('fecha')?.touched
+                                        }" /><!-- [minDate]="minDate" [maxDate]="maxDate" -->
+                            <label for="fecha">8. Fecha de la Reunión <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('fecha')?.invalid && ReservacionForm.get('fecha')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('fecha')?.errors?.['required']">
+                                Este campo es obligatorio.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-datepicker inputId="calendar-timeonly" formControlName="inicio" [timeOnly]="true"
+                                required
+                                [ngClass]="{'ng-invalid ng-dirty': ReservacionForm.get('inicio')?.invalid && ReservacionForm.get('inicio')?.touched}" />
+                            <label for="inicio">9. Hora de Inicio <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('inicio')?.invalid && ReservacionForm.get('inicio')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('inicio')?.errors?.['required']">
+                                Este campo es obligatorio.
+                            </small>
+                            <small *ngIf="ReservacionForm.get('inicio')?.errors?.['maxlength']">
+                                El campo no puede superar los {{
+                                ReservacionForm.get('inicio')?.errors?.['maxlength'].requiredLength }}
+                                caracteres.
+                            </small>
+                            <small
+                                *ngIf="ReservacionForm.get('inicio')?.errors?.['email'] || ReservacionForm.get('inicio')?.errors?.['pattern']">
+                                El correo no tiene un formato válido.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p-iftalabel class="sm:col-span-2">
+                            <p-datepicker inputId="calendar-timeonly" formControlName="fin" [timeOnly]="true" required
+                                [ngClass]="{'ng-invalid ng-dirty': ReservacionForm.get('fin')?.invalid && ReservacionForm.get('fin')?.touched}" />
+                            <label for="nombre">10. Hora de Finalización <span style="color: red">*</span></label>
+                        </p-iftalabel>
+                        <div *ngIf="ReservacionForm.get('fin')?.invalid && ReservacionForm.get('fin')?.touched"
+                            style="color: red;">
+                            <small *ngIf="ReservacionForm.get('fin')?.errors?.['required']">
+                                Este campo es obligatorio.
+                            </small>
+                            <small *ngIf="ReservacionForm.get('fin')?.errors?.['maxlength']">
+                                El campo no puede superar los {{
+                                ReservacionForm.get('fin')?.errors?.['maxlength'].requiredLength }} caracteres.
+                            </small>
+                            <small
+                                *ngIf="ReservacionForm.get('fin')?.errors?.['email'] || ReservacionForm.get('fin')?.errors?.['pattern']">
+                                El correo no tiene un formato válido.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="pt-4">
+                        <p-button label="Enviar" type="submit" (click)="confirmarReservacion()"
+                            [disabled]="ReservacionForm.invalid || isLoadingRegistrarTicket"
+                            [icon]="isLoadingRegistrarTicket ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                            styleClass="btn fw-bolder custom-1 w-full">
+                        </p-button>
+                    </div>
+                </p-fluid>
+
+
+                <!-------------- Dialog de Confirmación de Ticket Curricular ---------- -->
+                <p-dialog header="Header" [(visible)]="registrarReservacion" [modal]="true"
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }"
+                    [draggable]="false" [resizable]="false">
+                    <ng-template pTemplate="header">
+                        <div class="header-container title-header">
+                            <h2 class="header-title">Confirmación de Ticket</h2>
+                        </div>
+                    </ng-template>
+                    <p-panel>
+                        <div style="text-align: justify;">
+                            Estás a punto de registrar una solicitud <strong>{{ categoriaSeleccionadaNombre }}</strong>.
+                            Este
+                            será
+                            evaluado por el área correspondiente, y su resolución puede ser <strong>favorable o no
+                                favorable</strong>, dependiendo del análisis técnico y administrativo de la
+                            solicitud.
+
+                            <br><br>
+                            La evaluación se realizará en un <strong>máximo de 8 horas laborales</strong> a partir
+                            del registro del ticket. Durante ese tiempo, se asignará un número único de ticket, el
+                            cual recibirás por <strong>correo electrónico</strong>, junto con la confirmación de
+                            recepción.
+
+                            <br><br>
+                            En caso de que la evaluación sea <strong>favorable</strong>, recibirás en tu correo
+                            electrónico <strong>de confirmación</strong>.
+
+                            <br><br>
+                            Por favor, asegúrate de que comprendes esta información antes de proceder. El registro
+                            del ticket inicia un proceso formal que no podrá ser modificado una vez confirmado.
+
+                            <!-- Checkbox con texto y botón "Ver más" -->
+                            <div style="display: flex; justify-content: center; margin-top: 1rem;">
+                                <div style="display: flex; align-items: flex-start; gap: 0.5rem; max-width: 800px;">
+                                    <p-checkbox formControlName="aceptaTerminos" inputId="chkTerminos"
+                                        binary="true"></p-checkbox>
+                                    <label for="chkTerminos" style="margin: 0; text-align: justify;">
+                                        Se confirma que se han leído y aceptado voluntariamente los
+                                        <button type="button" (click)="verDialogoTerminos = true"
+                                            class="p-button-link p-0 m-0" style="font-weight: bold; color: #0d6efd;">
+                                            Términos y Condiciones
+                                        </button>
+                                        establecidos por parte de la Universidad Nacional Autónoma de Honduras
+                                        para el registro y gestión de tickets, reconociendo sus implicaciones
+                                        técnicas y administrativas.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; padding-top: 1rem;">
+                            ¿Estás seguro de que deseas continuar con el proceso de creación del ticket?
+                        </div>
+
+                        <p-footer style="display: flex; justify-content: center; gap: 10px;">
+                            <button pButton type="button"
+                                [disabled]="!RegistrarForm.get('aceptaTerminos')?.value || isLoadingRegistrarTicket"
+                                [icon]="isLoadingRegistrarTicket ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'"
+                                label="Aceptar" class="btn fw-bolder custom-1 w-full"
+                                (click)="ingresarTicketReservacion(); registrarReservacion = false"></button>
+
+                            <button pButton type="button" icon="bi bi-x-circle" label="Cancelar"
+                                class="btn fw-bolder custom-2-1 w-full" [disabled]="isLoadingRegistrarTicket"
+                                (click)="registrarReservacion = false"></button>
+                        </p-footer>
+                    </p-panel>
+                </p-dialog>
+
+            </form>
+        </p-panel>
+    </div>
+</div>
+<div class="space"></div>
+
+<p-dialog header="Header" [(visible)]="verDialogoTerminos" [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles" style="font-weight: bold;">Términos y Condiciones</h2>
+        </div>
+    </ng-template>
+
+    <p-panel>
+        <div class="col align-items-center justify-content-center">
+            <div class="flex flex-column">
+                <p-fluid>
+                    <p style="text-align: justify;">
+                        El presente acuerdo protege información confidencial compartida entre la Dirección de Docencia
+                        de la UNAH,
+                        los miembros de la subcomisión curricular y el consultor (si aplica), para salvaguardar la
+                        imagen y
+                        prestigio institucional.
+                    </p>
+                    <p style="text-align: justify;">
+                        Toda información intercambiada queda amparada por la obligación de confidencialidad según lo
+                        estipulado en
+                        este acuerdo.
+                    </p>
+                    <br />
+                    <h3 style="font-weight: bold;">ESTIPULACIONES</h3>
+                    <br />
+
+                    <p style="text-align: justify;">
+                        <strong>Primera.-</strong> Este acuerdo involucra toda información sin importar su naturaleza
+                        (oral, escrita o audiovisual)
+                        o medio que la Dirección de Docencia (DD) facilite a los miembros de la subcomisión
+                        curricular/consultor
+                        para los trabajos o responsabilidades relacionadas a la elaboración del proyecto curricular.
+                    </p>
+                    <br />
+                    <p style="text-align: justify;">
+                        Se entenderá como confidencial lo siguiente: Guías de Trabajo, Planillas, Matrices, Formatos en
+                        Excel,
+                        Acceso a la plataforma institucional, documentos de apoyo, vídeos, acceso a los grupos de
+                        WhatsApp,
+                        los documentos elaborados, es decir: El Proyecto de Investigación, Informe de Benchmarking,
+                        Documento de Diagnóstico, Plan de Estudios, Plan de Factibilidad, entre otros relacionados al
+                        diseño/rediseño de proyectos curriculares o afines.
+                    </p>
+                    <br />
+                    <p style="text-align: justify;">
+                        <strong>Segunda.-</strong> El Docente/consultor, únicamente podrá hacer uso de la información
+                        otorgada por la DD para el
+                        fin mencionado en el punto anterior, siempre con el compromiso de mantener la confidencialidad
+                        de la misma,
+                        y extendiendo la responsabilidad a cualquier otra persona que, debido a su relación con el
+                        Docente/consultor,
+                        tenga acceso a la información proporcionada por la DD.
+                    </p>
+                    <br />
+                    <p style="text-align: justify;">
+                        Se entiende que tanto el Docente/consultor como las personas autorizadas por la DD NO podrán
+                        modificar,
+                        reproducir, divulgar o hacer de conocimiento público la información clasificada como
+                        confidencial por el
+                        presente acuerdo sin la autorización escrita de la Dirección de Docencia. El Docente/consultor
+                        protegerá
+                        la información confidencial a fin de evitar su robo, pérdida o sustracción a toda costa.
+                    </p>
+                    <br />
+                    <p style="text-align: justify;">
+                        <strong>Tercera.-</strong> Sin afectar los acuerdos mencionados en el presente convenio, las
+                        partes tienen en común acuerdo
+                        que el deber de confidencialidad no es aplicable en los siguientes casos:
+                    </p>
+                    <br />
+                    <ul style="padding-left: 1.5rem; list-style-type: disc; list-style-position: inside;">
+                        <li>Si la información proporcionada por la Dirección de Docencia fuera de dominio público en el
+                            momento
+                            en que es entregada al Docente/Consultor, o bien, si pasa a ser de dominio público sin que
+                            ninguna de las
+                            partes esté involucrada.</li>
+                        <li>Si el Docente/Consultor ya tuviera conocimiento de la información enviada por la DD antes de
+                            que el
+                            presente convenio fuera firmado y por lo tanto, esté libre de la obligación de
+                            confidencialidad.</li>
+                        <li>En caso de que una orden judicial o mandato legal exija la divulgación de la información
+                            clasificada
+                            por este acuerdo como confidencial. En este caso, el Docente/Consultor buscará que el manejo
+                            de los datos
+                            mantenga su carácter de confidencial.</li>
+                        <li>Cuando el Docente/Consultor pueda probar que recibió, de manera totalmente legítima e
+                            independiente
+                            de la relación establecida con la DD, información de terceros que en este acuerdo esté
+                            clasificada como
+                            confidencial.</li>
+                    </ul>
+                    <br />
+                    <p style="text-align: justify;">
+                        <strong>Cuarta.-</strong> La propiedad intelectual de la información sujeta a este acuerdo de
+                        confidencialidad pertenecerá
+                        siempre al Departamento, carrera y a la subcomisión curricular que elabore los documentos de
+                        proyectos
+                        curriculares, por lo que el hecho de compartirla con la DD no le priva de este derecho; a
+                        excepción de las
+                        herramientas orales, escritas o audiovisuales que la Dirección de Docencia facilite a los
+                        miembros de la
+                        subcomisión curricular/consultor para trabajar en el proyecto.
+                    </p>
+                    <br />
+                    <p style="text-align: justify;">
+                        <strong>Quinta.-</strong> Para el caso del manejo de información que incluya datos personales,
+                        el Docente/Consultor dará
+                        estricto cumplimiento a las disposiciones legales sobre la protección del derecho fundamental de
+                        habeas data,
+                        en particular lo dispuesto en el artículo 182 numeral 2) del Decreto Legislativo No. 10-2013,
+                        del 27 de marzo
+                        del 2013, gaceta No. 33,086.
+                    </p>
+                    <br />
+                    <p style="text-align: justify;">
+                        <strong>Sexta.-</strong> En caso de que la relación entre las partes finalice, Docente/Consultor
+                        y Dirección de Docencia
+                        se comprometen a devolver a su propietario original cualquier tipo de material amparado por la
+                        obligación de
+                        confidencialidad suscrita en este acuerdo.
+                    </p>
+                    <br />
+                    <p style="text-align: justify;">
+                        <strong>Séptima.-</strong> En caso de que algún miembro de la subcomisión curricular incumpla
+                        parcial o totalmente con las
+                        obligaciones establecidas en el presente acuerdo, éste será responsable de los daños y
+                        perjuicios que dicho
+                        incumplimiento llegase a ocasionar a la Dirección de Docencia.
+                    </p>
+                    <br />
+                    <p style="text-align: justify;">
+                        <strong>Octava.-</strong> La vigencia del presente acuerdo será indefinida y permanecerá vigente
+                        mientras exista relación
+                        receptora.
+                    </p>
+                    <br />
+                </p-fluid>
+            </div>
+        </div>
+    </p-panel>
+
+</p-dialog>

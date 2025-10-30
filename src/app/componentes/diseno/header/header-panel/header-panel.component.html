@@ -1,0 +1,33 @@
+<div>
+    <p-menubar [model]="items">
+        <ng-template #start>
+            <div style="display: flex; align-items: center;">
+                <!-- Botón, Divider y Logo -->
+                <img src="LOGO_VRA.png" alt="Logo Izquierda" width="90" height="100%"
+                    class="img-left responsive-image" style="margin-left:20px; cursor: pointer;">
+            </div>
+        </ng-template>
+
+        <ng-template #item let-item let-root="root">
+            <a pRipple class="flex items-center p-menubar-item-link" [routerLink]="item.route">
+                <span>{{ item.label }}</span>
+
+                @if (item.badge) {
+                <p-badge [ngClass]="{ 'ml-auto': !root, 'ml-2': root }" [value]="item.badge" />
+                }
+
+                @if (item.shortcut) {
+                <span class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">
+                    {{ item.shortcut }}
+                </span>
+                }
+
+                @if (item.items) {
+                <i [ngClass]="['ml-auto pi', root ? 'pi-angle-down' : 'pi-angle-right']"></i>
+                }
+            </a>
+        </ng-template>
+    </p-menubar>
+</div>
+<br>
+<br>

@@ -1,0 +1,159 @@
+<div class="external-dashboard">
+  @if (loading) {
+  <div class="flex flex-col items-center justify-center text-center h-full p-4 loading-overlay">
+    <div class="custom-spinner mb-4"></div>
+  </div>
+  }
+
+  @if (!loading) {
+  <div class="dashboard-header">
+    <div class="header-cards-grid">
+
+      <!-- Card Tiempo Transcurrido -->
+      <p-card class="header-card time-card">
+        <div class="card-content">
+          <div class="counter-icon">
+            <i class="pi pi-clock"></i>
+          </div>
+          <div class="counter-info">
+            <h3>Tiempo Transcurrido</h3>
+            <div class="countdown">
+              <span class="time-value">{{ elapsedDays }}</span>
+              <span class="time-label">días</span>
+            </div>
+            <div class="time-summary">
+              <small>{{ getElapsedMonths() }} de {{ totalEstimatedMonths }} meses</small>
+            </div>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Card Etapa Actual -->
+      <p-card class="header-card stage-card">
+        <div class="card-content">
+          <div class="stage-icon">
+            <i class="pi pi-flag"></i>
+          </div>
+          <div class="stage-info" *ngIf="currentStage">
+            <h3>Etapa Actual</h3>
+            <p class="stage-name">{{ currentStage?.name }}</p>
+            <p class="stage-description">{{ currentStage?.description }}</p>
+            <div class="stage-progress">
+              <p-progressBar [value]="getCurrentStageProgress() || 0" [showValue]="true"></p-progressBar>
+            </div>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </div>
+
+  <!-- Progreso General -->
+  <div class="progress-section">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="progress-header">
+          <h4>Progreso General de la Solicitud</h4>
+          <span class="progress-percentage">{{ overallProgress }}%</span>
+        </div>
+      </ng-template>
+
+      <p-progressBar [value]="overallProgress" [showValue]="false" class="custom-progress"></p-progressBar>
+
+      <!-- Timeline -->
+      <div class="stages-timeline">
+        @for (stage of stages; track $index) {
+        <div class="timeline-item" [ngClass]="getStageClass(stage.status)">
+          <div class="timeline-marker">
+            <i class="pi" [ngClass]="getStageIcon(stage.status)"></i>
+          </div>
+          <div class="timeline-content">
+          <div class="stage-header">
+            <h5>{{ stage?.name }}</h5>
+            <span class="stage-duration">
+              {{ stage?.estimatedMonths }} {{ stage?.estimatedMonths === 1 ? 'mes' : 'meses' }}
+            </span>
+          </div>
+            <p>{{ stage.description }}</p>
+            <div class="stage-details">
+              @if (stage.completedDate) {
+              <small>
+                <i class="pi pi-check"></i> Completado: {{ stage.completedDate | date:'dd/MM/yyyy' }}
+                @if (stage.actualMonths) {
+                <span> ({{ stage.actualMonths }} {{ stage.actualMonths === 1 ? 'mes' : 'meses' }} reales)</span>
+                }
+              </small>
+              }
+              @if (stage.status === 'current') {
+              <small>
+                <i class="pi pi-clock"></i> En progreso desde: {{ stage?.startDate | date:'dd/MM/yyyy' }}
+              </small>
+              }
+              @if (stage.status === 'pending') {
+              <small>
+                <i class="pi pi-calendar"></i> Pendiente de inicio
+              </small>
+              }
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-section">
+    <div class="chart-grid">
+      <p-card class="chart-card">
+        <ng-template pTemplate="header">
+          <div class="chart-title">
+            <h4>Estado de las Etapas (Última Solicitud)</h4>
+          </div>
+        </ng-template>
+        <p-chart type="doughnut" [data]="doughnutData" [options]="doughnutOptions"></p-chart>
+      </p-card>
+
+      <p-card class="chart-card">
+        <ng-template pTemplate="header">
+          <div class="chart-title">
+            <h4>Tiempo por Etapa (Última Solicitud)</h4>
+          </div>
+        </ng-template>
+        <p-chart type="bar" [data]="barData" [options]="barOptions"></p-chart>
+      </p-card>
+    </div>
+
+    <p-card class="full-width-chart">
+      <ng-template pTemplate="header">
+        <div class="chart-title">
+          <h4>Progreso Real vs Estimado (Todas las Solicitudes)</h4>
+        </div>
+      </ng-template>
+      <p-chart type="line" [data]="lineData" [options]="lineOptions"></p-chart>
+    </p-card>
+  </div>
+
+  <!-- Información Detallada -->
+  <div class="additional-info">
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="info-title">
+          <h4>Información Detallada de la Solicitud</h4>
+        </div>
+      </ng-template>
+
+      <div class="info-grid">
+        <div class="info-item"><strong>Número de Solicitud:</strong><span>{{ requestInfo?.number }}</span></div>
+        <div class="info-item"><strong>Tipo de Solicitud:</strong><span>{{ requestInfo?.requestType }}</span></div>
+        <div class="info-item"><strong>Prioridad:</strong> <span [ngClass]="getPriorityClass()">{{ requestInfo?.priority || '—' }}</span></div>
+        <div class="info-item"><strong>Fecha de Inicio:</strong> <span>{{ requestInfo?.startDate | date:'dd/MM/yyyy' }}</span></div>        
+        <div class="info-item"><strong>Fecha Estimada de Finalización:</strong><span>{{ requestInfo?.estimatedEndDate |date:'dd/MM/yyyy' }}</span></div>
+        <div class="info-item"><strong>Responsable Actual:</strong> <span>{{ requestInfo?.currentResponsible }}</span></div>
+        <div class="info-item"><strong>Duración Total:</strong> <span>{{ totalEstimatedMonths }} meses</span></div>
+        <div class="info-item"><strong>Tiempo Transcurrido:</strong> <span>{{ getElapsedMonths() }} meses ({{
+            elapsedDays }} días)</span></div>
+      </div>
+    </p-card>
+  </div>
+  }
+</div>

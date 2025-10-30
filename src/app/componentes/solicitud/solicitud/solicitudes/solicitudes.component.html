@@ -1,0 +1,2763 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+
+@if (!loadingtable) {
+<div class="custom-container">
+  <p-panel class="transparente">
+    <div class="header-container title-header gap-2">
+      <span>
+        Gestión de Solicitudes
+      </span>
+    </div>
+
+    <br>
+    <br>
+
+    <p-tabs value="0" scrollable [(value)]="activeTab" (valueChange)="onTabChange($event)">
+      @if (mostrarTabs) {
+        <p-tablist>
+          <p-tab [value]="0">Solicitudes Estratégicas</p-tab>
+          <p-tab [value]="1">Solicitudes Curriculares</p-tab>
+          <p-tab [value]="2">Solicitudes Administrativas</p-tab>
+        </p-tablist>
+      }
+
+      <p-tabpanels>
+
+        @if(mostrarTabs){
+          <p-tabpanel [value]="0">
+            @if (loadingSolicitudEstrategica) {
+            <div class="flex flex-col items-center justify-center text-center h-full p-4"
+              style="background-color: transparent;">
+              <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+              <p class="font-semibold text-gray-700 text-lg">
+                Estamos cargando tus solicitudes estratégicas, por favor espera...
+              </p>
+            </div>
+            }
+
+            @if (!loadingSolicitudEstrategica) {
+            <p-panel class="transparente">
+
+              <p-table #dtEstrategica [value]="solicitudEstrategica" [paginator]="true" columnResizeMode="expand"
+                showGridlines class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+                [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+                [globalFilterFields]="['numero', 'idSolicitud', 'ticket','nombreSolicitud','estadoSolicitud', 'tipoSolicitud', 'fechaRegistro']">
+
+                <ng-template pTemplate="caption">
+                  <div class="toolbar">
+                    <!-- Botones a la izquierda -->
+                    <div class="centraciones">
+                      <!-- Contenedor de los botones a la izquierda -->
+                      <div class="left-buttons">
+                        <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder"
+                          label="Reportes" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised
+                          text />
+                        <p-popover #op>
+                          <div class="flex flex-col gap-4">
+                            <div>
+                              <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                                styleClass="btn fw-bolder custom-2-1 w-full" (click)="exportarPDFEstrategica()" raised
+                                text>
+                              </p-button>
+                            </div>
+                            <div>
+                              <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                                styleClass="btn fw-bolder custom-2-2 w-full" (click)="exportarExcelEstrategica()" raised
+                                text>
+                              </p-button>
+                            </div>
+                          </div>
+                        </p-popover>
+                      </div>
+
+                      <!-- Contenedor de los botones a la derecha -->
+                      <div class="right-search">
+                        <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                          styleClass="btn custom-slash" class="responsive" (click)="clear(dtEstrategica)" />
+
+                        <p-iconField iconPosition="right">
+                          <p-inputIcon class="pi pi-search" />
+                          <input pInputText type="text" class="custom-search-input" placeholder="Buscar ticket"
+                            [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dtEstrategica)" />
+                        </p-iconField>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+
+
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                      <div class="flex items-center">
+                        N°
+                        <p-columnFilter type="text" field="numero" display="menu" />
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                      <div class="flex items-center">
+                        Ticket
+                        <p-columnFilter type="text" field="ticket" display="menu" />
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                      <div class="flex items-center">
+                        Nombre de la Solicitud
+                        <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 12rem" rowspan="2">
+                      <div class="flex items-center">
+                        Estado de la Solicitud
+                        <p-columnFilter type="text" field="estadoSolicitud" display="menu"></p-columnFilter>
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 15rem" rowspan="2">
+                      <div class="flex items-center">
+                        Tipo de Solicitud
+                        <p-columnFilter type="text" field="tipoSolicitud" display="menu"></p-columnFilter>
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 12rem" rowspan="2">
+                      <div class="flex items-center">
+                        Fecha de Registro
+                        <p-columnFilter type="date" dateFormat="dd 'de' MM 'del' yy" field="fechaRegistro"
+                          display="menu"></p-columnFilter>
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 8rem" [attr.colspan]="mostrarColumnaSalida ? 2 : 1">
+                      <div class="flex items-center">
+                        Archivos
+                      </div>
+                    </th>
+                    @if (puedeVerAcciones()) {
+                    <th class="centered-header" style="min-width: 8rem" rowspan="2">
+                      <div class="flex align-items-center">Acciones</div>
+                    </th>
+                    }
+
+                  </tr>
+
+                  <!-- Segunda fila con subcolumnas -->
+                  <tr>
+                    <th class="centered-header">Recibidos</th>
+                    @if (mostrarColumnaSalida) {
+                    <th class="centered-header">Emitidos</th>
+                    }
+                  </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-solicitud>
+                  <tr>
+                    <td class="centered-cell">{{ solicitud.numero || 'No proporcionado' }}</td>
+                    <td class="centered-cell">{{ solicitud.ticket || 'No proporcionado' }}</td>
+                    <td class="centered-cell">{{ solicitud.nombreSolicitud || 'No proporcionado' }}</td>
+                    <td class="centered-cell"><span
+                        class="px-3 py-1 rounded-full text-sm font-medium shadow-sm whitespace-normal break-words inline-block"
+                        [ngStyle]="{
+                  backgroundColor: srvHistorial.getColorFondo(solicitud.idEstadoSolicitud),
+                  color: srvHistorial.getColorTexto(solicitud.idEstadoSolicitud),
+                  maxWidth: '200px',
+                  lineHeight: '1.2'
+                }">
+                        {{ solicitud.estadoSolicitud }}
+                      </span></td>
+                    <td class="centered-cell">{{ solicitud.tipoSolicitud || 'No proporcionado' }}</td>
+                    <td class="centered-cell">
+                      {{ solicitud.fechaRegistro ? (solicitud.fechaRegistro | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a")
+                      :
+                      'No proporcionado' }}
+                    </td>
+
+                    <!-- Columna: (Recibidos) -->
+                    <td class="centered-cell">
+                      <div class="flex justify-center items-center gap-2">
+                        @for (archivo of solicitud.archivosEntrada; track $index) {
+                        <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                          [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+                          [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-arrow-down'"
+                          (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+                        </p-button>
+
+                        <p-popover #filePopover>
+                          <div [ngClass]="{
+                                  'grid-cols-1': archivos.length === 1,
+                                  'grid-cols-2': archivos.length === 2,
+                                  'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': archivos.length === 3,
+                                  'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': archivos.length >= 4
+                                }" class="grid gap-4 p-4">
+                            @if (archivos && archivos.length > 0) {
+                            @for (archivo of archivos; track $index) {
+                            <div
+                              class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                              (click)="descargarArchivo(archivo.url, archivo.nombre)">
+                              <p-button class="icon-button" [rounded]="true" [outlined]="true"
+                                [style.font-size]="'1.25rem'" [icon]="'bi bi-file-earmark-text'">
+                              </p-button>
+                              <span class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                                title="{{ archivo.nombre }}">
+                                {{ archivo.nombre }}
+                              </span>
+                            </div>
+                            }
+                            } @else {
+                            <p class="text-xs text-muted text-center col-span-2">
+                              No hay archivos disponibles.
+                            </p>
+                            }
+                          </div>
+                        </p-popover>
+                        }
+                      </div>
+                    </td>
+
+                    <!-- Columna: (Emitidos) -->
+                    @if (mostrarColumnaSalida) {
+                    <td class="centered-cell">
+                      <div class="flex justify-center items-center gap-2">
+
+                        @if (solicitud.archivosSalida && solicitud.archivosSalida.length > 0) {
+                        @for (archivo of solicitud.archivosSalida; track $index) {
+                        <p-button class="icon-button" [rounded]="true" [outlined]="true"
+                          [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+                          [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-arrow-up'"
+                          (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+                        </p-button>
+
+                        <p-popover #filePopover>
+                          <div [ngClass]="{
+                  'grid-cols-1': archivos.length === 1,
+                  'grid-cols-2': archivos.length === 2,
+                  'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': archivos.length === 3,
+                  'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': archivos.length >= 4
+                }" class="grid gap-4 p-4">
+
+                            @if (archivos && archivos.length > 0) {
+                            @for (archivo of archivos; track $index) {
+                            <div
+                              class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                              (click)="descargarArchivo(archivo.url, archivo.nombre)">
+                              <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                                [style.font-size]="'1.25rem'" [icon]="'bi bi-file-earmark-text'">
+                              </p-button>
+                              <span class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                                title="{{ archivo.nombre }}">
+                                {{ archivo.nombre }}
+                              </span>
+                            </div>
+                            }
+                            } @else {
+                            <p class="text-xs text-muted text-center col-span-2">
+                              No hay archivos disponibles.
+                            </p>
+                            }
+                          </div>
+                        </p-popover>
+                        }
+                        } @else {
+                        <p-button class="icon-button p-button-secondary" [outlined]="true" [rounded]="true"
+                          icon="pi pi-times-circle" pTooltip="Archivo no disponible" tooltipStyleClass="tooltip-custom-7"
+                          tooltipPosition="top" disabled>
+                        </p-button>
+                        }
+                      </div>
+                    </td>
+                    }
+
+                    @if (puedeVerAcciones()) {
+                    <td class="centered-cell">
+                      <div class="flex justify-center items-center">
+                        <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                          styleClass="btn fw-bolder custom-8" raised text>
+                        </p-button>
+
+                        <p-popover #op>
+                          <div class="flex flex-col gap-4">
+
+                            @if (permisoActualizar && solicitud.idEstadoSolicitud === 1 && permisoAsignar) {
+                            <p-button label="Asignar" (click)="cargarAsignaciones(solicitud, 'Asignar', 'Estrategica')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosAsignacion ? 'pi pi-spin pi-spinner' : 'pi pi-user-edit fw-medium'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+
+                            @if (mostrarBotonMantener(solicitud)) {
+                            <p-button label="Asignar" (click)="cargarAsignaciones(solicitud, 'Mantener', 'Estrategica')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosMantener ? 'pi pi-spin pi-spinner' : 'pi pi-user-edit fw-medium'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+
+                            @if (mostrarBotonDenegar(solicitud)) {
+                            <p-button label="Denegar" (click)="cargarAsignaciones(solicitud, 'Denegar', 'Estrategica')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosDenegar ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-ruled fw-medium'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+
+                            @if (mostrarBotonEvaluar(solicitud)) {
+                            <p-button label="Evaluar" (click)="cargarAsignaciones(solicitud, 'Revision', 'Estrategica')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosRevision ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+                              [styleClass]="obtenerClaseBotonEvaluar(solicitud)" text>
+                            </p-button>
+                            }
+
+                            @if (mostrarBotonRevision(solicitud)) {
+                            <p-button label="Evaluar"
+                              (click)="cargarAsignaciones(solicitud, 'RevisionAsignacion', 'Estrategica')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosRevisionAsignacion ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+                            @if (mostrarBotonFormato(solicitud)) {
+                            <p-button [label]="tipobotonFormato(solicitud)" (click)="abrirDialogoFormato(solicitud)"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosRevisionAsignacion ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+
+
+                            <p-button [loading]="loadingHistorial" [disabled]="loadingHistorial" label="Seguimiento"
+                              [icon]="loadingHistorial ? 'pi pi-spin pi-spinner' : 'bi bi-hourglass-split'"
+                              (onClick)="mostrarHistorials(solicitud.idSolicitud, solicitud.ticket)"
+                              pTooltip="Ver el flujo de seguimiento de la solicitud" tooltipStyleClass="tooltip-custom-1"
+                              styleClass="btn fw-bolder custom-7 w-full">
+                            </p-button>
+
+                          <p-button [loading]="loadingDialogGeneral" [disabled]="loadingInformacion" label="Información"
+                            [icon]="loadingInformacion ? 'pi pi-spin pi-spinner' : 'bi bi-info-circle'"
+                            (click)="mostrarInformacionSolicitud(solicitud)"
+                            pTooltip="Ver información detallada de la solicitud" tooltipStyleClass="tooltip-custom-7"
+                            styleClass="btn fw-bolder custom-1 w-full">
+                          </p-button>
+
+                          <p-button label="Seguimiento Archivos" [disabled]="loadingDialogGeneral"
+                            [icon]="loadingDialogGeneral ? 'pi pi-spin pi-spinner' : 'pi pi-folder fw-medium'"
+                            styleClass="btn fw-bolder custom-7 w-full"
+                            (click)="abrirHistorial(solicitud.idSolicitud, solicitud.ticket)">
+                          </p-button>
+
+                            @if (solicitud.idEstadoSolicitud >= 5 && solicitud.idEstadoSolicitud !== 19 &&
+                            puedeVerAsignados()) {
+                            <p-button [loading]="loadingDialogAsignado" [disabled]="loadingDialogAsignado"
+                              label="Asignados" [icon]="loadingDialogAsignado ? 'pi pi-spin pi-spinner' : 'pi pi-users'"
+                              (onClick)="cargarAsigandosSolicitud(solicitud, 'Asignados', 'Estrategica')"
+                              pTooltip="Ver usuarios asignados a la solicitud" tooltipStyleClass="tooltip-custom-1"
+                              styleClass="btn fw-bolder custom-1 w-full">
+                            </p-button>
+                            }
+
+
+
+                        </div>
+                      </p-popover>
+                    </div>
+                  </td>
+                  }
+
+                  </tr>
+                </ng-template>
+
+                <ng-template pTemplate="emptymessage">
+
+                  <tr>
+                    <td colspan="11" class="centered-cell">
+                      No se encontraron datos.
+                    </td>
+                  </tr>
+                </ng-template>
+
+              </p-table>
+              <br>
+
+            </p-panel>
+            }
+
+          </p-tabpanel>
+        }
+
+        <p-tabpanel [value]="1">
+          @if (loadingSolicitudCurricular) {
+          <div class="flex flex-col items-center justify-center text-center h-full p-4"
+            style="background-color: transparent;">
+            <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+            <p class="font-semibold text-gray-700 text-lg">
+              Estamos cargando tus solicitudes curriculares, por favor espera...
+            </p>
+          </div>
+          }
+
+          @if (!loadingSolicitudCurricular) {
+          <p-panel class="transparente">
+
+            <p-table #dtCurricular [value]="solicitudCurricular" [paginator]="true" columnResizeMode="expand"
+              showGridlines class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+              [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+              [globalFilterFields]="['numero', 'idSolicitud', 'ticket','nombreSolicitud','fechaRegistro']">
+
+              <ng-template pTemplate="caption">
+                <div class="toolbar">
+                  <!-- Botones a la izquierda -->
+                  <div class="centraciones">
+                    <!-- Contenedor de los botones a la izquierda -->
+                    <div class="left-buttons">
+                      <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder"
+                        label="Reportes" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised
+                        text />
+                      <p-popover #op>
+                        <div class="flex flex-col gap-4">
+                          <div>
+                            <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-1 w-full" (click)="exportarPDFCurricular()" raised
+                              text>
+                            </p-button>
+                          </div>
+                          <div>
+                            <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                              styleClass="btn fw-bolder custom-2-2 w-full" (click)="exportarExcelCurricular()" raised
+                              text>
+                            </p-button>
+                          </div>
+                        </div>
+                      </p-popover>
+                    </div>
+
+                    <!-- Contenedor de los botones a la derecha -->
+                    <div class="right-search">
+                      <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                        styleClass="btn custom-slash" class="responsive" (click)="clear(dtCurricular)" />
+
+                      <p-iconField iconPosition="right">
+                        <p-inputIcon class="pi pi-search" />
+                        <input pInputText type="text" class="custom-search-input" placeholder="Buscar ticket"
+                          [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dtCurricular)" />
+                      </p-iconField>
+                    </div>
+                  </div>
+                </div>
+              </ng-template>
+
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                    <div class="flex items-center">
+                      N°
+                      <p-columnFilter type="text" field="numero" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                    <div class="flex items-center">
+                      Ticket
+                      <p-columnFilter type="text" field="ticket" display="menu" />
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                    <div class="flex items-center">
+                      Nombre de la Solicitud
+                      <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 12rem" rowspan="2">
+                    <div class="flex items-center">
+                      Estado de la Solicitud
+                      <p-columnFilter type="text" field="estadoSolicitud" display="menu"></p-columnFilter>
+                    </div>
+                  </th>
+
+                  @if (puedeVerAsignados()) {
+                  <th class="centered-header" style="min-width: 15rem" rowspan="2">
+                    <div class="flex items-center">
+                      Integrantes de la Subcomisión
+                      <p-columnFilter type="text" field="nombre" display="menu"></p-columnFilter>
+                    </div>
+                  </th>
+                  }
+
+                  <th class="centered-header" style="min-width: 12rem" rowspan="2">
+                    <div class="flex items-center">
+                      Fecha de Registro
+                      <p-columnFilter type="date" dateFormat="dd 'de' MM 'del' yy" field="fechaRegistro"
+                        display="menu"></p-columnFilter>
+                    </div>
+                  </th>
+                  <th class="centered-header" style="min-width: 8rem" [attr.colspan]="mostrarColumnaSalida ? 2 : 1"
+                    [attr.colspan]="mostrarColumnaBorradores ? 2 : 1">
+                    <div class="flex items-center">
+                      Archivos
+                    </div>
+                  </th>
+                  @if (puedeVerAcciones()) {
+                  <th class="centered-header" style="min-width: 8rem" rowspan="2">
+                    <div class="flex align-items-center">Acciones</div>
+                  </th>
+                  }
+                </tr>
+
+                <!-- Segunda fila con subcolumnas -->
+                <tr>
+                  <th class="centered-header">Recibidos</th>
+                  @if (mostrarColumnaBorradores) {
+                  <th class="centered-header">Borradores</th>
+                  }
+                  @if (mostrarColumnaSalida) {
+                  <th class="centered-header">Emitidos</th>
+                  }
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-solicitud>
+                <tr>
+                  <td class="centered-cell">{{ solicitud.numero || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ solicitud.ticket || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ solicitud.nombreSolicitud || 'No proporcionado'}}</td>
+                  <td class="centered-cell">
+                    <div class="flex flex-col items-center">
+                      @if (solicitud.interna) {
+                      <p-button styleClass="icon-button" [rounded]="true" [outlined]="true" icon="bi bi-ui-checks"
+                        [disabled]="loadingEtapa || !permisoActualizar"
+                        [icon]="loadingEtapa ? 'pi pi-spin pi-spinner' : 'bi bi-ui-checks'"
+                        pTooltip="Ver estados por etapa de la solicitud." tooltipStyleClass="tooltip-custom-7"
+                        (onClick)="mostrarDetalleEstados(solicitud)">
+                      </p-button>
+                      <small class="font-semibold text-[#253a69] text-center mt-1" style="font-size: 0.80rem;">
+                        Estados
+                      </small>
+                      } @else {
+                      <span
+                        class="px-3 py-1 rounded-full text-sm font-medium shadow-sm whitespace-normal break-words inline-block"
+                        [ngStyle]="{
+                          backgroundColor: srvHistorial.getColorFondo(solicitud.estadosSolicitud[0].idEstadoSolicitud),
+                          color: srvHistorial.getColorTexto(solicitud.estadosSolicitud[0].idEstadoSolicitud),
+                          maxWidth: '200px',
+                          lineHeight: '1.2'
+                        }">
+                        {{ solicitud.estadosSolicitud[0].estadoSolicitud }}
+                      </span>
+                      }
+
+                    </div>
+                  </td>
+
+                  @if (puedeVerAsignados()) {
+                  <td class="centered-cell">
+                    <div class="flex flex-col items-center">
+
+                      @if (solicitud.interna) {
+                      <p-button (click)="cargarDatos(solicitud, 'Integrante')" styleClass="icon-buttons"
+                        [disabled]="(loadingDialogGeneral && loadingSolicitudId !== solicitud.idSolicitud) || !permisoActualizar"
+                        [rounded]="true" [outlined]="true"
+                        [icon]="(loadingDialogGeneral && loadingSolicitudId === solicitud.idSolicitud) ? 'pi pi-spin pi-spinner' : 'pi pi-users'"
+                        [ngClass]="{'no-efecto': !permisoActualizar}">
+                      </p-button>
+                      <small class="font-semibold text-[#ea6427] text-center mt-1" style="font-size: 0.80rem;">
+                        Integrantes
+                      </small>
+                      } @else {
+                      <p-button styleClass="icon-buttons no-link no-link-disabled" [rounded]="true" [outlined]="true"
+                        [disabled]="true" [icon]="'pi pi-ban'">
+                      </p-button>
+                      <small class="font-semibold text-[#ea6427] text-center mt-1" style="font-size: 0.80rem;">
+                        No disponible
+                      </small>
+                      }
+
+                    </div>
+                  </td>
+                  }
+
+
+
+                  <td class="centered-cell">
+                    {{ solicitud.fechaRegistro ? (solicitud.fechaRegistro | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a")
+                    :
+                    'No proporcionado' }}
+                  </td>
+
+                  <!-- Columna: (Recibidos) -->
+                  <td class="centered-cell">
+                    <div class="flex justify-center items-center gap-2">
+
+
+                      @for (archivo of solicitud.archivosEntrada; track $index) {
+                      <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                        [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+                        [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-arrow-down'"
+                        (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+                      </p-button>
+                      <p-popover #filePopover>
+                        <div [ngClass]="{
+                                'grid-cols-1': archivos.length === 1,
+                                'grid-cols-2': archivos.length === 2,
+                                'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': archivos.length === 3,
+                                'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': archivos.length >= 4
+                              }" class="grid gap-4 p-4">
+                          @if (archivos && archivos.length > 0) {
+                          @for (archivo of archivos; track $index) {
+                          <div
+                            class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                            (click)="descargarArchivo(archivo.url, archivo.nombre)">
+                            <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                              [style.font-size]="'1.25rem'" [icon]="'bi bi-file-earmark-text'">
+                            </p-button>
+                            <span class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                              title="{{ archivo.nombre }}">
+                              {{ archivo.nombre }}
+                            </span>
+                          </div>
+                          }
+                          } @else {
+                          <p class="text-xs text-muted text-center col-span-2">
+                            No hay archivos disponibles.
+                          </p>
+                          }
+                        </div>
+                      </p-popover>
+                      }
+                    </div>
+                  </td>
+
+                  <!-- Columna: (Borradores) -->
+                  @if (mostrarColumnaBorradores) {
+                  <td class="centered-cell">
+                    <div class="flex justify-center items-center gap-2">
+
+                      @if (solicitud.archivosBorradores && solicitud.archivosBorradores.length > 0) {
+                      @for (archivo of solicitud.archivosBorradores; track $index) {
+                      <p-button class="icon-button" [rounded]="true" [outlined]="true"
+                        [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+                        [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-break'"
+                        (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+                      </p-button>
+                      <p-popover #filePopover>
+                        <div [ngClass]="{
+                'grid-cols-1': archivos.length === 1,
+                'grid-cols-2': archivos.length === 2,
+                'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': archivos.length === 3,
+                'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': archivos.length >= 4
+              }" class="grid gap-4 p-4">
+
+                          @if (archivos && archivos.length > 0) {
+                          @for (archivo of archivos; track $index) {
+                          <div
+                            class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                            (click)="descargarArchivo(archivo.url, archivo.nombre)">
+                            <p-button class="icon-button" [rounded]="true" [outlined]="true"
+                              [style.font-size]="'1.25rem'" [icon]="'bi bi-file-earmark-text'">
+                            </p-button>
+                            <span class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                              title="{{ archivo.nombre }}">
+                              {{ archivo.nombre }}
+                            </span>
+                          </div>
+                          }
+                          } @else {
+                          <p class="text-xs text-muted text-center col-span-2">
+                            No hay archivos disponibles.
+                          </p>
+                          }
+                        </div>
+                      </p-popover>
+                      }
+                      } @else {
+                      <p-button class="icon-button p-button-secondary" [outlined]="true" [rounded]="true"
+                        icon="pi pi-times-circle" pTooltip="Archivo no disponible" tooltipStyleClass="tooltip-custom-7"
+                        tooltipPosition="top" disabled>
+                      </p-button>
+                      }
+                    </div>
+                  </td>
+                  }
+
+                  <!-- Columna: (Emitidos) -->
+                  @if (mostrarColumnaSalida) {
+                  <td class="centered-cell">
+                    <div class="flex justify-center items-center gap-2">
+
+                      @if (solicitud.archivosSalida && solicitud.archivosSalida.length > 0) {
+                      @for (archivo of solicitud.archivosSalida; track $index) {
+                      <p-button class="icon-button" [rounded]="true" [outlined]="true"
+                        [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+                        [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-arrow-up'"
+                        (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+                      </p-button>
+                      <p-popover #filePopover>
+                        <div [ngClass]="{
+                'grid-cols-1': archivos.length === 1,
+                'grid-cols-2': archivos.length === 2,
+                'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': archivos.length === 3,
+                'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': archivos.length >= 4
+              }" class="grid gap-4 p-4">
+
+                          @if (archivos && archivos.length > 0) {
+                          @for (archivo of archivos; track $index) {
+                          <div
+                            class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                            (click)="descargarArchivo(archivo.url, archivo.nombre)">
+                            <p-button class="icon-button" [rounded]="true" [outlined]="true"
+                              [style.font-size]="'1.25rem'" [icon]="'bi bi-file-earmark-text'">
+                            </p-button>
+                            <span class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                              title="{{ archivo.nombre }}">
+                              {{ archivo.nombre }}
+                            </span>
+                          </div>
+                          }
+                          } @else {
+                          <p class="text-xs text-muted text-center col-span-2">
+                            No hay archivos disponibles.
+                          </p>
+                          }
+                        </div>
+                      </p-popover>
+                      }
+                      } @else {
+                      <p-button class="icon-button p-button-secondary" [outlined]="true" [rounded]="true"
+                        icon="pi pi-times-circle" pTooltip="Archivo no disponible" tooltipStyleClass="tooltip-custom-7"
+                        tooltipPosition="top" disabled>
+                      </p-button>
+                      }
+                    </div>
+                  </td>
+                  }
+
+
+                  @if (puedeVerAcciones()) {
+                  <td class="centered-cell">
+                    <div class="flex justify-center items-center">
+                      <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                        styleClass="btn fw-bolder custom-8" raised text></p-button>
+                      <p-popover #op>
+                        <div class="flex flex-col gap-4">
+
+                          @if (permisoActualizar && solicitud.estadosSolicitud[0]?.idEstadoSolicitud === 1 && permisoAsignar) {
+                          <p-button label="Asignar" (click)="cargarAsignaciones(solicitud, 'Asignar', 'Curricular')"
+                            [disabled]="loadingDialogGeneral"
+                            [icon]="isLoadingDatosAsignacion ? 'pi pi-spin pi-spinner' : 'pi pi-user-edit fw-medium'"
+                            styleClass="btn fw-bolder custom-1 w-full" text>
+                          </p-button>
+                          }
+
+                          @if (mostrarBotonMantenerCurricular(solicitud)) {
+                          <p-button label="Asignar"
+                            (click)="cargarAsignacionesCurricular(solicitud, 'AsignacionCurricular', 'Curricular')"
+                            [disabled]="loadingDialogGeneral"
+                            [icon]="isLoadingDatosCurricular ? 'pi pi-spin pi-spinner' : 'pi pi-user-edit fw-medium'"
+                            styleClass="btn fw-bolder custom-1 w-full" text>
+                          </p-button>
+                          }
+
+                          @if (mostrarBotonDenegarCurricular(solicitud)) {
+                          <p-button label="Denegar" (click)="cargarAsignaciones(solicitud, 'Denegar', 'Curricular')"
+                            [disabled]="loadingDialogGeneral"
+                            [icon]="isLoadingDatosDenegar ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-ruled fw-medium'"
+                            styleClass="btn fw-bolder custom-1 w-full" text>
+                          </p-button>
+                          }
+
+                          @if (mostrarBotonEvaluarCurricular(solicitud)) {
+                          <p-button label="Evaluar"
+                            (click)="cargarAsignacionesCurricular(solicitud, 'Revision', 'Curricular')"
+                            [disabled]="loadingDialogGeneral"
+                            [icon]="isLoadingDatosRevision ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+                            [styleClass]="obtenerClaseBotonEvaluarCurricular(solicitud)" text>
+                          </p-button>
+                          }
+
+                          @if (mostrarBotonRevisionCurricular(solicitud)) {
+                          <p-button label="Evaluar"
+                            (click)="cargarAsignaciones(solicitud, 'RevisionAsignacion', 'Curricular')"
+                            [disabled]="loadingDialogGeneral"
+                            [icon]="isLoadingDatosRevisionAsignacion ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+                            styleClass="btn fw-bolder custom-1 w-full" text>
+                          </p-button>
+                          }
+                          @if (mostrarBotonFormato(solicitud)) {
+                          <p-button [label]="tipobotonFormato(solicitud)" (click)="abrirDialogoFormato(solicitud)"
+                            [disabled]="loadingDialogGeneral"
+                            [icon]="isLoadingDatosRevisionAsignacion ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+                            styleClass="btn fw-bolder custom-1 w-full" text>
+                          </p-button>
+                          }
+
+                          <p-button [loading]="loadingHistorial" [disabled]="loadingHistorial" label="Seguimiento"
+                            [icon]="loadingHistorial ? 'pi pi-spin pi-spinner' : 'bi bi-hourglass-split'"
+                            (onClick)="mostrarHistorials(solicitud.idSolicitud, solicitud.ticket)"
+                            pTooltip="Ver el flujo de seguimiento de la solicitud" tooltipStyleClass="tooltip-custom-1"
+                            styleClass="btn fw-bolder custom-7 w-full"></p-button>
+
+                          <p-button [loading]="loadingInformacion" [disabled]="loadingInformacion" label="Información"
+                            [icon]="loadingInformacion ? 'pi pi-spin pi-spinner' : 'bi bi-info-circle'"
+                            (click)="mostrarInformacionSolicitud(solicitud)"
+                            pTooltip="Ver información detallada de la solicitud" tooltipStyleClass="tooltip-custom-7"
+                            styleClass="btn fw-bolder custom-1 w-full"></p-button>
+
+
+                          <p-button label="Seguimiento Archivos" [disabled]="loadingDialogGeneral"
+                            [icon]="loadingDialogGeneral ? 'pi pi-spin pi-spinner' : 'pi pi-folder fw-medium'"
+                            styleClass="btn fw-bolder custom-7 w-full"
+                            (click)="abrirHistorial(solicitud.idSolicitud, solicitud.ticket)">
+                          </p-button>
+
+                          @if (solicitud.estadosSolicitud?.[0]?.idEstadoSolicitud >= 5 &&
+                          solicitud.estadosSolicitud?.[0]?.idEstadoSolicitud !== 19 && puedeVerAsignados()) {
+                          <p-button [loading]="loadingDialogAsignado" [disabled]="loadingDialogAsignado"
+                            label="Asignados" [icon]="loadingDialogAsignado ? 'pi pi-spin pi-spinner' : 'pi pi-users'"
+                            (onClick)="cargarAsigandosSolicitud(solicitud, 'Asignados', 'Curricular')"
+                            pTooltip="Ver usuarios asignados a la solicitud" tooltipStyleClass="tooltip-custom-1"
+                            styleClass="btn fw-bolder custom-1 w-full">
+                          </p-button>
+                          }
+
+
+
+                        </div>
+                      </p-popover>
+                    </div>
+                  </td>
+                  }
+
+
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+
+                <tr>
+                  <td colspan="11" class="centered-cell">
+                    No se encontraron datos.
+                  </td>
+                </tr>
+              </ng-template>
+
+            </p-table>
+            <br>
+
+          </p-panel>
+          }
+        </p-tabpanel>
+
+        @if(mostrarTabs){
+          <p-tabpanel [value]="2">
+
+            @if (loadingSolicitudAdministrativa) {
+            <div class="flex flex-col items-center justify-center text-center h-full p-4"
+              style="background-color: transparent;">
+              <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+              <p class="font-semibold text-gray-700 text-lg">
+                Estamos cargando tus solicitudes administrativas, por favor espera...
+              </p>
+            </div>
+            }
+
+
+            @if (!loadingSolicitudAdministrativa) {
+            <p-panel styleClass="transparente">
+              <p-table #dtAdministrativa [value]="solicitudAdministrativa" [paginator]="true" columnResizeMode="expand"
+                showGridlines class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+                [rowsPerPageOptions]="[5, 15, 25]" dataKey="id" [globalFilterFields]="['numero', 'idSolicitud', 'ticket','nombreSolicitud','estadoSolicitud','tipoSolicitud', 'fechaRegistro']">
+
+                <ng-template pTemplate="caption">
+                  <div class="toolbar">
+                    <!-- Botones a la izquierda -->
+                    <div class="centraciones">
+                      <!-- Contenedor de los botones a la izquierda -->
+                      <div class="left-buttons">
+                        <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder"
+                          label="Reportes" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised
+                          text />
+                        <p-popover #op>
+                          <div class="flex flex-col gap-4">
+                            <div>
+                              <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                                styleClass="btn fw-bolder custom-2-1 w-full" (click)="exportarPDFAdministrativa()" raised
+                                text>
+                              </p-button>
+                            </div>
+                            <div>
+                              <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                                styleClass="btn fw-bolder custom-2-2 w-full" (click)="exportarExcelAdministrativa()"
+                                raised text>
+                              </p-button>
+                            </div>
+                          </div>
+                        </p-popover>
+                      </div>
+
+                      <!-- Contenedor de los botones a la derecha -->
+                      <div class="right-search">
+                        <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                          styleClass="btn custom-slash" class="responsive" (click)="clear(dtAdministrativa)" />
+
+                        <p-iconField iconPosition="right">
+                          <p-inputIcon class="pi pi-search" />
+                          <input pInputText type="text" class="custom-search-input " [(ngModel)]="searchValue"
+                            placeholder="Buscar ticket" (input)="applyFilterGlobal($event, dtAdministrativa)" />
+                        </p-iconField>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
+
+
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                      <div class="flex items-center">
+                        N°
+                        <p-columnFilter type="text" field="numero" display="menu" />
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                      <div class="flex items-center">
+                        Ticket
+                        <p-columnFilter type="text" field="ticket" display="menu" />
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 15rem" rowspan="2">
+                      <div class="flex items-center">
+                        Nombre de la Solicitud
+                        <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 12rem" rowspan="2">
+                      <div class="flex items-center">
+                        Estado de la Solicitud
+                        <p-columnFilter type="text" field="estadoSolicitud" display="menu"></p-columnFilter>
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 15rem" rowspan="2">
+                      <div class="flex items-center">
+                        Tipo de Solicitud
+                        <p-columnFilter type="text" field="tipoSolicitud" display="menu"></p-columnFilter>
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 12rem" rowspan="2">
+                      <div class="flex items-center">
+                        Fecha de Registro
+                        <p-columnFilter type="date" dateFormat="dd 'de' MM 'del' yy" field="fechaRegistro"
+                          display="menu"></p-columnFilter>
+                      </div>
+                    </th>
+                    <th class="centered-header" style="min-width: 8rem" [attr.colspan]="mostrarColumnaSalida ? 2 : 1">
+                      <div class="flex items-center">
+                        Archivos
+                      </div>
+                    </th>
+                    @if (puedeVerAcciones()) {
+                    <th class="centered-header" style="min-width: 8rem" rowspan="2">
+                      <div class="flex align-items-center">Acciones</div>
+                    </th>
+                    }
+                  </tr>
+
+                  <!-- Segunda fila con subcolumnas -->
+                  <tr>
+                    <th class="centered-header">Recibidos</th>
+
+                    @if (mostrarColumnaSalida) {
+                    <th class="centered-header">Emitidos</th>
+                    }
+
+                  </tr>
+
+                </ng-template>
+
+                <ng-template pTemplate="body" let-solicitud>
+                  <tr>
+                    <td class="centered-cell">{{ solicitud.numero || 'No proporcionado'}}</td>
+                    <td class="centered-cell">{{ solicitud.ticket || 'No proporcionado'}}</td>
+                    <td class="centered-cell">{{ solicitud.nombreSolicitud || 'No proporcionado'}}</td>
+                    <td class="centered-cell"><span
+                        class="px-3 py-1 rounded-full text-sm font-medium shadow-sm whitespace-normal break-words inline-block"
+                        [ngStyle]="{ backgroundColor: srvHistorial.getColorFondo(solicitud.idEstadoSolicitud),
+                        color: srvHistorial.getColorTexto(solicitud.idEstadoSolicitud), maxWidth: '200px', lineHeight: '1.2' }">
+                        {{ solicitud.estadoSolicitud }}
+                      </span></td>
+                    <td class="centered-cell">{{ solicitud.tipoSolicitud || 'No proporcionado' }}</td>
+
+                    <td class="centered-cell">
+                      {{ solicitud.fechaRegistro ? (solicitud.fechaRegistro | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a")
+                      : 'No proporcionado' }}
+                    </td>
+
+                    <!-- Columna: (Recibidos) -->
+                    <td class="centered-cell">
+                      <div class="flex justify-center items-center gap-2">
+
+                        @for (archivo of solicitud.archivosEntrada; track $index) {
+                        <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                          [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+                          [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-arrow-down'"
+                          (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+                        </p-button>
+
+                        <p-popover #filePopover>
+                          <div [ngClass]="{
+                            'grid-cols-1': archivos.length === 1,
+                            'grid-cols-2': archivos.length === 2,
+                            'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': archivos.length === 3,
+                            'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': archivos.length >= 4
+                          }" class="grid gap-4 p-4">
+
+                            @if (archivos && archivos.length > 0) {
+                            @for (archivo of archivos; track $index) {
+                            <div
+                              class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                              (click)="descargarArchivo(archivo.url, archivo.nombre)">
+                              <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                                [style.font-size]="'1.25rem'" [icon]="'bi bi-file-earmark-text'">
+                              </p-button>
+                              <span class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                                title="{{ archivo.nombre }}">
+                                {{ archivo.nombre }}
+                              </span>
+                            </div>
+                            }
+                            } @else {
+                            <p class="text-xs text-muted text-center col-span-2">
+                              No hay archivos disponibles.
+                            </p>
+                            }
+                          </div>
+                        </p-popover>
+                        }
+                      </div>
+                    </td>
+
+                    <!-- Columna: (Emitidos) -->
+                    @if (mostrarColumnaSalida) {
+                    <td class="centered-cell">
+                      <div class="flex justify-center items-center gap-2">
+
+                        @if (solicitud.archivosSalida && solicitud.archivosSalida.length > 0) {
+                        @for (archivo of solicitud.archivosSalida; track $index) {
+                        <p-button class="icon-button" [rounded]="true" [outlined]="true"
+                          [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys"
+                          [icon]="loadingBtnKey === archivo.keys ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-arrow-up'"
+                          (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+                        </p-button>
+
+                        <p-popover #filePopover>
+                          <div [ngClass]="{
+                              'grid-cols-1': archivos.length === 1,
+                              'grid-cols-2': archivos.length === 2,
+                              'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': archivos.length === 3,
+                              'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': archivos.length >= 4
+                            }" class="grid gap-4 p-4">
+
+                            @if (archivos && archivos.length > 0) {
+                            @for (archivo of archivos; track $index) {
+                            <div
+                              class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                              (click)="descargarArchivo(archivo.url, archivo.nombre)">
+                              <p-button class="icon-button" [rounded]="true" [outlined]="true"
+                                [style.font-size]="'1.25rem'" [icon]="'bi bi-file-earmark-text'">
+                              </p-button>
+                              <span class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                                title="{{ archivo.nombre }}">
+                                {{ archivo.nombre }}
+                              </span>
+                            </div>
+                            }
+                            } @else {
+                            <p class="text-xs text-muted text-center col-span-2">No hay archivos disponibles.</p>
+                            }
+                          </div>
+                        </p-popover>
+                        }
+                        } @else {
+                        <p-button class="icon-button p-button-secondary" [outlined]="true" [rounded]="true"
+                          icon="pi pi-times-circle" pTooltip="Archivo no disponible" tooltipStyleClass="tooltip-custom-7"
+                          tooltipPosition="top" disabled>
+                        </p-button>
+                        }
+                      </div>
+                    </td>
+                    }
+
+                    @if (puedeVerAcciones()) {
+                    <td class="centered-cell">
+                      <div class="flex justify-center items-center">
+                        <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                          styleClass="btn fw-bolder custom-8" raised text></p-button>
+                        <p-popover #op>
+
+                          <div class="flex flex-col gap-4">
+
+                            @if (permisoActualizar && solicitud.idEstadoSolicitud === 1 && rolesUsuario.includes(5)) {
+                            <p-button label="Asignar" (click)="cargarAsignaciones(solicitud, 'Asignar', 'Administrativa')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosAsignacion ? 'pi pi-spin pi-spinner' : 'pi pi-user-edit fw-medium'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+
+                            @if (mostrarBotonMantener(solicitud)) {
+                            <p-button label="Asignar"
+                              (click)="cargarAsignaciones(solicitud, 'Mantener', 'Administrativa')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosMantener ? 'pi pi-spin pi-spinner' : 'pi pi-user-edit fw-medium'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+
+                            @if (mostrarBotonDenegar(solicitud)) {
+                            <p-button label="Denegar" (click)="cargarAsignaciones(solicitud, 'Denegar', 'Administrativa')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosDenegar ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-ruled fw-medium'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+
+                            @if (mostrarBotonEvaluar(solicitud)) {
+                            <p-button label="Evaluar"
+                              (click)="cargarAsignaciones(solicitud, 'Revision', 'Administrativa')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosRevision ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+                              [styleClass]="obtenerClaseBotonEvaluar(solicitud)" text>
+                            </p-button>
+                            }
+
+                            @if (mostrarBotonRevision(solicitud)) {
+                            <p-button label="Evaluar"
+                              (click)="cargarAsignaciones(solicitud, 'RevisionAsignacion', 'Administrativa')"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosRevisionAsignacion ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+                            @if (mostrarBotonFormato(solicitud)) {
+                            <p-button [label]="tipobotonFormato(solicitud)" (click)="abrirDialogoFormato(solicitud)"
+                              [disabled]="loadingDialogGeneral"
+                              [icon]="isLoadingDatosRevisionAsignacion ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-post'"
+                              styleClass="btn fw-bolder custom-1 w-full" text>
+                            </p-button>
+                            }
+
+                            <p-button [loading]="loadingHistorial" [disabled]="loadingHistorial" label="Seguimiento"
+                              [icon]="loadingHistorial ? 'pi pi-spin pi-spinner' : 'bi bi-hourglass-split'"
+                              (onClick)="mostrarHistorials(solicitud.idSolicitud, solicitud.ticket)"
+                              pTooltip="Ver el flujo de seguimiento de la solicitud" tooltipStyleClass="tooltip-custom-1"
+                              styleClass="btn fw-bolder custom-7 w-full"></p-button>
+
+                            <p-button [loading]="loadingInformacion" [disabled]="loadingInformacion" label="Información"
+                              [icon]="loadingInformacion ? 'pi pi-spin pi-spinner' : 'bi bi-info-circle'"
+                              (click)="mostrarInformacionSolicitud(solicitud)"
+                              pTooltip="Ver información detallada de la solicitud" tooltipStyleClass="tooltip-custom-7"
+                              styleClass="btn fw-bolder custom-1 w-full"></p-button>
+
+                          <p-button label="Seguimiento Archivos" [disabled]="loadingDialogGeneral"
+                            [icon]="loadingDialogGeneral ? 'pi pi-spin pi-spinner' : 'pi pi-folder fw-medium'"
+                            styleClass="btn fw-bolder custom-7 w-full"
+                            (click)="abrirHistorial(solicitud.idSolicitud, solicitud.ticket)">
+                          </p-button>
+
+                          @if (solicitud.idEstadoSolicitud >= 5 && solicitud.idEstadoSolicitud !== 19 &&
+                          puedeVerAsignados()) {
+                          <p-button [loading]="loadingDialogAsignado" [disabled]="loadingDialogAsignado"
+                            label="Asignados" [icon]="loadingDialogAsignado ? 'pi pi-spin pi-spinner' : 'pi pi-users'"
+                            (onClick)="cargarAsigandosSolicitud(solicitud, 'Asignados', 'Administrativa')"
+                            pTooltip="Ver usuarios asignados a la solicitud" tooltipStyleClass="tooltip-custom-1"
+                            styleClass="btn fw-bolder custom-1 w-full">
+                          </p-button>
+                          }
+
+
+                        </div>
+                      </p-popover>
+                    </div>
+                  </td>
+                  }
+                </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td colspan="11" class="centered-cell">
+                      No se encontraron datos.
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+              <br>
+            </p-panel>
+            }
+          </p-tabpanel>
+          }
+      </p-tabpanels>
+    </p-tabs>
+  </p-panel>
+</div>
+}
+
+<!-------------- Dialog de Integrantes SubComisión ---------- -->
+<p-dialog header="Header" [(visible)]="visibleIntegrante" [modal]="true" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '90vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header gap-2">
+      <div class="header-titles">Integrantes de la {{ nombreSubComision }} </div>
+    </div>
+
+
+  </ng-template>
+  <form>
+    <p-panel>
+
+      <p-fluid>
+        <div>
+          <div class="table-container">
+            <p-table [value]="integrantes" showGridlines [tableStyle]="{ 'min-width': '30rem' }" dataKey="id">
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 7rem">N°</th>
+                  <th class="centered-header" style="min-width: 10rem">Nombre</th>
+                  <th class="centered-header" style="min-width: 10rem">Correo</th>
+                  <th class="centered-header" style="min-width: 10rem">Número de Empleado</th>
+                  <th class="centered-header" style="min-width: 10rem">Contacto</th>
+                  <th class="centered-header" style="min-width: 10rem">Estado</th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-integrante>
+                <tr>
+                  <td class="centered-cell">{{ integrante.numero || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ integrante.nombreCompleto || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ integrante.correo || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ integrante.numEmpleado || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ integrante.telefonos || 'No proporcionado' }}</td>
+                  <td class="centered-cell">{{ integrante.estadoUsuario || 'No proporcionado' }}</td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+
+                <tr>
+                  <td colspan="6" class="centered-cell">
+                    No se encontraron datos.
+                  </td>
+                </tr>
+              </ng-template>
+
+            </p-table>
+          </div>
+        </div>
+      </p-fluid>
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Asignacion ---------- -->
+<p-dialog header="Header" [(visible)]="visibleAsignar" [modal]="true" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Asignación de Ticket {{ ticket }}</h2>
+    </div>
+  </ng-template>
+
+
+
+  <form [formGroup]="AsignacionForm" (ngSubmit)="asignarRevisionSolicitud()">
+    <p-panel>
+      <p-fluid>
+        <!-- Mensaje explicativo -->
+
+        <div style="text-align: justify;">
+          Está a punto de asignar el <strong>Ticket {{ ticket }}</strong>, correspondiente a la solicitud <strong>{{
+            nombreSolicitud }}</strong>, a uno de los responsables autorizados: Jefes de Departamento, Director o
+          Asistente Estratégico. Esta asignación tiene como finalidad habilitar al usuario para que pueda elaborar y
+          registrar la contestación formal correspondiente a la solicitud recibida.
+          <br><br>
+          La persona asignada será la encargada de revisar la información proporcionada, analizar el contexto del
+          caso y preparar una respuesta fundamentada, siguiendo los criterios y lineamientos establecidos por la
+          institución. Este paso es esencial para asegurar que la solicitud reciba la atención adecuada y se
+          mantenga un proceso claro, transparente y trazable.
+          <br><br>
+          Le recordamos que esta asignación es un requisito previo indispensable para continuar con el tratamiento
+          del caso dentro del sistema institucional.
+        </div>
+
+        <br>
+
+        <div [formGroup]="AsignacionRolForm">
+          <div formArrayName="rolUsuario" class="table-container">
+            <p-table [value]="rolUsuario.controls" showGridlines [tableStyle]="{ 'min-width': '30rem' }" dataKey="id">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 15rem">Usuario</th>
+                  <th class="centered-header" style="min-width: 2rem">Eliminar</th>
+                </tr>
+              </ng-template>
+
+              <ng-template let-rowData let-rowIndex="rowIndex" pTemplate="body">
+                <tr [formGroupName]="rowIndex">
+                  <td class="centered-cell">
+                    <p-iftalabel class="sm:col-span-2">
+                      <p-select formControlName="idRol" [options]="getUsuariosDisponiblesRevision(rowData)"
+                        optionLabel="nombreCompleto" optionValue="idRol" [showClear]="true" [filter]="true"
+                        filterBy="nombreCompleto" appendTo="body" class="w-full">
+                      </p-select>
+                      <label>Usuario a Asignar</label>
+                    </p-iftalabel>
+                  </td>
+                  <td class="centered-cell">
+                    <button type="button" pButton icon="pi pi-trash" (click)="removeRow(rowIndex, 1)"
+                      [disabled]="isLoadingAsignacion" class="p-button-rounded p-button-danger">
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="footer">
+                <tr>
+                  @if (rolUsuario.controls.length < 1) { <td colspan="2">
+                    <button type="button" (click)="addRow(1)" pButton icon="pi pi-plus" label="Agregar Usuario"
+                      [disabled]="isLoadingAsignacion" class="p-button-text">
+                    </button>
+                    </td>
+                    }
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit"
+            [disabled]="AsignacionForm.invalid || isLoadingAsignacion || !hasValidUsuario()"
+            [icon]="isLoadingAsignacion ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+      </p-fluid>
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Evaluar Solicitud ---------- -->
+<p-dialog header="Header" [modal]="true" [(visible)]="visibleRevision" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Evaluación de Ticket <strong>{{ ticket }}</strong></h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="RevisionForm">
+    <p-panel>
+      <div style="padding: 0; height: auto; width: 100%; position: relative; text-align: center;">
+        Estás a punto de tomar una decisión sobre el ticket <strong>{{ ticket }}</strong> que tiene el nombre <strong>{{
+          nombreSolicitud }}</strong>.
+      </div>
+      <br>
+      <div style="text-align: justify; padding: 0 1rem;">
+        Este proceso implica una revisión final del contenido del ticket antes de determinar su aprobación o denegación.
+        <br><br>
+        <strong>Si apruebas el ticket</strong>, se entenderá que toda la información suministrada ha sido validada y
+        cumple con los requisitos establecidos.
+        A partir de ese momento, se procederá con los pasos operativos correspondientes al tipo de ticket en cuestión,
+        incluyendo la asignación para su tratamiento o ejecución.
+        <br><br>
+        <strong>Si deniegas el ticket</strong>, deberás ingresar una justificación clara y detallada del motivo de la
+        denegación. También será necesario adjuntar cualquier archivo o evidencia que respalde esta decisión.
+        Esta información quedará registrada para su trazabilidad y posibles revisiones posteriores.
+        <br><br>
+        Es importante que verifiques cuidadosamente todos los datos del ticket antes de tomar una acción definitiva, ya
+        que esto impactará directamente en su gestión y seguimiento.
+      </div>
+
+      <!-- Botones de decisión -->
+      <p-footer style="display: flex; justify-content: center; gap: 10px;">
+        <button pButton type="button" [disabled]="isLoadingDenegar || isLoadingAceptar"
+          [icon]="isLoadingAceptar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aprobar"
+          class="btn fw-bolder custom-1 w-full" (click)="handleAprobar()"></button>
+
+        <button pButton type="button" [disabled]="isLoadingDenegar || isLoadingAceptar"
+          [icon]="isLoadingDenegar ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle'" label="Denegar"
+          class="btn fw-bolder custom-2-1 w-full" (click)="handleDenegar()"></button>
+      </p-footer>
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Denegar ---------- -->
+<p-dialog header="Header" [(visible)]="visibleDenegar" [modal]="true" focusOnShow="false" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false" [blockScroll]="true" [contentStyle]="{ 'max-height': '70vh', 'overflow-y': 'auto' }"
+  (onHide)="hideModalDenegar()">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Denegar Ticket <strong>{{ ticket }}</strong></h2>
+    </div>
+  </ng-template>
+
+
+  <div>
+    <form [formGroup]="DenegarForm" (ngSubmit)="denegarTicket()">
+      <p-panel>
+        <p-fluid>
+
+          <!-- Mensaje explicativo -->
+          <div style="text-align: justify;">
+            Está a punto de proceder con la denegación del <strong>Ticket {{ ticket }}</strong> con nombre <strong> {{
+              nombreSolicitud }}</strong>. Para formalizar esta
+            acción, es obligatorio registrar una justificación clara y debidamente fundamentada. Se dispone de dos
+            plantillas diseñadas específicamente para estructurar la respuesta, las cuales son esenciales para
+            respaldar adecuadamente la resolución del caso.
+          </div>
+
+
+
+          <div class="space"></div>
+
+          <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <p-floatlabel variant="on" class="sm:col-span-2">
+              <textarea pTextarea autoResize="true" rows="2" required appCapitalizable appValidaciones
+                [normalTextValidation]="true" [blockSpecialChars]="true" [blockEmojis]="true" [blockSQLInjection]="true"
+                [invalid]="isInvalid(DenegarForm, 'observacion')"
+                style="min-height: 80px; max-height: 180px; overflow-y: auto;" formControlName="observacion"
+                [ngClass]="{ 'ng-invalid': showError && 
+                (!DenegarForm.get('observacion')?.value || DenegarForm.get('observacion')?.value.length > limiteCaracteres) }" (input)="verificarLimiteCaracteres()" maxlength="{{limiteCaracteres}}">
+              </textarea>
+
+              <!-- Label y contador -->
+              <label for="observaciones">
+                <span>
+                  1. Observaciones <span style="color: red;">*</span>
+                </span>
+                <small
+                  [ngStyle]="{ color: DenegarForm.get('observacion')?.value?.length > limiteCaracteres ? 'red' : '#555','margin-left': '12px' }">
+                  {{ DenegarForm.get('observacion')?.value?.length || 0 }} / {{ limiteCaracteres }}
+                </small>
+              </label>
+              @if (isInvalid(DenegarForm, 'observacion')) {
+              <p-message severity="error" size="small" variant="simple">Las observaciones son
+                requeridas..</p-message>
+              }
+
+            </p-floatlabel>
+          </div>
+
+          <div class="space"></div>
+
+
+          <!-- Sección de plantillas -->
+          <!-- @if (!esEspecialActual) {
+          <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="text-sm text-center mt-1 font-semibold block mb-4">
+                <strong>Plantillas disponibles:</strong>
+              </label>
+              <div class="p-4 rounded shadow-sm flex justify-center">
+                <ul class="list-none m-0 p-0 flex flex-wrap justify-center gap-8">
+                  <li class="flex items-center space-x-3">
+                    <p-button styleClass="icon-button" [rounded]="true" [outlined]="true" icon="bi bi-file-earmark-text"
+                      (click)="descargarPlantilla('/assets/plantillas/DictamenAcademico.pdf')">
+                    </p-button>
+                    <a href="/assets/plantillas/DictamenAcademico.pdf" target="_blank" download
+                      class="text-sm font-semibold">
+                      Dictamen
+                    </a>
+                  </li>
+
+                  <li class="flex items-center space-x-3">
+                    <p-button styleClass="icon-button" [rounded]="true" [outlined]="true" icon="bi bi-file-earmark-text"
+                      (click)="descargarPlantilla('/assets/plantillas/InformeEvaluacion.docx')">
+                    </p-button>
+                    <a href="/assets/plantillas/InformeEvaluacion.docx" target="_blank" download
+                      class="text-sm font-semibold">
+                      Oficio
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          } -->
+
+          <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <p-iftalabel class="sm:col-span-2">
+              <div style="width: 100%; margin-top: 16px;">
+                <p-fileUpload name="archivos[]" #uploader [multiple]="true" accept=".pdf,.doc,.docx"
+                  [class.form-sent]="loadingDenegar" [disabled]="loadingDenegar" (onSelect)="getfiles($event)"
+                  [disabled]="loadingDenegar" chooseStyleClass="custom-button-file" (onRemove)="removeFile($event)"
+                  [disabled]="loading" chooseLabel="Subir Archivo" [auto]="true" removeStyleClass="custom-button-1">
+                </p-fileUpload>
+              </div>
+            </p-iftalabel>
+          </div>
+
+          <div class="space"></div>
+
+          <div class="pt-4">
+            <p-button label="Enviar" type="submit" [disabled]="DenegarForm.invalid || loadingDenegar || !archivoSubido"
+              [icon]="loadingDenegar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+              styleClass="btn fw-bolder custom-1 w-full">
+            </p-button>
+          </div>
+
+        </p-fluid>
+      </p-panel>
+    </form>
+  </div>
+</p-dialog>
+
+<!-------------- Dialog de  Mantener Asignacion  ---------- -->
+<p-dialog header="Header" [(visible)]="visibleMantener" [modal]="true" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Asignación Ticket {{ ticket }}</h2>
+    </div>
+  </ng-template>
+
+
+  <form [formGroup]="AsignarUsuarioForm">
+    <p-panel>
+      <p-fluid>
+
+        <!-- Mensaje explicativo -->
+        <div style="text-align: justify;">
+          Has <strong>aprobado el Ticket {{ ticket }}</strong> con nombre <strong> {{ nombreSolicitud }}</strong>,
+          formalizando la aceptación de la asignación
+          correspondiente. Como responsable actual del caso, tienes la facultad de gestionar la continuidad del
+          mismo, ya sea manteniendo la asignación bajo tu responsabilidad o procediendo a delegarla otros miembros
+          de la dirección que cuenten con la experiencia o disponibilidad adecuada para su atención.
+          <br><br>
+          Esta decisión debe basarse en la optimización de recursos y en garantizar la eficiencia y calidad en la
+          resolución del ticket. Se recomienda evaluar criterios como la carga de trabajo, especialización técnica y
+          prioridad del caso antes de efectuar cualquier cambio en la asignación.
+        </div>
+
+        <div class="space"></div>
+
+        <!-- Botones de decisión -->
+        <p-footer style="display: flex; justify-content: center; gap: 10px;">
+          <button pButton type="button" [disabled]="isLoadingAsignacionUsuario || isLoadingDelegar"
+            [icon]="isLoadingAsignacionUsuario ? 'pi pi-spin pi-spinner' : 'pi pi-user'" label="Mantener Asignación"
+            class="btn fw-bolder custom-1 w-full" (click)="asignarSolicitudUsuario()"></button>
+
+          <button pButton type="button" [disabled]="isLoadingAsignacionUsuario || isLoadingDelegar"
+            [icon]="isLoadingDelegar ? 'pi pi-spin pi-spinner' : 'pi pi-users'" label="Delegar Asignación"
+            class="btn fw-bolder custom-6 w-full" (click)="handleAsignar()"></button>
+        </p-footer>
+      </p-fluid>
+    </p-panel>
+  </form>
+</p-dialog>
+
+<!-------------- Dialog de Asignacion Usuario/Departamento ---------- -->
+<p-dialog header="Header" [(visible)]="visibleAsignacion" [modal]="true" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Delegación de Asignación de Ticket {{ ticket }}</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="AsignarUsuarioForm" (ngSubmit)="asignarSolicitudUsuario()">
+    <p-panel>
+
+      <p-fluid>
+
+        @if (!AsignarUsuarioForm.get('idTipoAsignacion')?.value) {
+        <div style="text-align: justify;">
+          Ya <strong>aprobado el Ticket {{ ticket }}</strong> con nombre <strong>{{ nombreSolicitud }}</strong>,
+          formalizando la aceptación de la asignación correspondiente. A continuación, deberás indicar la entidad de
+          destino
+          para continuar con el proceso.
+
+          <br><br>
+          Si seleccionas como destino a un <strong>Jefe de Departamento</strong>, la asignación le será enviada
+          directamente,
+          y él tendrá la facultad de decidir si continúa con la gestión del caso o si lo delega a un miembro de su
+          departamento, en función de criterios como carga de trabajo, experiencia o disponibilidad.
+
+          <br><br>
+          En cambio, si decides asignar a uno o varios <strong>miembros de la Dirección</strong>, la asignación se
+          efectuará de forma automática y estos asumirán la responsabilidad del ticket inmediatamente, sin
+          intervención
+          adicional.
+
+          <br><br>
+          Te recomendamos tomar esta decisión considerando la eficiencia operativa, la especialización técnica y la
+          prioridad
+          del caso para garantizar una gestión oportuna y de calidad.
+        </div>
+        }
+
+
+        <!-- Mensaje para asignación a Jefe de Departamento -->
+        @if (AsignarUsuarioForm.get('idTipoAsignacion')?.value === 2) {
+        <div class="custom-message">
+          <p-message severity="info" icon="pi pi-user">
+            <strong>Asignación pendiente:</strong>
+            El Jefe de Departamento recibirá el ticket y decidirá si la gestiona directamente o la delega a un miembro
+            de su equipo.
+          </p-message>
+        </div>
+        }
+
+        @if (AsignarUsuarioForm.get('idTipoAsignacion')?.value === 3) {
+        <div class="custom-message">
+          <p-message severity="info" icon="pi pi-users">
+            <strong>Asignación inmediata:</strong>
+            Los usuarios seleccionados de la Dirección asumirán automáticamente la gestión del ticket.
+          </p-message>
+        </div>
+        }
+
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-select formControlName="idTipoAsignacion" [options]="tipoAsignacion" optionLabel="nombre"
+              optionValue="id" [showClear]="true" [filter]="true" filterBy="nombre" appendTo="body" class="w-full">
+            </p-select>
+            <label for="dd-tipo-asignacion">1. Entidad de destino *</label>
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        @if (AsignarUsuarioForm.get('idTipoAsignacion')?.value) {
+
+        @if (AsignarUsuarioForm.get('idTipoAsignacion')?.value === 3) {
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-datepicker formControlName="fechaFinalizacion" appendTo="body" [showButtonBar]="true" [showTime]="true"
+              hourFormat="12" [disabledDays]="disabledDays" [minDate]="minDate" inputId="date" [iconDisplay]="'input'"
+              [showIcon]="true" iconDisplay="input"></p-datepicker>
+            <label for="date">2. Fecha de Finalización de la Asignación *</label>
+          </p-iftalabel>
+        </div>
+        }
+
+        <div class="space"></div>
+
+        <small id="username-help" style="width: 100%; display: block; white-space: normal; margin-left: 10px;">
+          {{
+          (AsignarUsuarioForm.get('idTipoAsignacion')?.value === 3) ? '3.' :
+          (AsignarUsuarioForm.get('idTipoAsignacion')?.value === 2) ? '2.' : '2.'
+          }}
+          Usuarios a Asignar *
+        </small>
+
+        <div [formGroup]="UsuarioForm">
+          <div formArrayName="usuarioAsignacion" class="table-container">
+            <p-table [value]="usuarioAsignacion.controls" showGridlines [tableStyle]="{ 'min-width': '30rem' }"
+              dataKey="id">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 15rem">Usuario</th>
+                  <th class="centered-header" style="min-width: 2rem">Eliminar</th>
+                </tr>
+              </ng-template>
+
+              <ng-template let-rowData let-rowIndex="rowIndex" pTemplate="body">
+                <tr [formGroupName]="rowIndex">
+                  <td class="centered-cell">
+                    <p-iftalabel class="sm:col-span-2">
+                      @if (AsignarUsuarioForm.get('idTipoAsignacion')?.value === 2) {
+                      <!-- Mostrar select para tipoAsignacion 2 -->
+                      <p-select formControlName="idRol" [options]="getUsuariosDisponiblesAsignacion(rowData)"
+                        optionLabel="nombreCompleto" optionValue="idRol" [showClear]="true" [filter]="true"
+                        filterBy="nombreCompleto" appendTo="body" class="w-full"></p-select>
+                      <label>Usuario a Asignar</label>
+                      } @else {
+                      <!-- Mostrar select para tipoAsignacion 3 -->
+                      <p-select formControlName="idUsuario" [options]="getUsuariosDisponiblesAsignacion(rowData)"
+                        optionLabel="nombreCompleto" optionValue="idUsuario" [showClear]="true" [filter]="true"
+                        filterBy="nombreCompleto" appendTo="body" class="w-full"></p-select>
+                      <label>Usuarios</label>
+                      }
+                    </p-iftalabel>
+                  </td>
+                  <td class="centered-cell">
+                    <button type="button" pButton icon="pi pi-trash" (click)="removeRow(rowIndex, 2)"
+                      [disabled]="isLoadingAsignacionUsuario" class="p-button-rounded p-button-danger"></button>
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="footer">
+                <tr>
+                  <td colspan="2">
+                    <button type="button" (click)="addRow(2)" pButton icon="pi pi-plus" label="Agregar Usuario"
+                      [disabled]="isLoadingAsignacionUsuario" class="p-button-text">
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit" [disabled]="!isAsignacionValida() || isLoadingAsignacionUsuario"
+            [icon]="isLoadingAsignacionUsuario ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+        }
+
+
+      </p-fluid>
+
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Asignacion Usuarios del Departamento ---------- -->
+<p-dialog header="Header" [(visible)]="visibleAsignacionDepartamento" [modal]="true" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Asignación de Ticket {{ ticket }}</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="AsignarUsuarioForm" (ngSubmit)="asignarSolicitudUsuarioDepartamento()">
+    <p-panel>
+      <p-fluid>
+
+        <div class="custom-message mb-3">
+          <p-message severity="info" icon="pi pi-briefcase"
+            text="Asignación bajo supervisión: Como Jefe de Departamento, asignas el ticket a uno o varios miembros de tu equipo. Ellos asumirán la gestión directamente bajo tu supervisión.">
+          </p-message>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-datepicker formControlName="fechaFinalizacion" appendTo="body" [showButtonBar]="true"
+              [disabledDays]="disabledDays" [minDate]="minDate" inputId="date" [iconDisplay]="'input'" [showIcon]="true"
+              iconDisplay="input"></p-datepicker>
+            <label for="date">1. Fecha de Finalización de la Asignación *</label>
+          </p-iftalabel>
+        </div>
+
+
+        <div class="space"></div>
+        <small id="username-help" style="width: 100%; display: block; white-space: normal; margin-left: 10px;">
+          2. Usuarios a Asignar *
+        </small>
+        <div [formGroup]="UsuarioForm">
+          <div formArrayName="usuarioAsignacion" class="table-container">
+            <p-table [value]="usuarioAsignacion.controls" showGridlines [tableStyle]="{ 'min-width': '30rem' }"
+              dataKey="id">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 15rem">Usuario</th>
+                  <th class="centered-header" style="min-width: 2rem">Eliminar</th>
+                </tr>
+              </ng-template>
+
+              <ng-template let-rowData let-rowIndex="rowIndex" pTemplate="body">
+                <tr [formGroupName]="rowIndex">
+                  <td class="centered-cell">
+                    <p-iftalabel class="sm:col-span-2">
+                      <p-select formControlName="idUsuario"
+                        [options]="getUsuariosDisponiblesAsignacionDepartamento(rowData)" optionLabel="nombreCompleto"
+                        optionValue="idUsuario" [showClear]="true" [filter]="true" filterBy="nombreCompleto"
+                        appendTo="body" class="w-full">
+                      </p-select>
+                      <label>Usuario a Asignar</label>
+                    </p-iftalabel>
+                  </td>
+                  <td class="centered-cell">
+                    <button type="button" pButton icon="pi pi-trash" (click)="removeRow(rowIndex, 2)"
+                      [disabled]="isLoadingAsignacionUsuario" class="p-button-rounded p-button-danger">
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+
+
+              <ng-template pTemplate="footer">
+                <tr>
+                  <td colspan="2">
+                    <button type="button" (click)="addRow(2)" pButton icon="pi pi-plus" label="Agregar Usuario"
+                      [disabled]="isLoadingAsignacionUsuario" class="p-button-text">
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit"
+            [disabled]="isLoadingAsignacionUsuario || !isFormularioAsignacionValido()"
+            [icon]="isLoadingAsignacionUsuario ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+      </p-fluid>
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Asignacion Usuario Curricular ---------- -->
+<p-dialog header="Header" [(visible)]="visibleAsignacionCurricular" [modal]="true" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Asignación de Ticket {{ ticket }}</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="AsignarUsuarioForm" (ngSubmit)="asignarSolicitudCurricular()">
+    <p-panel>
+
+      <p-fluid>
+
+        <div class="mb-3" style="text-align: justify;">
+          Has aprobado el <strong>Ticket {{ ticket }}</strong> correspondiente a una solicitud institucional de
+          nombre <strong>{{ nombreSolicitud }}</strong>.
+
+          <br><br>
+
+          @if (!esSolicitudExterna) {
+          Al ser una solicitud curricular institucional, lo que implica que su procesamiento y
+          asignación se realizara conforme a los lineamientos establecidos por la estructura
+          académica vigente. En este contexto, el sistema ha seleccionado al usuario
+          responsable, tomando en cuenta la distribución actual de la estructura académica y los criterios previamente
+          definidos para asegurar la coherencia y eficiencia en la gestión curricular.
+
+          <br><br>
+
+          No obstante, tienes la opción de asignar el ticket a otro miembro del equipo que consideres más
+          adecuado, en función
+          de criterios como especialización, carga de trabajo o disponibilidad actual.
+
+          } @else {
+          Al tratarse de una solicitud curricular de carácter no institucional, la designación del responsable deberá
+          realizarse conforme a los perfiles y requisitos establecidos en los lineamientos de la unidad académica
+          competente,
+          con el fin de garantizar una gestión eficiente y acorde a los procedimientos internos vigentes.
+          }
+        </div>
+
+
+        <div class="space"></div>
+
+        <small id="username-help" style="width: 100%; display: block; white-space: normal; margin-left: 10px;">
+          1. Usuarios a Asignar *
+        </small>
+
+        <div [formGroup]="UsuarioForm">
+          <div formArrayName="usuarioAsignacion" class="table-container">
+            <p-table [value]="usuarioAsignacion.controls" showGridlines [tableStyle]="{ 'min-width': '30rem' }"
+              dataKey="id">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 15rem">Usuario</th>
+                  <th class="centered-header" style="min-width: 2rem">Eliminar</th>
+                </tr>
+              </ng-template>
+
+              <ng-template let-rowData let-rowIndex="rowIndex" pTemplate="body">
+                <tr [formGroupName]="rowIndex">
+                  <td class="centered-cell">
+                    <p-iftalabel class="sm:col-span-2">
+                      <p-select formControlName="idUsuario" [options]="getUsuariosAsignacionCurricular(rowData)"
+                        optionLabel="nombreCompleto" optionValue="idUsuario" [showClear]="true" [filter]="true"
+                        filterBy="nombreCompleto" appendTo="body" class="w-full">
+                      </p-select>
+                      <label>Usuario a Asignar</label>
+                    </p-iftalabel>
+                  </td>
+                  <td class="centered-cell">
+                    <button type="button" pButton icon="pi pi-trash" (click)="removeRow(rowIndex, 2)"
+                      [disabled]="isLoadingAsignacionUsuario" class="p-button-rounded p-button-danger">
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+
+
+              <ng-template pTemplate="footer">
+                <tr>
+                  @if (usuarioAsignacion.controls.length < 1) { <td colspan="2">
+                    <button type="button" (click)="addRow(2)" pButton icon="pi pi-plus" label="Agregar Usuario"
+                      [disabled]="isLoadingAsignacionUsuario" class="p-button-text">
+                    </button>
+                    </td>
+                    }
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit"
+            [disabled]="isLoadingAsignacionUsuario || AsignarUsuarioForm.invalid || !hayUsuarioSeleccionado()"
+            [icon]="isLoadingAsignacionUsuario ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+      </p-fluid>
+
+
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Revisar  ---------- -->
+<p-dialog header="Header" [modal]="true" [(visible)]="visibleRevisionAsignacion" focusOnShow="false"
+  [closable]="closableDialog" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }"
+  [draggable]="false" [resizable]="false" [blockScroll]="true"
+  [contentStyle]="{ 'max-height': '70vh', 'overflow-y': 'auto' }" (onHide)="hideModalRevision()">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Revisión de Dictamen del Ticket {{ ticket }}</h2>
+    </div>
+  </ng-template>
+
+  <p-panel>
+    <form [formGroup]="RevisionAsignacionForm">
+      <p-fluid>
+
+        <!-- Switch de opciones -->
+
+
+        @if (!isLoadingRechazarRevision && !isLoadingAceptarRevision) {
+        <div class="card flex justify-center mb-4">
+          <p-selectbutton [options]="stateOptions" formControlName="tipoDictamen" optionLabel="label"
+            optionValue="value" aria-labelledby="basic" />
+        </div>
+        }
+
+        <!-- Contenido dinámico basado en la selección -->
+        @if (RevisionAsignacionForm.get('tipoDictamen')?.value === 'off') {
+        <!-- Mensaje cuando no hay selección -->
+        <div class="text-center p-4">
+          <p class="text-muted-foreground">
+            Seleccione una opción para continuar con la revisión del ticket.
+          </p>
+        </div>
+        }
+
+        <!-- CONTENIDO PARA SUBSANAR -->
+        @if (RevisionAsignacionForm.get('tipoDictamen')?.value === 'subsanar') {
+
+        @if (tieneEstadoSolicitud(7)) {
+        <div style="text-align: justify; padding: 0 1rem;">
+          El ticket <strong>{{ ticket }}</strong>, correspondiente a la solicitud <strong>{{ nombreSolicitud
+            }}</strong>, será enviado a subsanar por contener observaciones.
+        </div>
+        <br>
+        <div style="text-align: justify; padding: 0 1rem;">
+          Se han identificado errores, omisiones o documentación incompleta. Registre una nota con las observaciones
+          detalladas. El ticket regresará a la etapa anterior para su corrección.
+          <br><br>
+          <strong>Indicaciones para registrar observaciones:</strong>
+          <ul style="list-style-type: disc; padding-left: 2rem; margin: 0;">
+            <li>Detalle los errores o inconsistencias</li>
+            <li>Especifique qué debe corregirse</li>
+            <li>Indique documentación faltante o incorrecta</li>
+          </ul>
+        </div>
+        }
+
+        @if (tieneEstadoSolicitud(20)) {
+        <div style="text-align: justify; padding: 0 1rem;">
+          El ticket <strong>{{ ticket }}</strong>, correspondiente a la solicitud <strong>{{ nombreSolicitud
+            }}</strong>, será devuelto para subsanar observaciones detectadas por el jefe de departamento.
+        </div>
+        <br>
+        <div style="text-align: justify; padding: 0 1rem;">
+          Registre las observaciones específicas. El ticket volverá a la etapa correspondiente para su revisión y
+          ajuste.
+          <br><br>
+          <strong>Observaciones a registrar:</strong>
+          <ul style="list-style-type: disc; padding-left: 2rem; margin: 0;">
+            <li>Errores en documentación</li>
+            <li>Falta de información</li>
+            <li>Inconsistencias detectadas</li>
+          </ul>
+        </div>
+        }
+        }
+
+        <!-- CONTENIDO PARA DICTAMINAR -->
+        @if (RevisionAsignacionForm.get('tipoDictamen')?.value === 'dictaminar') {
+
+        @if (tieneEstadoSolicitud(7)) {
+        <div style="text-align: justify; padding: 0 1rem;">
+          Se dictaminará el ticket <strong>{{ ticket }}</strong>, correspondiente a la solicitud <strong>{{
+            nombreSolicitud }}</strong>.
+        </div>
+        <br>
+        <div style="text-align: justify; padding: 0 1rem;">
+          Proceda con la validación favorable, confirmando que la información es precisa, completa y cumple con los
+          requisitos establecidos.
+          <br><br>
+          <strong>Verifique lo siguiente:</strong>
+          <ul style="list-style-type: disc; padding-left: 2rem; margin: 0;">
+            <li>Documentación completa y correcta</li>
+            <li>Todos los requisitos han sido verificados</li>
+            <li>No hay inconsistencias</li>
+            <li>Se adjuntaron los documentos correspondientes</li>
+          </ul>
+        </div>
+        }
+
+        @if (tieneEstadoSolicitud(20)) {
+        <div style="text-align: justify; padding: 0 1rem;">
+          Se aprueba la revisión del ticket <strong>{{ ticket }}</strong>, correspondiente a la solicitud <strong>{{
+            nombreSolicitud }}</strong>.
+        </div>
+        <br>
+        <div style="text-align: justify; padding: 0 1rem;">
+          Como jefe de departamento, confirma que la documentación ha sido validada y puede avanzar a la revisión final.
+          <br><br>
+          <strong>Confirmación de cumplimiento:</strong>
+          <ul style="list-style-type: disc; padding-left: 2rem; margin: 0;">
+            <li>Documentación revisada y aprobada</li>
+            <li>Requisitos institucionales cumplidos</li>
+            <li>Lista para avanzar a la siguiente etapa</li>
+          </ul>
+        </div>
+        }
+
+        }
+
+        <div class="space"></div>
+
+        <!-- SECCIÓN DE OBSERVACIONES - Solo para SUBSANAR -->
+        @if (RevisionAsignacionForm.get('tipoDictamen')?.value === 'subsanar') {
+        <h5 class="text-center font-bold px-4">Registro de Observaciones</h5>
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-floatlabel variant="on" class="sm:col-span-2">
+            <textarea pTextarea autoResize="true" rows="2" required appCapitalizable appValidaciones
+              [normalTextValidation]="true" [blockSpecialChars]="true" [blockEmojis]="true" [blockSQLInjection]="true"
+              [invalid]="isInvalid(RevisionAsignacionForm, 'observacion')"
+              style="min-height: 80px; max-height: 180px; overflow-y: auto;" formControlName="observacion"
+              [ngClass]="{ 'ng-invalid': showError && 
+                (!RevisionAsignacionForm.get('observacion')?.value || RevisionAsignacionForm.get('observacion')?.value.length > limiteCaracteres) }" (input)="verificarLimiteCaracteres()"
+              maxlength="{{limiteCaracteres}}">
+              </textarea>
+
+            <!-- Label y contador -->
+            <label for="observaciones">
+              <span>
+                1. Observaciones <span style="color: red;">*</span>
+              </span>
+              <small
+                [ngStyle]="{ color: RevisionAsignacionForm.get('observacion')?.value?.length > limiteCaracteres ? 'red' : '#555','margin-left': '12px' }">
+                {{ RevisionAsignacionForm.get('observacion')?.value?.length || 0 }} / {{ limiteCaracteres }}
+              </small>
+            </label>
+            @if (isInvalid(RevisionAsignacionForm, 'observacion')) {
+            <p-message severity="error" size="small" variant="simple">Las observaciones son
+              requeridas..</p-message>
+            }
+
+          </p-floatlabel>
+        </div>
+        }
+
+
+        <!-- SECCIÓN DE PLANTILLAS Y ARCHIVOS - Solo para DICTAMINAR -->
+        @if (RevisionAsignacionForm.get('tipoDictamen')?.value === 'dictaminar') {
+        @if (tieneEstadoSolicitud(7)) {
+        <!-- Upload de archivos -->
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+          <p-iftalabel class="sm:col-span-2">
+            <div style="width: 100%; margin-top: 16px;">
+              <p-fileUpload name="archivos[]" [multiple]="true" accept=".pdf" [disabled]="isLoadingAceptarRevision"
+                [class.form-sent]="isLoadingAceptarRevision" [disabled]="isLoadingAceptarRevision"
+                (onSelect)="getfiles($event)" [disabled]="isLoadingAceptarRevision"
+                chooseStyleClass="custom-button-file" (onRemove)="removeFile($event)" chooseLabel="Subir Archivo"
+                [auto]="true" removeStyleClass="custom-button-1">
+              </p-fileUpload>
+            </div>
+          </p-iftalabel>
+        </div>
+        }
+        }
+
+        <div class="space"></div>
+
+        <!-- Botones de acción -->
+        <p-footer style="display: flex; justify-content: center; gap: 10px;">
+          <!-- Botón para Subsanar -->
+          @if (RevisionAsignacionForm.get('tipoDictamen')?.value === 'subsanar') {
+          <button pButton type="button"
+            [disabled]="isLoadingRechazarRevision || !RevisionAsignacionForm.get('observacion')?.value?.trim()"
+            [icon]="isLoadingRechazarRevision ? 'pi pi-spin pi-spinner' : 'bi bi-arrow-counterclockwise'"
+            label="Enviar a Subsanar" class="btn fw-bolder custom-2-1 w-full" (click)="denegarRevision()">
+          </button>
+          }
+
+          <!-- Botón para Dictaminar -->
+          @if (RevisionAsignacionForm.get('tipoDictamen')?.value === 'dictaminar') {
+          <button pButton type="button" [disabled]="isLoadingAceptarRevision"
+            [icon]="isLoadingAceptarRevision ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'"
+            [label]="getLabelDictamen()" class="btn fw-bolder custom-1 w-full" (click)="aprobarRevision()">
+          </button>
+          }
+        </p-footer>
+      </p-fluid>
+    </form>
+  </p-panel>
+</p-dialog>
+
+<!-------------- Dialog de Asignados ---------- -->
+<p-dialog header="Header" [(visible)]="visibleAsignados" [modal]="true" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '75vw' }" [draggable]="false"
+  [resizable]="false" (onHide)="resetDialogEstado()">
+
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      @if (!mostrarFormularioFecha && !mostrarFormularioMiembros) {
+      <h2 class="header-titles">
+        Asignados del Ticket {{ ticket }}
+      </h2>
+      } @else if (mostrarFormularioFecha) {
+      <h2 class="header-titles">
+        Actualizar Fecha de Finalización del Ticket {{ ticket }}
+      </h2>
+      } @else if (mostrarFormularioMiembros) {
+      <h2 class="header-titles">
+        Actualizar Responsables del Ticket {{ ticket }}
+      </h2>
+      }
+    </div>
+  </ng-template>
+
+  <form>
+    <p-panel>
+
+      <p-fluid>
+        <div>
+          @if (!mostrarFormularioFecha && !mostrarFormularioMiembros) {
+          @if (!loadingAsignados) {
+
+          @if (![5, 6, 10, 11].includes(idTipoSolicitudActual) && ![7, 8, 18, 19].includes(idEstadoActual) &&
+          esAsignadorActual) {
+          <div class="toolbar" style=" margin-bottom: 1rem;">
+            <!-- Botones a la izquierda -->
+            <div class="centraciones">
+              <!-- Contenedor de los botones a la izquierda -->
+              <div class="left-buttons flex flex-col sm:flex-row gap-2 w-full">
+                <!-- Botón Responsables -->
+                <p-button icon="bi bi-people-fill fw-bolder"
+                  [label]="isMobile ? 'Responsables' : 'Actualizar Responsables'" (onClick)="mostrarMiembrosAsignados()"
+                  [raised]="true" styleClass="btn fw-bolder custom-1 w-full sm:w-auto" variant="text">
+                </p-button>
+
+                <!-- Botón Fecha -->
+                <p-button icon="bi bi-calendar-check-fill fw-bolder"
+                  [label]="isMobile ? 'Actualizar Fechas' : 'Actualizar Fecha de Finalización'"
+                  (onClick)="mostrarFechaFinalizacion()" [raised]="true"
+                  styleClass="btn fw-bolder custom-7 w-full sm:w-auto" variant="text">
+                </p-button>
+              </div>
+            </div>
+          </div>
+          }
+
+          <br>
+
+          <div class="table-container">
+
+            <p-table [value]="asignado" showGridlines [tableStyle]="{ 'min-width': '50rem' }" dataKey="nombreAsignador"
+              rowGroupMode="rowspan" groupRowsBy="nombreSolicitud,nombreAsignador" sortField="nombreSolicitud"
+              sortMode="single"> <!-- Ordenar por fecha -->
+
+
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 7rem">N°</th>
+                  <th class="centered-header" style="min-width: 10rem">Nombre de la Solicitud</th>
+                  <th class="centered-header" style="min-width: 10rem">Supervisor de la Asignación</th>
+                  <th class="centered-header" style="min-width: 10rem">Responsables Asignados</th>
+                  @if (idEstadoActual === 27) {
+                  <th class="centered-header" style="min-width: 10rem">Observación</th>
+                  }
+                  <th class="centered-header" style="min-width: 10rem">Fecha de Finalización</th>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="body" let-asignado let-rowgroup="rowgroup" let-rowspan="rowspan">
+                <tr>
+                  <td class="centered-cell">{{ asignado.numero || 'No proporcionado' }}</td>
+
+
+                  <!-- Mostrar solo si es rowgroup para aplicar rowspan (nombreSolicitud) -->
+                  <!-- Mostrar solo si es rowgroup para aplicar rowspan (nombreSolicitud) -->
+                  @if (rowgroup) {
+                  <td class="centered-cell" [attr.rowspan]="rowspan">
+                    {{ asignado.nombreSolicitud || 'No proporcionado' }}
+                  </td>
+                  }
+
+                  <!-- Mostrar solo si es rowgroup para aplicar rowspan (nombreAsignador) -->
+                  @if (rowgroup) {
+                  <td class="centered-cell" [attr.rowspan]="rowspan">
+                    {{ asignado.nombreAsignador || 'No proporcionado' }}
+                  </td>
+                  }
+
+                  <td class="centered-cell">{{ asignado.nombreAsignado || 'No proporcionado' }}</td>
+
+                  @if (idEstadoActual === 27) {
+                  <td class="centered-cell">
+                    {{ asignado.ultimaObservacion || 'No proporcionado' }}
+                  </td>
+                  }
+
+                  <!-- Mostrar solo si es rowgroup para aplicar rowspan (fechaFinalizacion) -->
+                  <td class="centered-cell">
+                    {{ asignado.fechaFinalizacion ? (asignado.fechaFinalizacion | date: "dd 'de' MMMM 'del' yyyy,
+                    h:mm:ss a") : 'No proporcionado' }}
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="5" class="centered-cell">No hay personas asignadas a esta solicitud {{ ticket }}
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+
+          </div>
+          }
+          }
+
+          <!-- Formulario para actualizar fecha asignacion -->
+          <div>
+            <form [formGroup]="FechaForm" (ngSubmit)="fechaAsignacion()">
+              <!-- FORMULARIO CON DATEPICKER -->
+              <div class="toolbar">
+                <div class="centraciones">
+                  <div class="left-buttons">
+                    @if (mostrarFormularioFecha) {
+                    <p-button icon="pi pi-angle-double-left" label="Volver" [disabled]="loadingFecha"
+                      (onClick)="volverATabla()" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1">
+                    </p-button>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              @if (mostrarFormularioFecha) {
+              <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                <p-iftalabel class="sm:col-span-2">
+                  <p-datepicker appendTo="body" [showButtonBar]="true" [showTime]="true" hourFormat="12"
+                    formControlName="nuevaFechaFinalizacion" [disabledDays]="disabledDays" [minDate]="minDate"
+                    inputId="date" [iconDisplay]="'input'" [showIcon]="true">
+                  </p-datepicker>
+                  <label for="date">1. Actualizar Fecha de Finalización de la Asignación *</label>
+                </p-iftalabel>
+              </div>
+              }
+
+              @if (mostrarFormularioFecha) {
+              <div class="space"></div>
+              <div class="pt-4">
+                <p-button label="Enviar" type="submit" [disabled]="FechaForm.invalid || loadingFecha"
+                  [icon]="loadingFecha ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                  styleClass="btn fw-bolder custom-1 w-full">
+                </p-button>
+              </div>
+              }
+
+            </form>
+          </div>
+
+          <!-- Formulario para actualizar miembros asignados -->
+          <div>
+            <form [formGroup]="MiembrosAsignadosForm" (ngSubmit)="reasignacionAsignacion()">
+              @if (mostrarFormularioMiembros) {
+              <div>
+                <div class="toolbar">
+                  <div class="centraciones">
+                    <div class="left-buttons">
+                      <p-button icon="pi pi-angle-double-left" label="Volver" (onClick)="volverATabla()" variant="text"
+                        [disabled]="isLoadingAsignados" styleClass="btn fw-bolder custom-1" />
+                    </div>
+                  </div>
+                </div>
+
+
+                <div class="space"></div>
+
+                <div [formGroup]="MiembrosForm">
+                  <div formArrayName="miembroAsignados" class="table-container">
+                    <p-table [value]="miembroAsignados.controls" showGridlines [tableStyle]="{ 'min-width': '45rem' }"
+                      dataKey="id">
+                      <ng-template pTemplate="header">
+                        <tr>
+                          <th class="centered-header" style="min-width: 15rem">Usuario</th>
+                          <th class="centered-header" style="min-width: 2rem">Eliminar</th>
+                        </tr>
+                      </ng-template>
+
+                      <ng-template let-rowData let-rowIndex="rowIndex" pTemplate="body">
+                        <tr [formGroupName]="rowIndex">
+                          <td class="centered-cell">
+                            <p-iftalabel class="sm:col-span-2">
+                              <p-select formControlName="idUsuario" [options]="getUsuariosReasignacion(rowData)"
+                                optionLabel="nombreCompleto" optionValue="idUsuario" [showClear]="true" [filter]="true"
+                                filterBy="nombreCompleto" appendTo="body" class="w-full">
+                              </p-select>
+                              <label>Usuario a Asignar</label>
+                            </p-iftalabel>
+                          </td>
+                          <td class="centered-cell">
+                            <button type="button" pButton icon="pi pi-trash" (click)="removeRow(rowIndex, 3)"
+                              [disabled]="isLoadingAsignados" class="p-button-rounded p-button-danger">
+                            </button>
+                          </td>
+                        </tr>
+                      </ng-template>
+
+                      <ng-template pTemplate="footer">
+                        <tr>
+                          <td colspan="2">
+                            <button type="button" (click)="addRow(3)" pButton icon="pi pi-plus" label="Agregar Usuario"
+                              [disabled]="isLoadingAsignados" class="p-button-text">
+                            </button>
+                          </td>
+                        </tr>
+                      </ng-template>
+                    </p-table>
+
+                    <div class="space"></div>
+
+                    <div class="pt-4">
+                      <p-button label="Enviar" type="submit" [disabled]="isLoadingAsignados"
+                        [icon]="isLoadingAsignados ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                      </p-button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              }
+            </form>
+          </div>
+
+        </div>
+      </p-fluid>
+
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Estados por Etapa---------- -->
+<p-dialog header="Header" [(visible)]="visibleEtapas" [modal]="true" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '70vw' }" [draggable]="false"
+  [resizable]="false">
+
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Etapas del Ticket {{ solicitudSeleccionada?.ticket }}</h2>
+    </div>
+  </ng-template>
+
+
+  <p-table [value]="estadosSeleccionados" columnResizeMode="expand" showGridlines
+    [tableStyle]="{ 'min-width': '50rem' }">
+    <ng-template pTemplate="header">
+      <tr>
+        <th class="centered-header" rowspan="2">Etapa</th>
+        <th class="centered-header" rowspan="2">Estado</th>
+        <th class="centered-header" rowspan="2">Seguimiento</th>
+        <th class="centered-header" colspan="2">Documentos</th>
+      </tr>
+
+      <tr>
+        <th class="centered-header">Plantillas</th>
+        <th class="centered-header">Material Recibido </th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-rowData let-i="rowIndex">
+      <tr>
+        <td class="centered-cell">{{ rowData.etapa }}</td>
+        <td class="centered-cell">
+          <span class="px-2 py-1 rounded-full text-sm font-medium shadow-sm inline-block" [ngStyle]="{
+            backgroundColor: srvHistorial.getColorFondo(rowData.idEstadoSolicitud),
+            color: srvHistorial.getColorTexto(rowData.idEstadoSolicitud)}">
+            {{ rowData.estadoSolicitud }}
+          </span>
+        </td>
+
+        <td>
+          <p-button [loading]="loadingHistorial" [disabled]="loadingHistorial" badgeSeverity="warn"
+            [label]="'Seguimiento - ' + rowData.etapa" icon="bi bi-hourglass-split"
+            (onClick)=" mostrarHistorials(solicitudSeleccionada?.idSolicitud,solicitudSeleccionada?.ticket, rowData.idEtapa)"
+            styleClass="btn fw-bolder custom-7 w-full btn-small-text"></p-button>
+        </td>
+
+        <!-- Plantillas -->
+        <td class="centered-cell">
+          <div class="flex flex-col justify-center items-center gap-2">
+            @if (getSoloPlantillasPorEtapa(rowData.idEtapa).length > 0) {
+            <div class="flex gap-2">
+              @for (archivo of getSoloPlantillasPorEtapa(rowData.idEtapa); track archivo) {
+              <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys" [icon]="getIconPlantilla(archivo)"
+                (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+              </p-button>
+              }
+            </div>
+            } @else {
+            <p-button styleClass="icon-button" [rounded]="true" [outlined]="true" [disabled]="true"
+              [icon]="'bi bi-file-earmark-post'"></p-button>
+            <span class="text-xs text-center text-muted italic">No disponible</span>
+            }
+          </div>
+        </td>
+
+        <!-- Material Enviado -->
+        <td class="centered-cell">
+          <div class="flex flex-col justify-center items-center gap-2">
+            @if (getMaterialEnviadoPorEtapa(rowData.idEtapa).length > 0) {
+            <div class="flex flex-col gap-1">
+              @for (archivo of getMaterialEnviadoPorEtapa(rowData.idEtapa); track archivo) {
+              <p-button styleClass="icon-button" [rounded]="true" [outlined]="true"
+                [disabled]="loadingBtnKey && loadingBtnKey !== archivo.keys" [icon]="getIconMaterial(archivo)"
+                (click)="cargarArchivos($event, archivo.nombreArchivo, archivo.keys, archivo.bucket)">
+              </p-button>
+              }
+            </div>
+            } @else {
+            <p-button styleClass="icon-button" [rounded]="true" [outlined]="true" [disabled]="true"
+              [icon]="'bi bi-file-earmark-code'"></p-button>
+            <span class="text-xs text-center text-muted italic">No disponible</span>
+            }
+          </div>
+        </td>
+
+      </tr>
+    </ng-template>
+  </p-table>
+
+</p-dialog>
+
+<!-------------- Dialog de Historial de Archivo---------- -->
+<app-historial-archivo #historialHijo [(visible)]="historialVisible" [idSolicitud]="idSolicitudSeleccionada"
+  [ticket]="ticketSeleccionado">
+</app-historial-archivo>
+
+<!-------------- Dialog de Información de la Solicitud ---------- -->
+<p-dialog header="Header" [(visible)]="visibleInformacion" [modal]="true" [closable]="closableDialog"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '60vw' }" [draggable]="false"
+  [resizable]="false" (onHide)="cerrarDialogoInformacion()">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header gap-2">
+      <div class="header-titles">
+        Información del Ticket {{ ticket }}
+      </div>
+    </div>
+  </ng-template>
+
+  @if (solicitudSeleccionada) {
+  <div>
+
+    <!-- Información General -->
+    <p-table [value]="[solicitudSeleccionada]" [tableStyle]="{ 'min-width': '100%' }" showGridlines>
+      <ng-template pTemplate="header">
+        <tr class="centered-cell">
+          <th class="centered-header" colspan="2">
+            Información General
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-solicitud>
+        <tr>
+          <td class="centered-header">Ticket</td>
+          <td class="centered-cell">{{ solicitud.ticket || 'No proporcionado' }}</td>
+        </tr>
+        <tr>
+          <td class="centered-header">Nombre de la Solicitud</td>
+          <td class="centered-cell">{{ solicitud.nombreSolicitud || 'No proporcionado' }}</td>
+        </tr>
+        <tr>
+          <td class="centered-header">Fecha de Registro</td>
+          <td class="centered-cell">{{ formatearFecha(solicitud.fechaRegistro) }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <br>
+
+    <!-- Información del Solicitante -->
+    <p-table [value]="[solicitudSeleccionada]" [tableStyle]="{ 'min-width': '100%' }" showGridlines>
+      <ng-template pTemplate="header">
+        <tr class="centered-cell">
+          <th class="centered-header" colspan="2">
+            Información del Solicitante
+          </th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-solicitud>
+        <tr>
+          <td class="centered-header">Nombre Completo</td>
+          <td class="centered-cell">{{ solicitud.nombreCompleto || 'No proporcionado' }}</td>
+        </tr>
+        <tr>
+          <td class="centered-header">Correo Electrónico</td>
+          <td class="centered-cell">{{ solicitud.correo || 'No proporcionado' }}</td>
+        </tr>
+        <tr>
+          <td class="centered-header">Teléfono</td>
+          <td class="centered-cell">{{ solicitud.telefonos || 'No proporcionado' }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+  </div>
+  }
+</p-dialog>
+
+<!-------------- Dialog de Historial de Solicitud---------- -->
+<app-historial-modal [(visible)]="mostrarHistorial" [historialEstados]="historialEstados"
+  [ticket]="nombreTicketSeleccionado">
+</app-historial-modal>
+
+
+<!-------------- Dialog de Dar formato al ticket ---------- -->
+<p-dialog header="Header" [(visible)]="visibleFormato" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles"> {{tituloDialogoFormato}} al Ticket {{ ticket }}</h2>
+    </div>
+  </ng-template>
+
+  <p-panel>
+    <form [formGroup]="FormatoForm" (ngSubmit)="procesarDecision()">
+      <p-fluid>
+        <div class="mt-3">
+          <br>
+          <strong>Recordatorio:</strong>
+          <br>
+          <ul style="list-style-type: disc; padding-left: 2rem; margin: 0;">
+              <li>
+                Si existe algun comentario para <u>corrección</u> asegúrese de escribirlo en el espacio de abajo.
+                En caso de no querer enviarlo a corregir, dejar el espacio vacío y subir el documento con formato
+                correspondiente.
+              </li>
+              <br>
+
+            <li>
+              Asegúrese de subir el documento correcto con formato adecuado en caso de <u>aprobar</u>.
+                @if(!subirArchivo){
+                <span style="color: #666; font-style: italic;">
+                  (Para su rol el archivo no es obligatorio).
+                </span>
+                }
+            </li>
+          </ul>
+          <br>
+        </div>
+
+        <!-- 🔹 Observaciones -->
+          <div class="mt-3">
+            <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <p-iftalabel class="sm:col-span-2">
+                <textarea pTextarea [autoResize]="true" rows="1" style="min-height: 60px;" formControlName="observacion"
+                  (input)="filtrarObservacion('FormatoForm')" (blur)="formatObservacion('FormatoForm')"
+                  placeholder="Escriba observaciones si desea enviar a corrección...">
+                </textarea>
+                <label for="observaciones">Observaciones</label>
+              </p-iftalabel>
+            </div>
+          </div>
+
+        <!-- 🔹 Texto cuando hay observaciones -->
+        @if(hasObservacion()) {
+        <div class="mt-3">
+          <br>
+          <strong>Advertencia:</strong>
+          <br>
+          <ul style="list-style-type: disc; padding-left: 2rem; margin: 0;">
+            <li>
+              Ha ingresado observaciones. Estas serán enviadas a la persona responsable para su <u>revisión y
+                corrección</u>.
+            </li>
+            <br>
+            <li>
+              Puede detallar todos los comentarios que considere necesarios antes de confirmar el envío.
+            </li>
+          </ul>
+          <br>
+        </div>
+        }
+
+        <!-- 🔹 Archivo solo si es aprobar (sin observación) -->
+        @if(!hasObservacion() && puedeSubirArchivo()) {
+        <div class="mt-3">
+          <ul style="list-style-type: disc; padding-left: 2rem; margin: 0;">
+            <li>
+              En este espacio deberá subir el borrador del documento con formato adecuado.
+              Este será revisado y en caso de no haber observaciones por la entidad que revisa,
+              se deberá imprimir y llevar a firmar.
+            </li>
+            <br>
+            <li>
+              El archivo debe estar en formato DOC o DOCX y no debe exceder los 100 MB.
+              Para garantizar una gestión eficiente, le recomendamos que el nombre del archivo incluya
+              el ticket y una breve descripción, por ejemplo:
+              <strong>Ticket123_Borrador_CF_Oficio.docx</strong>.
+            </li>
+          </ul>
+          <br>
+
+          <!-- 🔹 Sección de Plantillas -->
+          <div class="mt-4">
+            <h3 class="text-lg font-bold text-center mb-3">Plantillas</h3>
+
+            <div class="flex justify-center items-center gap-3">
+              <div class="flex flex-col items-center">
+                <p-button
+                  styleClass="icon-button flex justify-center items-center"
+                  [rounded]="true"
+                  [outlined]="true"
+                  [disabled]="loadingPlantillaId !== false"
+                  [icon]="loadingPlantillaId ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-word'"
+                  (click)="descargarFormatos($event, '6')"
+                  [pTooltip]="'Descargar formato Oficio'"
+                  tooltipStyleClass="tooltip-custom-7">
+                </p-button>
+                <span class="text-sm font-semibold mt-1 text-center">Oficio</span>
+              </div>
+
+              <br>
+              <div class="flex flex-col items-center">
+                <p-button
+                  styleClass="icon-button flex justify-center items-center"
+                  [rounded]="true"
+                  [outlined]="true"
+                  [disabled]="loadingPlantillaId !== false"
+                  [icon]="loadingPlantillaId ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-word-fill'"
+                  (click)="descargarFormatos($event, '5')"
+                  [pTooltip]="'Descargar formato Dictamen'"
+                  tooltipStyleClass="tooltip-custom-7">
+                </p-button>
+                <span class="text-sm font-semibold mt-1 text-center">Dictamen</span>
+              </div>
+
+              <br>
+              <div class="flex flex-col items-center">
+                <p-button
+                  styleClass="icon-button flex justify-center items-center"
+                  [rounded]="true"
+                  [outlined]="true"
+                  [disabled]="loadingPlantillaId !== false"
+                  [icon]="loadingPlantillaId ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-word'"
+                  (click)="descargarFormatos($event, '4')"
+                  [pTooltip]="'Descargar formato Memorandum'"
+                  tooltipStyleClass="tooltip-custom-7">
+                </p-button>
+                <span class="text-sm font-semibold mt-1 text-center">Memorandum</span>
+              </div>
+
+              <br>
+              <div class="flex flex-col items-center">
+                <p-button
+                  styleClass="icon-button flex justify-center items-center"
+                  [rounded]="true"
+                  [outlined]="true"
+                  [disabled]="loadingPlantillaId !== false"
+                  [icon]="loadingPlantillaId ? 'pi pi-spin pi-spinner' : 'bi bi-file-earmark-word-fill'"
+                  (click)="descargarFormatos($event, '3')"
+                  [pTooltip]="'Descargar formato Circular'"
+                  tooltipStyleClass="tooltip-custom-7">
+                </p-button>
+                <span class="text-sm font-semibold mt-1 text-center">Circular</span>
+              </div>
+            </div>
+          </div>
+          <br>
+
+          <!-- Upload: solo visible si cumple condiciones -->
+          @if (puedeSubirArchivo() && subirArchivo && ultimoEstado !== 32) {
+          <p-fileUpload #fileUploader name="archivos[]" [multiple]="true" accept=".doc,.docx"
+            (onSelect)="getfiles($event)" (onRemove)="removeFile($event)" maxFileSize="100000000"
+            styleClass="custom-button-file custom-button-1" [disabled]="loading" chooseLabel="Subir Archivo"
+            [auto]="true">
+          </p-fileUpload>
+          }
+          @if (subirArchivo && ultimoEstado === 32) {
+            <p-fileUpload #fileUploader name="archivos[]" [multiple]="true" accept=".pdf"
+              (onSelect)="getfiles($event)" (onRemove)="removeFile($event)" maxFileSize="100000000"
+              styleClass="custom-button-file custom-button-1" [disabled]="loading" chooseLabel="Subir Archivo"
+              [auto]="true">
+            </p-fileUpload>
+          }
+        </div>
+        }
+
+        <div class="space"></div>
+
+        <!-- 🔹 Botón dinámico -->
+        <!-- 🔹 Botón dinámico corregido -->
+        <p-footer style="display: flex; justify-content: center; gap: 10px;">
+          <button pButton type="button" [disabled]="
+              isLoadingFormato ||(!hasObservacion() &&puedeSubirArchivo() &&subirArchivo &&!archivoSubido)"
+            [icon]="
+              isLoadingFormato ? 'pi pi-spin pi-spinner': (hasObservacion() ? 'bi bi-arrow-counterclockwise': 'bi bi-check2-circle')" [label]="hasObservacion() ? 'A Corrección' : 'Aprobar'"
+            class="btn fw-bolder w-full" [ngClass]="hasObservacion() ? 'custom-2-1' : 'custom-1'"
+            (click)="procesarDecision()">
+          </button>
+        </p-footer>
+      </p-fluid>
+    </form>
+  </p-panel>
+</p-dialog>

@@ -1,0 +1,527 @@
+<ng-template #loadingHeader>
+</ng-template>
+
+<div class="header">
+    <!-- Imagen a la izquierda -->
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <!-- Contenedor de elementos del lado izquierdo -->
+        <div style="display: flex; align-items: center;" class="img-lefts">
+
+            @if (objetoPermitido.includes(1)) {
+            <p-button styleClass="fw-bolder custom-button-side" icon="pi pi-bars" (click)="visible = true"></p-button>
+            @if (!isMobile) {
+            <p-divider layout="vertical"></p-divider>
+            }
+            @if(visibleMenu){
+            <img src="LOGO VRA-DD.png" alt="Logo Izquierda" class="img-left responsive-image"
+                style="margin-left:-10px; cursor: pointer;" routerLink="/menu" />
+            } @else {
+            <img src="LOGO VRA-DD.png" alt="Logo Izquierda" class="img-left responsive-image"
+                style="margin-left:-10px; cursor: pointer;" routerLink="/persona/perfil" />
+            }
+            }
+
+        </div>
+
+        <!-- Contenedor de elementos del lado derecho -->
+        <div style="display: flex; align-items: center; gap: 10px;" class="img-rights">
+
+            @if (objetoPermitido.includes(1)) {
+            @if (!isMobile) {
+            <span class="bold-soft" style="font-size: 1rem;">
+                {{ nombreUsuario || 'Bienvenido' }}
+            </span>
+            }
+            }
+
+            @if (objetoPermitido.includes(1)) {
+            <p-divider layout="vertical" />
+            }
+
+            @if (visibleMenu && objetoPermitido.includes(1) && getRutaMenu() !== null)
+            {
+                <p-button styleClass="fw-bolder" tooltipStyleClass="tooltip" pTooltip="Menú" tooltipPosition="bottom"
+                    [routerLink]="getRutaMenu()" [text]="true"
+                    severity="secondary" size="large">
+                    <i class="pi pi-home fw-medium fw-bold text-azul-menu" style="font-size: 1.2rem"></i>
+                </p-button>
+            }
+
+
+            @if (objetoPermitido.includes(2)) {
+            <p-button styleClass="fw-bolder" tooltipStyleClass="tooltip" pTooltip="Perfil" tooltipPosition="bottom"
+                routerLink="/persona/perfil"
+                [text]="true" severity="secondary" size="large">
+                <i class="pi pi-user-edit fw-medium fw-bold text-azul-menu " style="font-size: 1.2rem"></i>
+            </p-button>
+            }
+
+            @if (objetoPermitido.includes(3)) {
+            <p-button styleClass="fw-bolder" tooltipStyleClass="tooltip" pTooltip="Notificaciones"
+                tooltipPosition="bottom" [text]="true" severity="secondary" (click)="op.toggle($event)">
+                @if (unreadCount > 0) {
+                <i class="pi pi-bell mr-2 fw-bold text-azul-menu" style="font-size: 1.2rem" [value]="unreadCount"
+                    pBadge></i>
+                } @else {
+                <i class="pi pi-bell text-azul-menu mr-2 fw-bold" style="font-size: 1.2rem"></i>
+                }
+            </p-button>
+            }
+
+            <p-popover #op>
+                <div class="flex flex-col gap-4 w-[25rem]">
+                    <p-tabs value="0">
+                        <p-tablist>
+                            <p-tab value="0">
+                                <span class="tab-label">
+                                    Notificaciones
+                                    @if (unreadNotificationsCount > 0) {
+                                    <span [value]="unreadNotificationsCount" class="badge-dot" pBadge></span>
+                                    }
+                                </span>
+                            </p-tab>
+                            <p-tab value="1">
+                                <span class="tab-label">
+                                    Recordatorios
+                                    @if (unreadRemindersCount > 0) {
+                                    <span [value]="unreadRemindersCount" class="badge-dot" pBadge></span>
+                                    }
+                                </span>
+                            </p-tab>
+
+                            <p-button label="Ver todas" routerLink="/persona/notificacion"
+
+                                styleClass="btn fw-bolder custom-1 w-full">
+                            </p-button>
+                        </p-tablist>
+
+                        <p-tabpanels>
+
+                            <!-- PANEL NOTIFICACIONES -->
+                            <p-tabpanel value="0">
+                                @if (notificaciones.length > 0) {
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-bold">Notificaciones</span>
+                                    <p-button label="Marcar todo como leído"
+                                        [icon]="isLoadingMarcarLeido ? 'pi pi-spin pi-spinner' : 'bi bi-check2-square'"
+                                        [disabled]="isLoadingMarcarLeido" [outlined]="true"
+                                        styleClass="btn fw-bolder custom-1 w-full" (click)="marcarNotificacion()">
+                                    </p-button>
+                                </div>
+                                }
+
+                                @if (notificacionesMostradas.length === 0) {
+                                <div class="p-4 text-center text-gray-500">
+                                    No hay notificaciones nuevas.
+                                </div>
+                                }
+
+                                <div class="max-h-[17rem] overflow-y-auto space-y-2">
+                                    @for (n of notificacionesMostradas; track $index) {
+                                    <div class="notification-card" [ngClass]="{ 'not-leido': !n.dfLeido }"
+                                        (click)="toggleExpand(n)">
+                                        <div class="card-header">
+                                            <div>
+                                                <div class="font-semibold">{{ n.titulo }}</div>
+                                                <div class="text-xs text-gray-500">
+                                                    <strong>Fecha:</strong><br />{{ n.fechaRegistro | date:'short' }}
+                                                </div>
+                                            </div>
+                                            <i class="pi"
+                                                [ngClass]="n.expanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                                        </div>
+
+                                        <div class="card-details" [class.expanded]="n.expanded">
+                                            <p class="mb-1"><strong>Mensaje:</strong><br />{{ n.mensaje }}</p>
+
+                                            @if (n.ruta) {
+                                            <p-button label="Ir a la notificación" [routerLink]="n.ruta"
+                                                icon="pi pi-arrow-right" styleClass="btn fw-bolder custom-1 w-full"
+                                                raised text>
+                                            </p-button>
+                                            }
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+
+
+                            </p-tabpanel>
+
+                            <!-- PANEL RECORDATORIOS -->
+                            <p-tabpanel value="1">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-bold">Recordatorios</span>
+                                    <p-button label="Marcar todo como leído"
+                                        [icon]="isLoadingMarcarLeido ? 'pi pi-spin pi-spinner' : 'bi bi-check2-square'"
+                                        [disabled]="isLoadingMarcarLeido" [outlined]="true"
+                                        styleClass="btn fw-bolder custom-1 w-full" (click)="marcarNotificacion()">
+                                    </p-button>
+                                </div>
+
+                                @if (recordatoriosMostrados.length === 0) {
+                                <div class="p-4 text-center text-gray-500">
+                                    No hay recordatorios nuevos.
+                                </div>
+                                }
+
+                                <div class="max-h-[17rem] overflow-y-auto space-y-2">
+                                    @for (n of recordatoriosMostrados; track $index) {
+
+                                    <div class="notification-card" [ngClass]="{ 'not-leido': !n.dfLeido }"
+                                        (click)="toggleExpand(n)">
+                                        <div class="card-header">
+                                            <div>
+                                                <div class="font-semibold">{{ n.titulo }}</div>
+                                                <div class="text-xs text-gray-500">
+                                                    <strong>Fecha:</strong><br />{{ n.fechaRegistro | date:'short' }}
+                                                </div>
+                                            </div>
+                                            <i class="pi"
+                                                [ngClass]="n.expanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                                        </div>
+
+                                        <div class="card-details" [class.expanded]="n.expanded">
+                                            <p class="mb-1"><strong>Mensaje:</strong><br />{{ n.mensaje }}</p>
+
+                                            @if (n.ruta) {
+                                            <p-button label="Ir a la notificación" [routerLink]="n.ruta"
+                                                icon="pi pi-arrow-right" styleClass="btn fw-bolder custom-1 w-full"
+                                                raised text>
+                                            </p-button>
+                                            }
+                                        </div>
+                                    </div>
+                                    }
+                                </div>
+
+
+                            </p-tabpanel>
+                        </p-tabpanels>
+                    </p-tabs>
+                </div>
+            </p-popover>
+
+            @if (objetoPermitido.includes(1)) {
+            <p-button styleClass="fw-bolder" tooltipStyleClass="tooltip1" pTooltip="Cerrar Sesión"
+                tooltipPosition="bottom" (click)="onLogoutClick($event)" [text]="true" severity="secondary"
+                size="large">
+                <i class="pi pi-sign-out fw-bold text-azul-out" style="font-size: 1.1rem"></i>
+            </p-button>
+            }
+
+        </div>
+    </div>
+
+
+    <p-drawer #drawerRef [(visible)]="visible" styleClass="!w-full md:!w-80 lg:!w-[22rem]">
+        <ng-template #headless>
+            <div class="flex flex-col h-full">
+                <div class="flex items-center justify-between px-6 pt-4 shrink-0">
+                    <span class="inline-flex items-center gap-2">
+                        @if(visibleMenu){
+                        <p-image class="image-containers image-containers" class="cursor-pointer" src="LOGO VRA-DD.png"
+                            shape="circle" alt="Image" width="220" routerLink="/menu" />
+                        } @else {
+                        <p-image class="image-containers image-containers" class="cursor-pointer" src="LOGO VRA-DD.png"
+                            shape="circle" alt="Image" width="220" routerLink="/persona/perfil" />
+                        }
+                    </span>
+                    <span>
+                        <p-button type="button" (click)="closeCallback($event)" icon="pi pi-times" severity="secondary"
+                            styleClass="h-8 w-8"></p-button>
+                    </span>
+                </div>
+                <div class="overflow-y-auto">
+                    <ul class="list-none p-4 m-0">
+                        <li>
+                        <ul class="list-none p-0 m-0 overflow-hidden">
+                        @if (getRutaMenu() !== null) {
+                            <li>
+                            <a pRipple [routerLink]="getRutaMenu()"
+                                class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                <i class="pi pi-home text-azul-menu mr-2"></i>
+                                <span class="font-medium">Menú</span>
+                            </a>
+                            </li>
+                        }
+                        </ul>
+                            @if (isUlAllowed([7])) {
+                            <div pRipple pStyleClass="@next" enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                class="p-4 flex items-center justify-between text-surface-600 dark:text-surface-200 cursor-pointer p-ripple">
+                                <span class="font-medium">Solicitudes</span>
+                                <i class="pi pi-chevron-down text-azul-menu"></i>
+                            </div>
+                            }
+                            <ul class="list-none p-0 m-0 overflow-hidden">
+                                @if (objetoPermitido.includes(7)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/solicitud/usuario']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="bi bi-folder-plus text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Mis Solicitudes</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="list-none p-4 m-0">
+                        <li>
+                            @if (isUlAllowed([4,5])) {
+                            <div pRipple pStyleClass="@next" enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                class="p-4 flex items-center justify-between text-surface-600 dark:text-surface-200 cursor-pointer p-ripple">
+                                <span class="font-medium">Dirección</span>
+                                <i class="pi pi-chevron-down text-azul-menu"></i>
+                            </div>
+                            }
+                            <ul class="list-none p-0 m-0 overflow-hidden">
+                                @if (objetoPermitido.includes(4)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/solicitud']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="bi bi-folder2 text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Gestión de Solicitudes</span>
+                                    </a>
+                                </li>
+                                }
+                                @if (objetoPermitido.includes(5)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/solicitud/historial']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="bi bi-hourglass-split text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Historial de Solicitudes</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+
+                        </li>
+                    </ul>
+                    <ul class="list-none p-4 m-0">
+                        <li>
+                            @if (isUlAllowed([6])) {
+                            <div pRipple pStyleClass="@next" enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                class="p-4 flex items-center justify-between text-surface-600 dark:text-surface-200 cursor-pointer p-ripple">
+                                <span class="font-medium">Asignaciones</span>
+                                <i class="pi pi-chevron-down text-azul-menu"></i>
+                            </div>
+                            }
+                            <ul class="list-none p-0 m-0 overflow-hidden">
+                                @if (objetoPermitido.includes(6)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/asignacion/usuario']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="pi pi-user-edit text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Asignaciones</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="list-none p-4 m-0">
+                        <li>
+                            @if (isUlAllowed([30])) {
+                            <div pRipple pStyleClass="@next" enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                class="p-4 flex items-center justify-between text-surface-600 dark:text-surface-200 cursor-pointer p-ripple">
+                                <span class="font-medium">Calendario Academico</span>
+                                <i class="pi pi-chevron-down text-azul-menu"></i>
+                            </div>
+                            }
+                            <ul class="list-none p-0 m-0 overflow-hidden">
+                                @if (objetoPermitido.includes(30)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/calendario/academico']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="bi bi-calendar3 text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Calendario Academico</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="list-none p-4 m-0">
+                        <li>
+                            @if (isUlAllowed([16])) {
+                            <div pRipple pStyleClass="@next" enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                class="p-4 flex items-center justify-between text-surface-600 dark:text-surface-200 cursor-pointer p-ripple">
+                                <span class="font-medium">Comisiones Academicas</span>
+                                <i class="pi pi-chevron-down text-azul-menu"></i>
+                            </div>
+                            }
+                            <ul class="list-none p-0 m-0 overflow-hidden">
+                                @if (objetoPermitido.includes(16)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/comision']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="bi bi-inboxes text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Comisiones Academicas</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="list-none p-4 m-0">
+                        <li>
+                            @if (isUlAllowed([17])) {
+                            <div pRipple pStyleClass="@next" enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                class="p-4 flex items-center justify-between text-surface-600 dark:text-surface-200 cursor-pointer p-ripple">
+                                <span class="font-medium">Formación Docente</span>
+                                <i class="pi pi-chevron-down text-azul-menu"></i>
+                            </div>
+                            }
+                            <ul class="list-none p-0 m-0 overflow-hidden">
+                                @if (objetoPermitido.includes(17)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/formacion']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="bi bi-bookmarks text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Formación Docente</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="list-none p-4 m-0">
+                        <li>
+                            @if (isUlAllowed([18,19])) {
+                            <div pRipple pStyleClass="@next" enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                class="p-4 flex items-center justify-between text-surface-600 dark:text-surface-200 cursor-pointer p-ripple">
+                                <span class="font-medium">Plan Operativo Anual</span>
+                                <i class="pi pi-chevron-down text-azul-menu"></i>
+                            </div>
+                            }
+                            <ul class="list-none p-0 m-0 overflow-hidden">
+                                @if (objetoPermitido.includes(18)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/plan/operativo']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="bi bi-layers text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Plan Operativo Anual</span>
+                                    </a>
+                                </li>
+                                }
+                                @if (objetoPermitido.includes(19)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/plan/estadística']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="bi bi-file-earmark-bar-graph text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Estadísticas</span>
+                                    </a>
+                                </li>
+                                }
+                                @if (objetoPermitido.includes(19)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/plan/estadística/personal']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="pi pi-chart-bar text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Estadísticas Personal</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </li>
+                    </ul>
+                    <ul class="list-none p-4 m-0">
+                        <li>
+                            @if (isUlAllowed([20])) {
+                            <div pRipple pStyleClass="@next" enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                class="p-4 flex items-center justify-between text-surface-600 dark:text-surface-200 cursor-pointer p-ripple">
+                                <span class="font-medium">Reservaciones</span>
+                                <i class="pi pi-chevron-down text-azul-menu"></i>
+                            </div>
+                            }
+                            <ul class="list-none p-0 m-0 overflow-hidden">
+                                @if (objetoPermitido.includes(20)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/reservacion']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="bi bi-calendar4-week text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Reservación del Salón</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </li>
+
+                    </ul>
+                    <ul class="list-none p-4 m-0">
+                        <li>
+                            @if (isUlAllowed([22,11,21])) {
+                            <div pRipple pStyleClass="@next" enterFromClass="hidden"
+                                enterActiveClass="animate-slidedown" leaveToClass="hidden"
+                                leaveActiveClass="animate-slideup"
+                                class="p-4 flex items-center justify-between text-surface-600 dark:text-surface-200 cursor-pointer p-ripple">
+                                <span class="font-medium">Seguridad </span>
+                                <i class="pi pi-chevron-down text-azul-menu"></i>
+                            </div>
+                            }
+                            <ul class="list-none p-0 m-0 overflow-hidden">
+                                @if (objetoPermitido.includes(22)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/seguridad/usuario']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="pi pi-users text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Ajustes de Usuarios</span>
+                                    </a>
+                                </li>
+                                }
+                                @if (objetoPermitido.includes(11)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/seguridad/rol']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="pi pi-shield text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Roles</span>
+                                    </a>
+                                </li>
+                                }
+                                @if (objetoPermitido.includes(21)) {
+                                <li>
+                                    <a pRipple [routerLink]="['/ajuste/sistema']"
+                                        class="flex items-center cursor-pointer p-4 rounded-border text-surface-700 dark:text-surface-100 hover:bg-surface-100 dark:hover:bg-surface-700 duration-150 transition-colors p-ripple">
+                                        <i class="pi pi-cog text-azul-menu mr-2"></i>
+                                        <span class="font-medium">Ajustes</span>
+                                    </a>
+                                </li>
+                                }
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <div class="mt-auto">
+                    <hr class="mb-4 mx-4 border-t border-0 border-surface" />
+                    <div class="flex items-center gap-2">
+                        <button pButton label="Perfil" icon="pi pi-user" class="w-full" text
+                            routerLink="/persona/perfil"></button>
+                        <button pButton label="Cerrar Sesión" icon="pi pi-sign-out" class="w-full" severity="danger"
+                            (click)="onLogoutClick($event)" text></button>
+                    </div>
+                </div>
+
+            </div>
+        </ng-template>
+    </p-drawer>
+
+</div>
+<br>
+<br>

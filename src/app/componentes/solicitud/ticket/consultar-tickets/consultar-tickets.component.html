@@ -1,0 +1,419 @@
+<app-header-panel></app-header-panel>
+<div>
+    <p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+    <div class="custom-container">
+        <p-panel styleClass="transparente">
+            <ng-template pTemplate="header">
+
+                <div class="header-container title-header">
+                    <span>
+                        Seguimiento del Ticket
+                    </span>
+                </div>
+            </ng-template>
+            <div class="space"></div>
+
+            <form [formGroup]="ConsultarForm" (ngSubmit)="consultarTicket()">
+                <p-fluid>
+
+                    <div>
+                        <div class="ticket-system">
+                            <h4>Consulta de Tickets - Dirección de Docencia</h4>
+                            <p>Bienvenido al sistema de consulta de tickets. Para acceder, deberás ingresar las
+                                credenciales que te fueron enviadas previamente a tu correo electrónico.</p>
+                            <p>Desde esta plataforma podrás:</p>
+                            <ul>
+                                <li><strong>Consultar el estado de tus solicitudes</strong>
+                                    <p>Revisar en qué estado se encuentra tu ticket y visualizar actualizaciones
+                                        relacionadas.</p>
+                                </li>
+                            </ul>
+                            <p>Por favor, ten a la mano tus credenciales para poder ingresar y realizar la
+                                consulta de tu ticket de manera segura y eficiente.</p>
+
+                        </div>
+                    </div>
+
+                    <div *ngIf="mensajeAdvertencia">
+                        <p-message severity="warn" icon="pi pi-exclamation-triangle"
+                            text="Advertencia: Este tipo de ticket no es válido para consulta en esta ventana. Por favor acceda a la plataforma para poder seguir viendo el seguimiento de tu ticket.">
+                        </p-message>
+                    </div>
+
+                    <div class="space"></div>
+
+
+                    <div class="ticket-system">
+                        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <p-iftalabel class="sm:col-span-2">
+                                <input pInputText id="email" formControlName="correo"
+                                    placeholder="direccion@unah.edu.hn" maxlength="50" />
+                                <label for="email">1. Correo Electrónico *</label>
+                            </p-iftalabel>
+                        </div>
+
+                        <div class="space"></div>
+
+
+                        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <p-iftalabel class="sm:col-span-2">
+                                <input pInputText id="username" formControlName="ticket"
+                                    placeholder="Ejemplo: TCK-AC-10-202504102057" />
+                                <label for="username">2. Ticket</label>
+                            </p-iftalabel>
+                        </div>
+
+                    </div>
+
+                    <div class="space"></div>
+
+
+                    <div class="ticket-system">
+                        <div *ngIf="mostrarTabla && estadoTicket">
+                            <div class="table-container">
+                                <p-table showGridlines [tableStyle]="{ 'min-width': '30rem' }" dataKey="id"
+                                    [value]="estadoTicket">
+                                    <ng-template pTemplate="header">
+                                        <tr>
+                                            <th class="centered-header" style="min-width: 10rem" rowspan="2">N° de
+                                                Ticket
+                                            </th>
+                                            <th class="centered-header" style="min-width: 10rem" rowspan="2">Tipo de
+                                                Ticket
+                                            </th>
+                                            <th class="centered-header" style="min-width: 10rem" rowspan="2">Estado</th>
+                                            <th class="centered-header" style="min-width: 10rem" rowspan="2">Ultima
+                                                Actualización</th>
+                                            <th class="centered-header" style="min-width: 8rem"
+                                                [attr.colspan]="mostrarColumnaSalida ? 2 : 1">
+                                                <div class="flex items-center">
+                                                    Archivos
+                                                </div>
+                                            </th>
+                                        </tr>
+
+                                        <!-- Segunda fila con subcolumnas -->
+                                        <tr>
+                                            <th class="centered-header">Enviados</th>
+                                            <th *ngIf="mostrarColumnaSalida" class="centered-header">Recibidos</th>
+                                        </tr>
+                                    </ng-template>
+
+                                    <ng-template pTemplate="body" let-ticket>
+                                        <tr>
+                                            <td class="centered-cell">{{ ticket.ticket || 'No proporcionado' }}</td>
+                                            <td class="centered-cell">{{ ticket.tipoSolicitud || 'No proporcionado'
+                                                }}</td>
+                                            <td class="centered-cell" *ngIf="!ticket.interna">
+                                                <span
+                                                    class="px-3 py-1 rounded-full text-sm font-medium shadow-sm whitespace-normal break-words inline-block"
+                                                    [ngStyle]="{
+                                                            backgroundColor: srvHistorial.getColorFondo(ticket.estadosSolicitud?.[0]?.idEstadoSolicitud),
+                                                            color: srvHistorial.getColorTexto(ticket.estadosSolicitud?.[0]?.idEstadoSolicitud),
+                                                            maxWidth: '200px',
+                                                            lineHeight: '1.2'
+                                                            }">
+                                                    {{ ticket.estadosSolicitud?.[0]?.estadoSolicitud || 'Sin estado' }}
+                                                </span>
+                                            </td>
+                                            <td *ngIf="ticket.interna" class="centered-cell">
+                                                <ng-container
+                                                    *ngIf="ticket.idCategoriaTipoSolicitud === 2; else estadoGeneral">
+                                                    <p-button styleClass="icon-button" [rounded]="true"
+                                                        [outlined]="true" [disabled]="loadingEtapa"
+                                                        [icon]="loadingEtapa ? 'pi pi-spin pi-spinner' : 'bi bi-ui-checks'"
+                                                        pTooltip="Ver estados por etapa"
+                                                        (onClick)="mostrarDetalleEstados(ticket)">
+                                                    </p-button>
+                                                </ng-container>
+
+                                                <ng-template #estadoGeneral>
+                                                    <span
+                                                        class="px-3 py-1 rounded-full text-sm font-medium shadow-sm whitespace-normal break-words inline-block"
+                                                        [ngStyle]="{
+                                                    backgroundColor: srvHistorial.getColorFondo(ticket.estadosSolicitud?.[0]?.idEstadoSolicitud),
+                                                    color: srvHistorial.getColorTexto(ticket.estadosSolicitud?.[0]?.idEstadoSolicitud),
+                                                    maxWidth: '200px',
+                                                    lineHeight: '1.2'}">
+                                                        {{ ticket.estadosSolicitud?.[0]?.estadoSolicitud || 'No
+                                                        proporcionado' }}
+                                                    </span>
+                                                </ng-template>
+                                            </td>
+
+                                            <td class="centered-cell">
+                                                {{ ticket.fechaModifico ? (ticket.fechaModifico | date: "dd 'de'
+                                                MMMM 'del' yyyy, h:mm:ss a") : 'No proporcionado' }}
+                                            </td>
+
+                                            <!-- Columna: (Recibidos) -->
+                                            <td class="centered-cell">
+                                                <div class="flex justify-center items-center gap-2">
+
+                                                    <!-- Botón que activa el popover manualmente -->
+                                                    <p-button styleClass="icon-button" [rounded]="true"
+                                                        [outlined]="true" icon="bi bi-file-earmark-arrow-up"
+                                                        (click)="popoverEntrada.toggle($event)">
+                                                    </p-button>
+
+                                                    <!-- Popover manual (usando #popoverEntrada) -->
+                                                    <p-popover #popoverEntrada>
+                                                        <div [ngClass]="{
+                                                        'grid-cols-1': ticket.archivosEntrada.length === 1,
+                                                        'grid-cols-2': ticket.archivosEntrada.length === 2,
+                                                        'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': ticket.archivosEntrada.length === 3,
+                                                        'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': ticket.archivosEntrada.length >= 4
+                                                        }" class="grid gap-4 p-4">
+
+                                                            <ng-container
+                                                                *ngIf="ticket.archivosEntrada.length > 0; else noFilesEntrada">
+                                                                <div *ngFor="let archivo of ticket.archivosEntrada"
+                                                                    class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                                                                    (click)="descargarBase64(archivo)">
+                                                                    <p-button class="icon-button" [rounded]="true"
+                                                                        [outlined]="true" [style.font-size]="'1.25rem'"
+                                                                        [icon]="'bi bi-file-earmark-text'">
+                                                                    </p-button>
+                                                                    <span
+                                                                        class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                                                                        [title]="archivo.nombreArchivo">
+                                                                        {{ archivo.nombreArchivo }}
+                                                                    </span>
+                                                                </div>
+                                                            </ng-container>
+                                                            <ng-template #noFilesEntrada>
+                                                                <p class="text-xs text-muted text-center col-span-2">No
+                                                                    hay
+                                                                    archivos disponibles.</p>
+                                                            </ng-template>
+                                                        </div>
+                                                    </p-popover>
+
+                                                </div>
+                                            </td>
+
+                                            <!-- Columna: (Emitidos) -->
+                                            <td class="centered-cell" *ngIf="mostrarColumnaSalida">
+                                                <div class="flex justify-center items-center gap-2">
+
+                                                    <p-button styleClass="icon-button" [rounded]="true"
+                                                        [outlined]="true" icon="bi bi-file-earmark-arrow-down"
+                                                        (click)="popoverSalida.toggle($event)">
+                                                    </p-button>
+
+                                                    <p-popover #popoverSalida>
+                                                        <div [ngClass]="{
+              'grid-cols-1': ticket.archivosSalida.length === 1,
+              'grid-cols-2': ticket.archivosSalida.length === 2,
+              'grid-cols-2 md:grid-cols-2 lg:grid-cols-2': ticket.archivosSalida.length === 3,
+              'grid-cols-2 md:grid-cols-2 lg:grid-cols-3': ticket.archivosSalida.length >= 4
+            }" class="grid gap-4 p-4 w-[320px] max-w-full">
+                                                            <ng-container
+                                                                *ngIf="ticket.archivosSalida.length > 0; else noFilesSalida">
+                                                                <div *ngFor="let archivo of ticket.archivosSalida"
+                                                                    class="flex flex-col items-center file-container cursor-pointer hover:bg-blue-100 p-2 rounded transition"
+                                                                    (click)="descargarBase64(archivo)">
+                                                                    <p-button class="icon-button" [rounded]="true"
+                                                                        [outlined]="true" [style.font-size]="'1.25rem'"
+                                                                        [icon]="'bi bi-file-earmark-text'">
+                                                                    </p-button>
+                                                                    <span
+                                                                        class="text-sm text-center mt-1 font-semibold max-w-[180px] truncate"
+                                                                        [title]="archivo.nombreArchivo">
+                                                                        {{ archivo.nombreArchivo }}
+                                                                    </span>
+                                                                </div>
+                                                            </ng-container>
+                                                            <ng-template #noFilesSalida>
+                                                                <p class="text-xs text-muted text-center col-span-2">No
+                                                                    hay
+                                                                    archivos disponibles.</p>
+                                                            </ng-template>
+                                                        </div>
+                                                    </p-popover>
+
+                                                </div>
+                                            </td>
+
+
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space"></div>
+
+                    <div class="ticket-system">
+                        <div class="pt-4">
+                            <p-button label="Consultar" type="submit"
+                                [disabled]="ConsultarForm.invalid || isLoadingConsultar"
+                                [icon]="isLoadingConsultar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                                styleClass="btn fw-bolder custom-1 w-full">
+                            </p-button>
+                        </div>
+                    </div>
+                </p-fluid>
+                <br>
+                <br>
+            </form>
+        </p-panel>
+    </div>
+</div>
+<div class="space"></div>
+
+<!-------------- Dialog de Registro Usuario ---------- -->
+<p-dialog header="Header" [(visible)]="visibleActualizar" [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false" (onHide)="onModalHide()">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Actualización de Credencial de Usuario </h2>
+        </div>
+    </ng-template>
+
+    <form [formGroup]="ActualizarForm" (ngSubmit)="actualizarCredencialPersona()">
+        <p-panel>
+            <div class="col align-items-center justify-content-center">
+                <div class="flex flex-column">
+                    <p-fluid>
+
+                        <div style="text-align: justify; padding: 0 1rem;">
+                            Como recomendación, te sugerimos agregar el nombre de una persona de contacto o de la
+                            empresa como referencia en este ticket, utilizando el correo proporcionado. Esto nos
+                            permitirá contar con un punto de comunicación adicional, lo cual facilitará el seguimiento y
+                            resolución de cualquier consulta o actualización relacionada con el ticket.
+                        </div>
+
+                        <div style="text-align: justify; padding: 0 1rem; margin-top: 1rem;">
+                            Es importante aclarar que agregar una persona de referencia no es obligatorio. Si lo
+                            prefieres, puedes cerrar esta pestaña y continuar con tu consulta del ticket. No afectará el
+                            proceso ni la atención del mismo.
+                        </div>
+
+
+                        <div class="space"></div>
+
+                        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <p-iftalabel>
+                                <input pInputText id="firstName" formControlName="primerNombre" appCapitalizable
+                                    appValidaciones [nameValidation]="true" maxlength="20" />
+                                <label for="firstName">1. Primer Nombre *</label>
+                                <div *ngIf="ActualizarForm.get('primerNombre')?.hasError('required') && ActualizarForm.get('primerNombre')?.touched"
+                                    class="text-red-500 text-sm sm:col-span-2 ml-2">
+                                    El primer nombre es obligatorio *.
+                                </div>
+                                <div *ngIf="ActualizarForm.get('primerNombre')?.hasError('pattern') && ActualizarForm.get('primerNombre')?.touched"
+                                    class="text-red-500 text-sm sm:col-span-2 ml-2">
+                                    Solo se permiten letras.
+                                </div>
+                            </p-iftalabel>
+                            <p-iftalabel>
+                                <input pInputText id="secondName" formControlName="segundoNombre" appCapitalizable
+                                    appValidaciones [nameValidationTwoWords]="true" maxlength="30" />
+                                <label for="blockspace">2. Segundo Nombre</label>
+                                <div *ngIf="ActualizarForm.get('segundoNombre')?.hasError('pattern') && ActualizarForm.get('segundoNombre')?.touched"
+                                    class="text-red-500 text-sm sm:col-span-2 ml-2">
+                                    Solo se permiten letras y un espacio.
+                                </div>
+                            </p-iftalabel>
+                        </div>
+
+                        <div class="space"></div>
+
+                        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <p-iftalabel>
+                                <input pInputText id="lastName" formControlName="primerApellido" appCapitalizable
+                                    appValidaciones [nameValidation]="true" maxlength="20" />
+                                <label for="blockspace">3. Primer Apellido *</label>
+                                <div *ngIf="ActualizarForm.get('primerApellido')?.hasError('required') && ActualizarForm.get('primerApellido')?.touched"
+                                    class="text-red-500 text-sm sm:col-span-2 ml-2">
+                                    El primer apellido es obligatorio *.
+                                </div>
+                                <div *ngIf="ActualizarForm.get('primerApellido')?.hasError('pattern') && ActualizarForm.get('primerApellido')?.touched"
+                                    class="text-red-500 text-sm sm:col-span-2 ml-2">
+                                    Solo se permiten letras.
+                                </div>
+
+                            </p-iftalabel>
+                            <p-iftalabel>
+                                <input pInputText id="secondLastName" formControlName="segundoApellido" appCapitalizable
+                                    appValidaciones [nameValidationTwoWords]="true" maxlength="30" />
+                                <label for="secondLastName">4. Segundo Apellido</label>
+                                <div *ngIf="ActualizarForm.get('segundoApellido')?.hasError('pattern') && ActualizarForm.get('segundoApellido')?.touched"
+                                    class="text-red-500 text-sm sm:col-span-2 ml-2">
+                                    Solo se permiten letras y un espacio.
+                                </div>
+                            </p-iftalabel>
+                        </div>
+
+                        <div class="space"></div>
+
+                        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <p-iftalabel class="sm:col-span-2">
+                                <input pInputText id="phone" formControlName="telefono" appValidaciones
+                                    [phoneValidation]="true" maxlength="20" />
+                                <label for="phone">6. Teléfono de Contacto *</label>
+                                <div *ngIf="ActualizarForm.get('telefono')?.hasError('required') && ActualizarForm.get('telefono')?.touched"
+                                    class="text-red-500 text-sm sm:col-span-2 ml-2">
+                                    El numero de teléfono es obligatorio *.
+                                </div>
+                            </p-iftalabel>
+                        </div>
+
+                        <div class="space"></div>
+
+                        <div class="pt-4">
+                            <p-button label="Enviar" type="submit"
+                                [disabled]="ActualizarForm.invalid || isLoadingActualizar"
+                                [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                                styleClass="btn fw-bolder custom-1 w-full">
+                            </p-button>
+                        </div>
+                    </p-fluid>
+                </div>
+            </div>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Estados por Etapa---------- -->
+<p-dialog header="Header" [(visible)]="visibleEtapas" [modal]="true"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '60vw' }" [draggable]="false"
+    [resizable]="false">
+
+
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Etapas del Ticket {{ solicitudSeleccionada?.ticket }}</h2>
+        </div>
+    </ng-template>
+
+
+    <p-table [value]="estadosSeleccionados" columnResizeMode="expand" showGridlines
+        [tableStyle]="{ 'min-width': '50rem' }">
+        <ng-template pTemplate="header">
+            <tr>
+                <th class="centered-header">Etapa</th>
+                <th class="centered-header">Estado</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-rowData>
+            <tr>
+                <td class="centered-cell">{{ rowData.etapa }}</td>
+                <td class="centered-cell">
+                    <span class="px-2 py-1 rounded-full text-sm font-medium shadow-sm inline-block" [ngStyle]="{
+            backgroundColor: srvHistorial.getColorFondo(rowData.idEstadoSolicitud),
+            color: srvHistorial.getColorTexto(rowData.idEstadoSolicitud)
+          }">
+                        {{ rowData.estadoSolicitud }}
+                    </span>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+</p-dialog>

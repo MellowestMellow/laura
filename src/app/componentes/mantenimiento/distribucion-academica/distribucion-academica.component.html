@@ -1,0 +1,304 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+<div class="custom-container">
+  <p-panel class="transparente">
+
+    <ng-template pTemplate="header">
+      <div class="boton-container">
+        <p-button icon="pi pi-angle-double-left" (click)="regresarPanel()" variant="outlined"
+          pTooltip="Regresar a Ajustes del Sistema" tooltipStyleClass="tooltip-custom-1" />
+      </div>
+      <div class="header-container title-header gap-2">
+        <span>
+          Mantenimiento de Carga Académica
+        </span>
+      </div>
+    </ng-template>
+
+    @if(loadingtable){
+      <div
+        class="flex flex-col items-center justify-center text-center h-full p-4"
+        style="background-color: transparent;">
+        <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+        <p class="font-semibold text-gray-700 text-lg">Cargando información soobre carga académica de la unidad, por favor
+          espera...</p>
+      </div>
+    }
+    @if(!loadingtable && cargaAcademica.length > 0){
+      <p-panel class="transparente">
+        <p-table #dtTipo [value]="cargaAcademica" [paginator]="true" columnResizeMode="expand" showGridlines
+          class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+          [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+          [globalFilterFields]="['nombreCompleto', 'carrerasTexto']">
+
+          <ng-template pTemplate="caption">
+            <div class="toolbar">
+              <!-- Botones a la izquierda -->
+              <div class="centraciones">
+                <!-- Contenedor de los botones a la izquierda -->
+                <div class="left-buttons">
+                  @if (permisoInsertar) {
+                  <p-button label="Registrar" (click)="showDialog('Registrar')"
+                    [disabled]="loadingDialogRegistrar"
+                    [icon]="loadingDialogRegistrar ? 'pi pi-spin pi-spinner' : 'fw-bolder bi bi-plus-circle'"
+                    styleClass="btn fw-bolder custom-1" raised text><!--icon="bi bi-plus-circle fw-bolder custom-icon-1"-->
+                  </p-button>
+                  }
+                  <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder"
+                    label="Reportes" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised
+                    text />
+                  <p-popover #op>
+                  <div class="flex flex-col gap-4">
+                    <div>
+                      <p-button label="PDF" icon="bi bi-filetype-pdf fw-medium icon-big"
+                        styleClass="btn fw-bolder custom-2-1 w-full" raised text>
+                      </p-button>
+                    </div>
+                    <div>
+                      <p-button label="Excel" icon="bi bi-filetype-xlsx fw-medium icon-big"
+                        styleClass="btn fw-bolder custom-2-2 w-full" raised text>
+                      </p-button>
+                    </div>
+                  </div>
+                </p-popover>
+              </div>
+
+              <!-- Contenedor de los botones a la derecha -->
+              <div class="right-search">
+                <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                  styleClass="btn custom-slash" class="responsive" (click)="clear(dtTipo)" />
+
+                  <p-iconField iconPosition="right">
+                    <p-inputIcon class="pi pi-search" />
+                    <input pInputText type="text" class="custom-search-input" placeholder="Buscar datos"
+                      [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dtTipo)" />
+                    </p-iconField>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+
+
+            <ng-template pTemplate="header">
+            <tr>
+              <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                <div class="flex items-center">
+                  N°
+                  <p-columnFilter type="text" field="idTipoSolicitud" display="menu" />
+                </div>
+              </th>
+              <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                <div class="flex items-center">
+                  Nombre Docente Responsable
+                  <p-columnFilter type="text" field="ticket" display="menu" />
+                </div>
+              </th>
+              <th class="centered-header" style="min-width: 20rem" rowspan="2">
+                <div class="flex items-center">
+                  Distribución de Carga Académica
+                  <p-columnFilter type="text" field="nombreSolicitud" display="menu"></p-columnFilter>
+                </div>
+              </th>
+              @if(permisoActualizar){
+                <th class="centered-header" style="min-width: 8rem" rowspan="2">
+                  <div class="flex align-items-center">Acciones</div>
+                </th>
+              }
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-carga let-i="rowIndex">
+            <tr>
+              <td class="centered-cell">{{ i + 1 }}</td>
+              <td class="centered-cell">{{ carga.nombreCompleto || 'No proporcionado' }}</td>
+              <td class="centered-cell" [innerHTML]="cargaPorDocente[carga.idUsuario]?.join('<br>') || 'No proporcionado'"></td>
+
+              <!-- Columna de acciones -->
+             @if(permisoActualizar || permisoEliminar){
+              <td class="centered-cell">
+                <div class="flex justify-center items-center">
+                  <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                    styleClass="btn fw-bolder custom-8" raised text></p-button>
+                  <p-popover #op>
+
+                  <div class="flex flex-col gap-4">
+                    @if (permisoActualizar) {
+                      <p-button label="Actualizar" (click)="cargarDatos(carga, 'Modificar')" icon="pi pi-user-edit fw-medium"
+                        [disabled]="loadingDialogGeneral || visibleModificar || visibleEliminar"
+                        styleClass="btn fw-bolder custom-1 w-full" text>
+                      </p-button>
+                    }
+
+                    @if (permisoEliminar) {
+                      <p-button label="Eliminar" (click)="cargarDatos(carga, 'Eliminar')"
+                        [disabled]="loadingDialogGeneral || visibleModificar || visibleEliminar"
+                        [icon]="loadingDialogEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle'"
+                        styleClass="btn fw-bolder custom-2-1 w-full" text>
+                      </p-button>
+                    }
+                  </div>
+                </p-popover>
+
+              </div>
+              </td>
+            }
+          </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="11" class="centered-cell">
+                No se encontraron datos.
+              </td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+        <br>
+      </p-panel>
+    }
+  </p-panel>
+</div>
+
+<!-------------- Dialog de Registro Distribución Académica ---------- -->
+<p-dialog header="Header" [(visible)]="visibleRegistrar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Registro de Carga Académica</h2>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="registrarDistribucion()" [formGroup]="RegistrarForm">
+    <p-panel>
+
+      <p-fluid>
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-select [options]="docentes" formControlName="idUsuario" optionLabel="nombre" optionValue="idUsuario"
+              [showClear]="true" [filter]="true" filterBy="nombre" appendTo="body" class="w-full" />
+            <label for="firstName">1. Docente*</label>
+            @if (RegistrarForm.get('idUsuario')?.hasError('required') && RegistrarForm.get('idUsuario')?.touched)
+            {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              Este campo es obligatorio *.
+            </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <!-- hacerlo en formato de tabla para ir agregando o quitando carreras -->
+            <p-select [options]="carreras" formControlName="idTituloAcademico" optionLabel="nombre" optionValue="idTituloAcademico"
+              [showClear]="true" [filter]="true" filterBy="nombre" appendTo="body" class="w-full" />
+            <label for="dd-city">2. Carreras *</label>
+            @if (RegistrarForm.get('carreras')?.hasError('required') && RegistrarForm.get('carreras')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              Este campo es obligatorio *.
+            </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit" [disabled]="RegistrarForm.invalid || isLoadingRegistrar"
+            [icon]="isLoadingRegistrar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+      </p-fluid>
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Actualización de Distribución Académica ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Actualización de Carga Académica del docente {{ nombreDocente }}</h2>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="actualizarDistribucion()" [formGroup]="ActualizarForm">
+    <p-panel>
+
+      <p-fluid>
+
+        <div class="grid grid-cols-2 gap-4">
+          <p-iftalabel class="col-span-full">
+            <p-select formControlName="idEstadoUsuario" optionLabel="estado"
+              optionValue="idEstadoUsuario" [showClear]="true" [filter]="true" filterBy="estado" appendTo="body"
+              class="w-full" /><!--[options]="estadoUsuario"-->
+            <label for="dd-city">1. Carreras *</label>
+            @if (ActualizarForm.get('idEstadoUsuario')?.hasError('required') &&
+            ActualizarForm.get('idEstadoUsuario')?.touched) {
+            <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+              El estado es obligatorio *.
+            </div>
+            }
+
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit" [disabled]="ActualizarForm.invalid || isLoadingActualizar"
+            [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+      </p-fluid>
+
+
+    </p-panel>
+  </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Eliminar Carga Distribución Académica ---------- -->
+<p-dialog header="Header" [(visible)]="visibleEliminar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Eliminar Carga Académica </h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="EliminarForm">
+    <p-panel>
+      <div style="padding: 0; height: auto; width: 100%; position: relative; text-align: center;">
+        Estás a punto de eliminar la carga académica del docente <strong>{{ nombreDocente }}</strong>.
+      </div>
+      <br>
+      <div style="text-align: justify; padding: 0 1rem;">
+        Esta acción eliminará todo registro relacionado a la carga académica de este docente de forma inmediata. A partir de ese momento, no podrá asignarse automaticamente
+        las gestiones académicas para el docente, implicará una asignación manual dentro de la plataforma o registrar nuevamente una distribución.
+        <br><br>
+        Por favor, asegúrate de que comprendes las consecuencias de esta acción antes de proceder.
+      </div>
+      <div style="text-align: center; padding-top: 1rem;">
+        ¿Estás seguro de que deseas continuar con el proceso de inactivación?
+      </div>
+
+      <p-footer style="display: flex; justify-content: center; gap: 10px;">
+        <button pButton type="button" [disabled]="isLoadingEliminar"
+          [icon]="isLoadingEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+          class="btn fw-bolder custom-1 w-full"></button><!--(click)="handleAceptarInactivar()"-->
+
+        <button pButton type="button" icon="bi bi-x-circle" label="Cancelar" class="btn fw-bolder custom-2-1 w-full"
+          [disabled]="isLoadingEliminar" (click)="visibleEliminar = false && loadingDialogEliminar = false"></button>
+      </p-footer>
+    </p-panel>
+  </form>
+
+</p-dialog>

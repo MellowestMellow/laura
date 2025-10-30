@@ -1,0 +1,619 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+
+@if (loadingtable) {
+<div class="flex flex-col items-center justify-center text-center h-full p-4" style="background-color: transparent;">
+  <div class="custom-spinner mb-4"></div>
+</div>
+}
+
+@if (!loadingtable) {
+<div class="custom-container">
+  <p-panel class="transparente">
+
+    <ng-template pTemplate="header">
+      <!-- <div class="boton-container">
+        <p-button icon="pi pi-angle-double-left" (click)="regresarPanel()" variant="outlined" />
+      </div> -->
+      <div class="header-container title-header gap-2">
+
+          <span>{{ tituloUsuarios }}</span>
+
+      </div>
+    </ng-template>
+    <br>
+
+    <p-table #dt [value]="usuarios" [paginator]="true" columnResizeMode="expand" showGridlines
+      [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [rowsPerPageOptions]="[5, 10, 25]" dataKey="id"
+      [globalFilterFields]="['nombre','correo','numeroEmpleado','estadoUsuario']">
+
+      <ng-template pTemplate="caption">
+        <div class="toolbar">
+          <!-- Botones a la izquierda -->
+          <div class="centraciones">
+            <!-- Contenedor de los botones a la izquierda -->
+            <div class="left-buttons">
+              @if (permisoInsertar) {
+              <p-button label="Registrar" (click)="showDialog('Registrar')"
+                icon="bi bi-plus-circle fw-bolder custom-icon-1" styleClass="btn fw-bolder custom-1" raised text>
+              </p-button>
+              }
+                  <p-button (onClick)="op.toggle($event)" icon="bi bi-file-earmark-spreadsheet fw-bolder" label="Reportes"
+                    variant="text" [raised]="true" styleClass="btn fw-bolder custom-7" raised text></p-button>
+
+                  <p-popover #op>
+                    <div class="flex flex-col gap-4">
+                      <div>
+                        <p-button 
+                          label="PDF" 
+                          icon="bi bi-filetype-pdf fw-medium icon-big"
+                          styleClass="btn fw-bolder custom-2-1 w-full" 
+                          raised text
+                          (click)="generarReportePDF()">
+                        </p-button>
+                      </div>
+                      <div>
+                        <p-button 
+                          label="Excel" 
+                          icon="bi bi-filetype-xlsx fw-medium icon-big"
+                          styleClass="btn fw-bolder custom-2-2 w-full" 
+                          raised text
+                          (click)="generarReporteExcel()">
+                        </p-button>
+                      </div>
+                    </div>
+                  </p-popover>
+                  </div>
+
+
+            <!-- Contenedor de los botones a la derecha -->
+            <div class="right-search">
+              <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true" styleClass="btn custom-slash"
+                (click)="clear(dt)" class="responsive" />
+
+              <p-iconField iconPosition="right">
+                <p-inputIcon class="pi pi-search" />
+                <input pInputText type="text" class="custom-search-input" placeholder="Buscar usuario"
+                  [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dt)" />
+              </p-iconField>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th class="centered-header" style="min-width: 5rem">
+            <div class="flex items-center">
+              N°
+              <p-columnFilter type="text" field="numero" display="menu" />
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 12rem">
+            <div class="flex items-center">
+              Nombre
+              <p-columnFilter type="text" field="nombre" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 10rem">
+            <div class="flex items-center">
+              Numero de Empleado
+              <p-columnFilter type="text" field="numeroEmpleado" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 8rem">
+            <div class="flex items-center">
+              Correo Electrónico
+              <p-columnFilter type="text" field="correo" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 8rem">
+            <div class="flex items-center">
+              Unidad Académica
+              <p-columnFilter type="text" field="estadoUsuario" display="menu"></p-columnFilter>
+            </div>
+          </th>
+                    <th class="centered-header" style="min-width: 8rem">
+            <div class="flex items-center">
+              Estado
+              <p-columnFilter type="text" field="estadoUsuario" display="menu"></p-columnFilter>
+            </div>
+          </th>
+          <th class="centered-header" style="min-width: 12rem">
+            <div class="flex items-center">
+              Fecha de Expiración de Contraseña
+              <p-columnFilter type="date" dateFormat="dd 'de' MM 'del' yy" field="fechaVencimiento"
+                display="menu"></p-columnFilter>
+            </div>
+          </th>
+          @if (permisoActualizar || permisoEliminar) {
+          <th class="centered-header" style="min-width: 8rem">
+            <div class="flex align-items-center">Acciones</div>
+          </th>
+          }
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-usuario>
+        <tr>
+          <td class="centered-cell">{{ usuario.numero || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ usuario.nombre || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ usuario.numeroEmpleado || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ usuario.correo || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ usuario.nombreUnidadAcademica || 'No proporcionado' }}</td>
+          <td class="centered-cell">{{ usuario.estadoUsuario || 'No proporcionado' }}</td>
+          <td class="centered-cell">
+            {{ usuario.fechaVencimiento ? (usuario.fechaVencimiento | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a") : 'No
+            proporcionado' }}
+          </td>
+          @if (permisoActualizar || permisoEliminar) {
+          <td class="centered-cell">
+            <div class="flex justify-center items-center">
+              <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                styleClass="btn fw-bolder custom-8" raised text></p-button>
+              <p-popover #op>
+                <div class="flex flex-col gap-4">
+
+                @if (permisoActualizar) {
+                  <p-button 
+                    label="Actualizar"
+                    (click)="cargarDatos(usuario, 'Modificar')"
+                    [disabled]="loadingDialogGeneral || loadingDialogActualizar"
+                    [icon]="loadingDialogActualizar ? 'pi pi-spin pi-spinner' : 'pi pi-user-edit fw-medium'"
+                    styleClass="btn fw-bolder custom-1 w-full"
+                    text>
+                  </p-button>
+                }
+
+
+                  @if (permisoActualizar && roles.includes(1)) {
+                  <p-button label="Roles" (click)="cargarDatosRoles(usuario)" [disabled]="isLoadingDatosRol"
+                    [icon]="isLoadingDatosRol ? 'pi pi-spin pi-spinner' : 'pi pi-file-edit fw-medium'"
+                    styleClass="btn fw-bolder custom-7 w-full" text>
+                  </p-button>
+                  }
+
+                </div>
+              </p-popover>
+            </div>
+          </td>
+          }
+
+
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+
+        <tr>
+          <td colspan="8" class="centered-cell">
+            No se encontraron usuarios.
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+    <br>
+
+  </p-panel>
+</div>
+}
+
+<!-------------- Dialog de Registro Usuario ---------- -->
+<p-dialog header="Registro de Usuario" [(visible)]="visibleRegistrar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Registro de Usuario</h2>
+    </div>
+  </ng-template>
+
+  <form (ngSubmit)="insertarUsuarioPersona()" [formGroup]="RegistrarForm">
+    <p-panel>
+      <p-fluid>
+
+        <!-- Nombres -->
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel>
+            <input pInputText id="firstName" formControlName="primerNombre" appCapitalizable appValidaciones
+              [nameValidation]="true" maxlength="20" />
+            <label for="firstName">1. Primer Nombre *</label>
+            @if (RegistrarForm.get('primerNombre')?.hasError('required') && RegistrarForm.get('primerNombre')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                El primer nombre es obligatorio *.
+              </div>
+            }
+            @if (RegistrarForm.get('primerNombre')?.hasError('pattern') && RegistrarForm.get('primerNombre')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                Solo se permiten letras.
+              </div>
+            }
+          </p-iftalabel>
+
+          <p-iftalabel>
+            <input pInputText id="secondName" formControlName="segundoNombre" appCapitalizable appValidaciones
+              [nameValidationTwoWords]="true" maxlength="30" />
+            <label for="secondName">2. Segundo Nombre</label>
+            @if (RegistrarForm.get('segundoNombre')?.hasError('pattern') && RegistrarForm.get('segundoNombre')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                Solo se permiten letras y un espacio.
+              </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <!-- Apellidos -->
+        <div class="space"></div>
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel>
+            <input pInputText id="lastName" formControlName="primerApellido" appCapitalizable appValidaciones
+              [nameValidation]="true" maxlength="20" />
+            <label for="lastName">3. Primer Apellido *</label>
+            @if (RegistrarForm.get('primerApellido')?.hasError('required') && RegistrarForm.get('primerApellido')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                El primer apellido es obligatorio *.
+              </div>
+            }
+            @if (RegistrarForm.get('primerApellido')?.hasError('pattern') && RegistrarForm.get('primerApellido')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                Solo se permiten letras.
+              </div>
+            }
+          </p-iftalabel>
+
+          <p-iftalabel>
+            <input pInputText id="secondLastName" formControlName="segundoApellido" appCapitalizable appValidaciones
+              [nameValidationTwoWords]="true" maxlength="30" />
+            <label for="secondLastName">4. Segundo Apellido</label>
+            @if (RegistrarForm.get('segundoApellido')?.hasError('pattern') && RegistrarForm.get('segundoApellido')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                Solo se permiten letras y un espacio.
+              </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <!-- Género -->
+        <div class="space"></div>
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <p-select formControlName="idGenero" [options]="genero" optionLabel="genero" optionValue="idGenero"
+              [showClear]="true" [filter]="true" filterBy="genero" appendTo="body" class="w-full" />
+            <label for="dd-city">5. Género *</label>
+            @if (RegistrarForm.get('idGenero')?.hasError('required') && RegistrarForm.get('idGenero')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                El género es obligatorio *.
+              </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <!-- Teléfonos -->
+        <div class="space"></div>
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel>
+            <input pInputText id="phone" placeholder="+504 9999-9999" formControlName="telefono" appValidaciones
+              [phoneValidation]="true" maxlength="20" />
+            <label for="phone">6. Teléfono *</label>
+            @if (RegistrarForm.get('telefono')?.hasError('required') && RegistrarForm.get('telefono')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                El número de teléfono es obligatorio *.
+              </div>
+            }
+          </p-iftalabel>
+
+          <p-iftalabel>
+            <input pInputText id="altPhone" placeholder="2216-6100 - Ext. 110207" appValidaciones
+              [phoneValidation]="true" formControlName="telefonoAlterno" maxlength="20" />
+            <label for="altPhone">7. Teléfono Alterno</label>
+          </p-iftalabel>
+        </div>
+
+        <!-- Número de Empleado -->
+        <div class="space"></div>
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <input pInputText id="numEmpleado" placeholder="251026" formControlName="numEmpleado" appValidaciones
+              [onlyNumbersValidation]="true" maxlength="10" />
+            <label for="numEmpleado">8. Número de Empleado *</label>
+            @if (RegistrarForm.get('numEmpleado')?.hasError('required') && RegistrarForm.get('numEmpleado')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                El número de empleado es obligatorio *.
+              </div>
+            }
+            @if (RegistrarForm.get('numEmpleado')?.hasError('pattern') && RegistrarForm.get('numEmpleado')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                Solo se aceptan números.
+              </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <!-- Correo -->
+        <div class="space"></div>
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p-iftalabel class="sm:col-span-2">
+            <input pInputText id="email" placeholder="direccion@unah.edu.hn" formControlName="correo" appValidaciones
+              [emailValidation]="true" maxlength="50" />
+            <label for="email">9. Correo Electrónico *</label>
+            @if (RegistrarForm.get('correo')?.hasError('required') && RegistrarForm.get('correo')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                El correo electrónico es obligatorio *.
+              </div>
+            }
+            @if (RegistrarForm.get('correo')?.hasError('dominioInvalido') && RegistrarForm.get('correo')?.touched)
+            {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                Solo se aceptan correos que terminen en &#64;unah.hn o &#64;unah.edu.hn *
+              </div>
+            }
+          </p-iftalabel>
+        </div>
+
+              <!-- Unidad Académica -->
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="space"></div>
+          @if (roles.includes(1))
+          {
+            <p-iftalabel class="sm:col-span-2">
+              <p-select
+                id="unidadAcademica"
+                formControlName="idUnidadAcademica"
+                [options]="unidades"
+                optionLabel="nombreUnidadAcademica"
+                optionValue="idUnidadAcademica"
+                placeholder="Seleccione una Unidad Académica"
+                [showClear]="true"
+                filter="true"
+                filterBy="nombreUnidadAcademica"
+                class="w-full"
+                appendTo="body"
+              >
+              </p-select>
+              <label for="unidadAcademica">Unidad Académica *</label>
+
+              @if (ActualizarForm.get('idUnidadAcademica')?.hasError('required') &&
+                  ActualizarForm.get('idUnidadAcademica')?.touched)
+              {
+                <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                  Seleccione una unidad académica.
+                </div>
+              }
+            </p-iftalabel>
+          }
+        </div>
+        <div class="space"></div>
+
+
+        <!-- Botón Enviar -->
+        <div class="space"></div>
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit" [disabled]="RegistrarForm.invalid || isLoadingRegistrar"
+            [icon]="isLoadingRegistrar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+
+      </p-fluid>
+    </p-panel>
+  </form>
+</p-dialog>
+
+
+<!-------------- Dialog de Actualización de Usuario ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Actualización de {{ nombreUsuario }}</h2>
+    </div>
+  </ng-template>
+
+  <!-- Aquí se cambió a onSubmitActualizar() -->
+  <form (ngSubmit)="onSubmitActualizar()" [formGroup]="ActualizarForm">
+    <p-panel>
+      <p-fluid>
+
+        <!-- Estado del usuario -->
+        <div class="grid grid-cols-2 gap-4">
+          <p-iftalabel class="col-span-full">
+            <p-select formControlName="idEstadoUsuario" [options]="estadoUsuario" optionLabel="estado"
+              optionValue="idEstadoUsuario" [showClear]="true" [filter]="true" filterBy="estado" appendTo="body"
+              class="w-full" />
+            <label for="dd-city">1. Estado del Usuario *</label>
+            @if (ActualizarForm.get('idEstadoUsuario')?.hasError('required') &&
+            ActualizarForm.get('idEstadoUsuario')?.touched) {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                El estado es obligatorio *.
+              </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <!-- Fecha de expiración -->
+        <div class="grid grid-cols-2 gap-4">
+          <p-iftalabel class="col-span-full">
+            <p-datepicker formControlName="dfFechaVencimientoUsuario" appendTo="body" [showButtonBar]="true"
+              inputId="date" [iconDisplay]="'input'" [showIcon]="true" iconDisplay="input" />
+            <label for="date">2. Fecha de Expiración de Contraseña *</label>
+            @if (ActualizarForm.get('dfFechaVencimientoUsuario')?.hasError('required') &&
+            ActualizarForm.get('dfFechaVencimientoUsuario')?.touched) {
+              <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                La fecha de expiración es obligatoria *.
+              </div>
+            }
+          </p-iftalabel>
+        </div>
+
+        <div class="space"></div>
+
+        <!-- Unidad Académica -->
+        <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space"></div>
+          @if (roles.includes(1)) {
+            <p-iftalabel class="sm:col-span-2">
+              <p-select
+                id="unidadAcademica"
+                formControlName="idUnidadAcademica"
+                [options]="unidades"
+                optionLabel="nombreUnidadAcademica"
+                optionValue="idUnidadAcademica"
+                placeholder="Seleccione una Unidad Académica"
+                [showClear]="true"
+                filter="true"
+                filterBy="nombreUnidadAcademica"
+                class="w-full"
+                appendTo="body"
+              >
+              </p-select>
+              <label for="unidadAcademica">Unidad Académica *</label>
+
+              @if (ActualizarForm.get('idUnidadAcademica')?.hasError('required') &&
+                  ActualizarForm.get('idUnidadAcademica')?.touched) {
+                <div class="text-red-500 text-sm sm:col-span-2 ml-2">
+                  Seleccione una unidad académica.
+                </div>
+              }
+            </p-iftalabel>
+          }
+        </div>
+
+        <div class="space"></div>
+
+        <!-- Botón Enviar -->
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit" [disabled]="ActualizarForm.invalid || isLoadingActualizar"
+            [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+            styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+
+      </p-fluid>
+    </p-panel>
+  </form>
+</p-dialog>
+
+<!-------------- Dialog de Inactivación de Usuario ---------- -->
+<p-dialog header="Header" [(visible)]="visibleInactivar" [modal]="true"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Inactivación de Usuario </h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="InactivarForm">
+    <p-panel>
+      <div style="padding: 0; height: auto; width: 100%; position: relative; text-align: center;">
+        Estás a punto de inactivar la cuenta del usuario <strong>{{ nombreUsuario }}</strong>.
+      </div>
+      <br>
+      <div style="text-align: justify; padding: 0 1rem;">
+        Esta acción deshabilitará su acceso al sistema de forma inmediata. A partir de ese momento, no podrá iniciar
+        sesión, acceder a sus servicios, ni ejecutar ninguna acción dentro de la plataforma.
+        <br><br>
+        Además, se revocarán todos sus permisos y quedarán suspendidas sus operaciones pendientes, en caso de haberlas.
+        Esta medida puede revertirse posteriormente reactivando la cuenta, pero mientras tanto, el usuario quedará
+        completamente bloqueado.
+        <br><br>
+        Por favor, asegúrate de que comprendes las consecuencias de esta acción antes de proceder.
+      </div>
+      <div style="text-align: center; padding-top: 1rem;">
+        ¿Estás seguro de que deseas continuar con el proceso de inactivación?
+      </div>
+
+      <p-footer style="display: flex; justify-content: center; gap: 10px;">
+        <button pButton type="button" [disabled]="isLoadingInactivar"
+          [icon]="isLoadingInactivar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+          class="btn fw-bolder custom-1 w-full" (click)="handleAceptarInactivar()"></button>
+
+        <button pButton type="button" icon="bi bi-x-circle" label="Cancelar" class="btn fw-bolder custom-2-1 w-full"
+          [disabled]="isLoadingInactivar" (click)="visibleInactivar = false"></button>
+      </p-footer>
+    </p-panel>
+  </form>
+</p-dialog>
+
+
+<!-------------- Dialog de Roles de Usuario ---------- -->
+<p-dialog header="Header" [(visible)]="visibleRol" [modal]="true" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+  [style]="{ width: '50vw' }" [draggable]="false" [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header">
+      <h2 class="header-titles">Roles del Usuario {{ nombreUsuario }} </h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="RolesForm" (ngSubmit)="actualizarRolUsuario()">
+    <p-panel>
+      <p-fluid>
+
+        <div [formGroup]="RolesUsuarioForm">
+          <div formArrayName="rolUsuario" class="table-container">
+            <p-table [value]="rolUsuario.controls" showGridlines [tableStyle]="{ 'min-width': '30rem' }" dataKey="id">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="centered-header" style="min-width: 15rem">Rol</th>
+                  <th class="centered-header" style="min-width: 2rem">Eliminar</th>
+                </tr>
+              </ng-template>
+
+              <ng-template let-rowData let-rowIndex="rowIndex" pTemplate="body">
+                <tr [formGroupName]="rowIndex">
+                  <td class="centered-cell">
+                    <p-iftalabel class="sm:col-span-2">
+                      <p-select formControlName="idRol" [options]="getRolesDisponibles(rowData)" optionLabel="rol"
+                        [disabled]=" isLoadingRol" optionValue="idRol" [showClear]="true" [filter]="true" filterBy="rol"
+                        appendTo="body" class="w-full">
+                      </p-select>
+                      <label>Rol del Usuario</label>
+                    </p-iftalabel>
+                  </td>
+                  <td class="centered-cell">
+                    <button type="button" pButton icon="pi pi-trash" (click)="removeRow(rowIndex, 1)"
+                      [disabled]=" isLoadingRol" class="p-button-rounded p-button-danger">
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+
+              <ng-template pTemplate="footer">
+                <tr>
+                  <td colspan="2">
+                    <button type="button" (click)="addRow(1)" pButton icon="pi pi-plus" label="Agregar Rol"
+                      [disabled]=" isLoadingRol" class="p-button-text">
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+
+
+        <div class="pt-4">
+          <p-button label="Enviar" type="submit" [disabled]="RolesForm.invalid || isLoadingRol"
+            [icon]="isLoadingRol ? 'pi pi-spin pi-spinner' : 'bi bi-send'" styleClass="btn fw-bolder custom-1 w-full">
+          </p-button>
+        </div>
+      </p-fluid>
+    </p-panel>
+  </form>
+
+</p-dialog>

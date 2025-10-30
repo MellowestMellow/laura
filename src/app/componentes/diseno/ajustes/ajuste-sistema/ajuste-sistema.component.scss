@@ -1,0 +1,243 @@
+/* ------------------------------------------------------------------------------------------------- */
+/* Variables */
+/* ------------------------------------------------------------------------------------------------- */
+$primary-color: #003578;
+$secondary-color: #253a69;
+$light-gray: #d3d3d3;
+$border-color: #dee2e6;
+$error-color: red;
+$background-light: #f8f9fa;
+$background-header: #e9ecef;
+$text-dark: #495057;
+$text-black: #000;
+$text-white: #fff;
+
+/* ------------------------------------------------------------------------------------------------- */
+/* Estructura del HTML */
+/* ------------------------------------------------------------------------------------------------- */
+body, html {
+  background-color: #eae9e9  ; /* Azul claro */
+}
+
+
+.linea-de-color {
+  height: 4px;
+  background-color: $primary-color;
+  width: 100%;
+}
+
+.header-container {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  font-weight: bolder;
+  font-size: 1.55rem;
+}
+
+.title-header {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 6px;
+    background: linear-gradient(270deg, #229bb9, #253a69, #336699, #229bb9);
+    background-size: 400% 100%;
+    animation: gradientMove 3s ease infinite;
+    border-radius: 2px;
+  }
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.custom-container {
+  padding-left: 5%;
+  padding-right: 5%;
+ 
+  .toolbar {
+    width: 100%;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .right-search {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+
+  }
+
+  
+
+  .icon-size {
+    font-size: 2rem;  // Ajusta el tamaño a lo que desees
+  }
+
+  .descripcion-texto {
+    font-size: 1rem;  // Ajusta el tamaño a lo que desees
+    line-height: 1.6;   // Ajusta el espacio entre líneas si es necesario
+  }
+
+  .custom-carousel {
+    width: 100%;
+    max-width: 1200px;
+
+    ::ng-deep .p-carousel-content {
+      display: flex;
+      justify-content: center;
+    }
+
+    ::ng-deep .p-carousel-item {
+      display: flex;
+      justify-content: center;
+    }
+
+    ::ng-deep .p-carousel-item > div {
+      background-color: $background-light;
+      border: 1px solid $border-color;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+  }
+}
+
+.card-container {
+    border: 1px solid $border-color;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    background-color: $background-light;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 350px;  // Establece una altura fija
+  }
+
+  .metric-card {
+    width: 250px; /* O el tamaño que prefieras */
+    height: 150px; /* O el tamaño que prefieras */
+  }
+  
+
+.error-message {
+  color: $error-color;
+  font-size: 12px;
+  margin-left: 10px;
+}
+
+/* ------------------------------------------------------------------------------------------------- */
+/* Para Dispositivos */
+/* ------------------------------------------------------------------------------------------------- */
+
+@mixin responsive-layout {
+    .centracion {
+        margin-right: 2%;
+        margin-left: 7%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+
+        .col {
+            padding-right: 0;
+        }
+    }
+
+    .custom-container {
+        padding-left: 0%;
+        padding-right: 0%;
+    }
+}
+
+@mixin button-responsive {
+    .button-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .left-buttons,
+    .right-search {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .right-search {
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 880px) {
+    @include responsive-layout;
+    @include button-responsive;
+
+    .centraciones {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+    }
+
+    .left-buttons,
+    .right-search {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .right-search {
+        margin-left: 0;
+    }
+
+    .tamano {
+        height: 'autoResize';
+    }
+}
+
+@media (max-width: 479px) {
+    @include button-responsive;
+
+    .responsive {
+        display: none;
+    }
+}
+
+.no-results {
+  padding: 3rem 1rem;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+
+  .icono-error {
+    font-size: 3rem;
+    color: $primary-color;
+    display: block;
+  }
+
+  .mensaje-error {
+    font-size: 1.2rem;
+    color: $text-dark;
+    margin-top: 1rem;
+  }
+}

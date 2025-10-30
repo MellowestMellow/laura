@@ -1,0 +1,84 @@
+/* Estilos globales */
+body, html {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-container {
+  min-height: 100%;  /* Hace que el contenido ocupe toda la altura disponible */
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;  /* Esto hace que el contenido ocupe el espacio disponible entre el encabezado y el footer */
+}
+
+/* Footer Styles */
+.footer {
+  height: 80px;
+  background: #336699;
+  color: #FFFFFF;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  font-family: 'Inter var', sans-serif;
+  box-sizing: border-box;
+  margin-top: auto;  /* Esto hace que el footer se quede en la parte inferior */
+  
+  img {
+    height: 60px;
+    width: auto; /* Mantenemos la relación de aspecto */
+  }
+  
+  .header-container {
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center;    /* Centra verticalmente */
+    text-align: center;     /* Asegura que el texto esté centrado dentro del span */
+    font-weight: bolder;    /* Aplica negrita */
+    font-size: 0.90rem;
+    display: grid;
+    place-items: center; /* Centra horizontal y verticalmente */
+    width: 100%; /* Asegura que ocupe todo el ancho */
+    margin-right: 65px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .footer {
+    img:not(.mobile-only), /* Oculta las imágenes originales */
+    .header-container, /* Oculta el texto */
+    .header-container span { 
+      display: none !important;
+    }
+    
+    .mobile-only { /* Muestra la nueva imagen en móvil */
+      display: block;
+      margin: 0 auto; /* Centra la imagen */
+    }
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .mobile-only { /* Oculta la nueva imagen en pantallas grandes */
+    display: none;
+  }
+}
+
+/* Estilos para tablets (pantallas entre 769px y 1024px) */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .footer {
+    img { 
+      display: none !important; /* Oculta las imágenes en tablets */
+    }
+    
+    .header-container { 
+      display: block !important; /* Muestra el texto en tablets */
+      margin-left: 65px;
+    }
+  }
+}

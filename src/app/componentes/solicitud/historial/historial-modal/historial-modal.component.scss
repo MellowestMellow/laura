@@ -1,0 +1,19 @@
+::ng-deep .custom-timeline {
+  // En móviles, usar timeline vertical simple
+  @media (max-width: 575px) {
+    .p-timeline-event-opposite {
+      display: none !important; // Oculta lado opuesto
+    }
+    .p-timeline-event-content {
+      text-align: left !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+    .p-timeline-event-marker {
+      margin: 0 auto 1rem auto !important; // marcador al centro
+    }
+    .p-timeline-event-connector {
+      margin: 0 auto !important;
+    }
+  }
+}

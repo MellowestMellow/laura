@@ -1,0 +1,120 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }"></p-toast>
+
+@if (loadingtable) {
+<div class="flex flex-col items-center justify-center text-center h-full p-4" style="background-color: transparent;">
+    <div class="custom-spinner mb-4"></div>
+</div>
+}
+
+@if (!loadingtable) {
+<div class="custom-container">
+    <!-- Pestañas -->
+    <p-tabs value="0" class="mb-4">
+        <p-tablist>
+            <p-tab value="0">Notificaciones</p-tab>
+            <p-tab value="1">Recordatorios</p-tab>
+        </p-tablist>
+
+        <p-tabpanels>
+            <!-- PANEL NOTIFICACIONES -->
+            <p-tabpanel value="0">
+                <ng-container *ngTemplateOutlet="dtNotificaciones; context: { datos: notificaciones }"></ng-container>
+            </p-tabpanel>
+
+            <!-- PANEL RECORDATORIOS -->
+            <p-tabpanel value="1">
+                <ng-container *ngTemplateOutlet="dtNotificaciones; context: { datos: recordatorios }"></ng-container>
+            </p-tabpanel>
+        </p-tabpanels>
+    </p-tabs>
+</div>
+}
+
+<!-- Plantilla reutilizable de tabla -->
+<ng-template #dtNotificaciones let-datos="datos">
+    <form>
+        <div class="toolbar">
+            <!-- Botones a la izquierda -->
+            <div class="centraciones">
+                <!-- Contenedor de los botones a la izquierda -->
+                <div class="left-buttons">
+                    <div class="botonera__izquierda flex items-center gap-2">
+                        <p-button icon="pi pi-chevron-left" (click)="prev()" text></p-button>
+                        <p-button icon="pi pi-refresh" (click)="reset()" text></p-button>
+                        <p-button icon="pi pi-chevron-right" (click)="next()" text></p-button>
+                    </div>
+
+                </div>
+
+                <!-- Contenedor de los botones a la derecha -->
+                <div class="right-search">
+                    <p-button label="Marcar todo como leído"
+                        [icon]="isLoadingMarcarLeido ? 'pi pi-spin pi-spinner' : 'bi bi-check2-square'"
+                        [disabled]="isLoadingMarcarLeido" [outlined]="true" styleClass="btn fw-bolder custom-1 w-full"
+                        (click)="marcarNotificacion()"></p-button>
+
+                    <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true" styleClass="btn custom-slash"
+                        class="responsive" (click)="clear(dtNotificaciones)" />
+
+                    <p-iconField iconPosition="right">
+                        <p-inputIcon class="pi pi-search"></p-inputIcon>
+                        <input pInputText type="text" class="custom-search-input" placeholder="Buscar notificacion"
+                            [(ngModel)]="searchValue" (input)="applyFilterGlobal($event, dtNotificaciones)" />
+                    </p-iconField>
+                </div>
+            </div>
+        </div>
+
+        <div class="space"></div>
+
+        <div class="card">
+            <p-table #dtNotificaciones [value]="datos" [paginator]="true" [rows]="5" [first]="first"
+                [showCurrentPageReport]="true" currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords}"
+                [rowsPerPageOptions]="[5,10,25]" [tableStyle]="{ 'min-width': '50rem' }" showGridlines
+                [globalFilterFields]="['numeros','titulo','mensaje','tipoNotificacion', 'fechaRegistro']">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th class="centered-header" style="min-width: 5em">N°</th>
+                        <th class="centered-header" style="min-width: 10rem">
+                            <div class="flex items-center">
+                                Título
+                                <p-columnFilter type="text" field="titulo" display="menu" />
+                            </div>
+                        </th>
+                        <th class="centered-header" style="min-width: 15rem">
+                            <div class="flex items-center">
+                                Mensaje
+                                <p-columnFilter type="text" field="mensaje" display="menu" />
+                            </div>
+                        </th>
+                        <th class="centered-header" style="min-width: 8em">
+                            <div class="flex items-center">
+                                Tipo de Notificación
+                                <p-columnFilter type="text" field="mensaje" display="menu" />
+                            </div>
+                        </th>
+                        <th class="centered-header" style="min-width: 10rem">
+                            <div class="flex items-center">
+                                Fecha de Registro
+                                <p-columnFilter type="date" dateFormat="dd 'de' MM 'del' yy" field="fechaRegistro"
+                                    display="menu"></p-columnFilter>
+                            </div>
+                        </th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-row>
+                    <tr [ngClass]="{ 'not-leido': !row.dfLeido }">
+                        <td class="centered-cell">{{ row.numeros }}</td>
+                        <td class="centered-cell">{{ row.titulo }}</td>
+                        <td class="centered-cell">{{ row.mensaje }}</td>
+                        <td class="centered-cell">{{ row.tipoNotificacion }}</td>
+                        <td class="centered-cell">
+                            {{ row.fechaRegistro
+                            | date:"dd 'de' MMMM 'del' yyyy 'a las' hh:mm a" }}
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </form>
+</ng-template>

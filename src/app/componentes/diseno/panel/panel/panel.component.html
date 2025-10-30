@@ -1,0 +1,49 @@
+<div class="panel">
+  <!-- <h1 class="page-title">Plataforma de Documentación Académica – Vicerrectoría Académica</h1> -->
+  <h1 class="page-title">Plataforma de Documentación Académica - Dirección de Docencia</h1>
+
+
+  <div class="container" [class.mobile-view]="isMobileOrTablet">
+    @for (card of cards; track card.id) {
+    <div class="card" [ngClass]="{
+           expanded: card.isExpanded,
+           reduced: !card.isExpanded && !isMobileOrTablet && activeCardId !== null
+         }" (click)="toggleCard(card.id)" (mouseenter)="onHover(card.id)" (mouseleave)="onLeave()">
+
+      <div class="card-content-wrapper">
+
+        <!-- Columna izquierda: solo visible si expandida o en móvil -->
+        @if (card.isExpanded || isMobileOrTablet) {
+        <div class="card-text">
+          <h2>{{ card.title }}</h2>
+          <p>{{ card.description }}</p>
+
+          @if (card.isExpanded) {
+          <p-button [label]="card.buttonLabel" [routerLink]="card.routerLink" routerLinkActive="active"
+            styleClass="hero-button" (click)="$event.stopPropagation()">
+          </p-button>
+          }
+        </div>
+        }
+        
+        @if (!card.isExpanded && !isMobileOrTablet) {
+        <div class="card-text">
+          <h2>{{ card.title }}</h2>
+        </div>
+        }
+
+        <!-- Imagen siempre visible -->
+        <div class="card-image" [class.decorated]="card.isExpanded">
+          <img [src]="card.image" [alt]="card.title" />
+        </div>
+      </div>
+
+
+    </div>
+    }
+  </div>
+
+  <div class="sun-container">
+    <img src="Sol.png" alt="Sol decorativo" class="sun-image" loading="lazy" />
+  </div>
+</div>

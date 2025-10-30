@@ -1,0 +1,761 @@
+// Variables
+$primary-blue: #193a6b;
+$secondary-blue: #336699;
+$accent-blue: #229BB9;
+$light-gray: #000;
+$white: #fff;
+$black: #000;
+
+:host ::ng-deep .boton-container {
+  position: absolute; /* Cambiar a posición absoluta */
+  display: block;
+  margin-bottom: 15px; /* Espacio entre la flecha y el título */
+  top: 10px; /* Espacio desde la parte superior */
+  left: 10px; /* Cambiar de left a right para moverlo a la derecha */
+  font-size: 2rem; /* Aumentar el tamaño del texto */
+  color: #ffffff; /* Color de la flecha */
+  cursor: pointer; /* Cambiar el cursor al pasar el ratón */
+  margin-right: 2%;
+}
+
+// Body styles
+.bodys {
+  background-color: #253A69;
+  background: #253A69;
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Helvetica Neue', sans-serif;
+  overflow: hidden !important;
+  padding: 0;
+  z-index: -1;
+}
+
+.carousel-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; /* Esto asegura que el contenedor del carrusel tenga una altura suficiente */
+}
+
+:host ::ng-deep .p-carousel {
+  width: 100%;
+  height: 100%; /* Asegura que el carrusel ocupe toda la altura disponible */
+}
+
+:host ::ng-deep .p-carousel .p-carousel-indicators {
+  margin-top: 10px;
+}
+
+:host ::ng-deep .p-carousel .p-carousel-indicators .p-carousel-indicator button {
+  background-color: #e0e0e0;
+}
+
+:host ::ng-deep .p-carousel .p-carousel-indicators .p-carousel-indicator.p-highlight button {
+  background-color: #007ad9;
+}
+
+/* Preserva cualquier estilo de imagen responsive existente */
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain; /* Asegura que la imagen se ajuste correctamente sin distorsionarse */
+}
+
+// Login container styles
+.login-wrapper {
+  display: 1;
+  width: 80%;
+  max-width: 1200px;
+  height: 80%;
+  background: #193a6b;
+  border-radius: 10px;
+  box-shadow: 10px 10px 20px 20px rgba(0, 0, 0, 0.5);
+  position: relative;
+  display: flex;
+}
+
+.login-images {
+  background: no-repeat center center;
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  display: flex;
+}
+
+.col {
+  flex: 1;
+  min-width: 250px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+
+// Responsive styles
+@media screen and (max-width: 955px) {
+  .login-wrapper {
+    flex-direction: column;
+    width: 90%;
+    height: auto;
+    padding: 20px;
+    box-shadow: none;
+  }
+
+  .image-container {
+    display: none;
+    width: 30%;
+  }
+
+  .login-container {
+    width: 100%;
+    padding: 10px;
+    margin: 0;
+    height: 100vh;
+    
+    input {
+      &[type="email"],
+      &[type="password"] {
+        width: 70%;
+        font-size: 1rem;
+      }
+      
+      &[type="submit"] {
+        width: 70%;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  h1 {
+    font-size: 1.2rem;
+  }
+
+  .otp-container,
+  .change-password-container,
+  .registro-container {
+    width: 70%;
+    margin: 0;
+    padding: 10px;
+  }
+}
+
+.responsive-image {
+  max-width: 100%;
+  height: auto;
+  
+  @media (max-width: 955px) {
+    display: none;
+  }
+  
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+.imagenessss {
+  width: 100%;
+  
+  @media (max-width: 912px) {
+    width: 90%;
+  }
+}
+
+.centracion {
+  margin-right: 2%;
+  margin-left: 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    margin-right: 2%;
+    margin-left: 7%;
+    
+    .col {
+      padding-right: 0;
+    }
+  }
+}
+
+.tamano {
+  @media (max-width: 768px) {
+    height: 'autoResize';
+  }
+}
+
+// Media queries for different screen sizes
+@media (max-width: 768px) {
+  .login-wrapper {
+    padding: 10px;
+  }
+
+  .login-container h1 {
+    font-size: 1rem;
+  }
+
+  .otp-container {
+    input[type="email"],
+    input[type="submit"] {
+      font-size: 0.9rem;
+    }
+  }
+
+  .link-button {
+    font-size: 0.8rem;
+  }
+
+  :host ::ng-deep .margin {
+    margin-bottom: 0px;
+  }
+
+  .login-image {
+    margin-top: 0px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .login-wrapper {
+    padding: 10px;
+  }
+
+  .login-container h1 {
+    font-size: 1rem;
+  }
+
+  .otp-container {
+    input[type="email"],
+    input[type="submit"] {
+      font-size: 0.9rem;
+    }
+  }
+
+  .link-button {
+    font-size: 0.8rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .registro-columns {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .column {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  .login-image {
+    background-size: auto;
+    height: 120px;
+  }
+
+  .otp-image {
+    background-size: 50%;
+    height: 60px;
+  }
+}
+
+// Image containers
+:host ::ng-deep .image-containers {
+  display: flex;
+  flex-direction: column;
+  flex: 2;
+  justify-content: center;
+  align-items: center;
+}
+
+:host ::ng-deep .image-container {
+  display: flex;
+  flex-direction: column;
+  flex: 2;
+  background-size: 70%; /* Ajustar tamaño de la imagen */
+}
+
+
+// Login container
+.login-container {
+  flex: 1.5;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #193a6b;
+  position: relative;
+  z-index: 1;
+  font-weight: 500 !important;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    z-index: -1;
+  }
+  
+  h1 {
+    margin: 0;
+    font-size: 1.5em;
+  }
+  
+  input {
+    &[type="email"],
+    &[type="password"] {
+      width: 70%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      box-sizing: border-box;
+      color: $black;
+    }
+    
+    &[type="submit"] {
+      width: 70%;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: #193a6b;
+      border: none;
+      border-radius: 10px;
+      color: $white;
+      cursor: pointer;
+      box-sizing: border-box;
+      outline: none;
+      
+      &:hover {
+        background-color: $secondary-blue;
+      }
+    }
+  }
+  
+  a {
+    color: $white;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Utility classes
+.centrado {
+  text-align: center;
+}
+
+// OTP styles
+.otp-container {
+  color: $white;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  max-width: 495px;
+  background: $primary-blue;
+  border-radius: 10px;
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  position: relative;
+  margin-top: 0px;
+  
+  h1 {
+    margin: 0;
+    font-size: 1.5em;
+    color: $white;
+  }
+  
+  input {
+    &[type="email"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 2px;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    
+    &[type="submit"] {
+      width: 60%;
+      padding: 10px;
+      margin: 10px 0;
+      background-color: $accent-blue;
+      border: none;
+      border-radius: 10px;
+      color: $white;
+      cursor: pointer;
+      box-sizing: border-box;
+      outline: none;
+      
+      &:hover {
+        background-color: $secondary-blue;
+      }
+    }
+  }
+  
+  .error {
+    color: red;
+  }
+  
+  .success {
+    color: green;
+  }
+}
+
+:host ::ng-deep .link-button {
+  color: #336699;
+  transition: color 0.3s ease-in-out;
+}
+
+:host ::ng-deep .link-button:hover {
+  color: #003578; /* Puedes cambiar este color al que prefieras */
+}
+
+// Back arrow
+.back-arrow {
+  position: absolute;
+  display: block;
+  margin-bottom: 15px;
+  top: 10px;
+  right: 10px;
+  font-size: 2rem;
+  color: $white;
+  cursor: pointer;
+  margin-right: 2%;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// OTP image
+.otp-image {
+  background: url('/assets/Imagenes/DICIHT_Blanco_Izquierdo.png') no-repeat center center;
+  background-size: 90%;
+  height: 100px;
+  width: 100%;
+  display: block;
+}
+
+// Registration container
+.registro-container {
+  max-width: 1200px;
+  padding: 20px;
+  background-color: $primary-blue;
+  border-radius: 10px;
+  height: 100%;
+  width: 100%;
+  z-index: 2;
+  
+  a {
+    text-align: center;
+    color: $white;
+    margin-bottom: 10px;
+  }
+  
+  h2 {
+    text-align: center;
+    color: $white;
+    margin-bottom: 10px;
+  }
+  
+  label {
+    text-align: left;
+    color: $white;
+    margin-bottom: 5px;
+  }
+}
+
+// Registration columns
+.registro-columns {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+// Column styles
+.column {
+  flex: 1;
+  padding: 10px;
+  background-color: #d7e8ff54;
+  border: 2px solid $white;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+// Form inputs
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+select {
+  width: 80%;
+  padding: 10px;
+  margin: 5px 0;
+  border: 2px solid #cdddff;
+  border-radius: 8px;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+// Button styles
+button {
+  border: 2px solid #cdddff;
+  background-color: #1d7fff;
+  color: $white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  align-self: flex-end;
+  margin-left: 10px;
+  
+  &:hover {
+    background-color: $accent-blue;
+  }
+}
+
+// Button container
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding-top: 20px;
+}
+
+// Error and success messages
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  font-weight: bold;
+}
+
+.error-messages {
+  color: $light-gray;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.success-message {
+  color: green;
+  font-size: 0.9em;
+}
+
+.required-asterisk {
+  color: red;
+  margin-left: 5px;
+  font-weight: bold;
+}
+
+.is-invalid {
+  border: 1px solid red;
+  border-radius: 4px;
+}
+
+// Disabled link
+a.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+// Change password container
+.change-password-container {
+  color: $white;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+  max-width: 495px;
+  background: $primary-blue;
+  border-radius: 10px;
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  position: relative;
+  margin-top: 0px;
+  
+  input[type="submit"] {
+    width: 60%;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: $accent-blue;
+    border: none;
+    border-radius: 10px;
+    color: $white;
+    cursor: pointer;
+    box-sizing: border-box;
+    outline: none;
+  }
+}
+
+// HTML structure
+.linea-de-color {
+  height: 4px;
+  background-color: #003578;
+  width: 100%;
+}
+
+// Header container
+.header-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-weight: bolder;
+  font-size: 1.25rem;
+  display: grid;
+  place-items: center;
+  width: 100%;
+}
+
+// Header containers for different actions
+.header-container-registrar {
+  align-items: center;
+  justify-content: center;
+  font-weight: bolder;
+  font-size: 1.25rem;
+  text-align: center;
+  width: 100%;
+}
+
+.header-container-actualizar {
+  align-items: center;
+  justify-content: center;
+  font-weight: bolder;
+  font-size: 1.25rem;
+  text-align: center;
+  margin-left: 34%;
+}
+
+.header-container-inactivar {
+  align-items: center;
+  justify-content: center;
+  font-weight: bolder;
+  font-size: 1.25rem;
+  text-align: center;
+  margin-left: 27%;
+}
+
+.header-container-proyecto {
+  align-items: center;
+  justify-content: center;
+  font-weight: bolder;
+  font-size: 1.25rem;
+  text-align: center;
+  margin-left: 3%;
+}
+
+// Custom container
+.custom-container {
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+// Body and toolbar
+.body {
+  text-align: center;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+// Search and buttons
+.right-search {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-left: auto;
+  gap: 10px;
+}
+
+.left-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+// Utility classes
+.custom-margin {
+  margin: 0;
+}
+
+.centered-header {
+  text-align: center;
+  vertical-align: middle;
+  
+  .flex {
+    justify-content: center;
+  }
+}
+
+.centered-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+// Tooltip styles
+::ng-deep {
+  .p-tooltip .p-tooltip-text {
+    background-color: #f9fafb;
+    color: $black;
+    width: 150%;
+    font-size: 14px;
+    font-weight: 400;
+    white-space: pre-line;
+  }
+
+  .conditional-label {
+    display: inline;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .tooltip-required {
+    color: red;
+  }
+  
+  .largo {
+    width: 80%;
+  }
+
+  .largos {
+    width: 100%;
+  }
+  
+
+}
+
+// Overflow control
+html, body {
+  overflow-x: hidden;
+}
+
+// Register link
+.register-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

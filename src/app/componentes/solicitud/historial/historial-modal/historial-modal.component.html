@@ -1,0 +1,107 @@
+<p-dialog header="Header" [(visible)]="visible" [modal]="true" (onHide)="visibleChange.emit(false)"
+  [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+  [resizable]="false">
+  <ng-template pTemplate="header">
+    <div class="header-container title-header gap-2">
+      <span>
+        Seguimiento del Ticket {{ ticket }}
+      </span>
+    </div>
+  </ng-template>
+
+  @if (historialEstados.length > 0) {
+  <p-panel>
+    <div #scrollContenedor [style]="{ 'max-height': '50vh', 'overflow-y': 'auto' }">
+      <p-timeline [value]="historialEstados" align="alternate" [class]="'p-3 custom-timeline'">
+
+        <ng-template let-item pTemplate="marker">
+          <span [ngStyle]="{
+            display: 'inline-block',
+            width: '14px',
+            height: '14px',
+            backgroundColor: srvHistorial.getColorFondo(item.idEstadoSolicitud),
+            borderRadius: '50%'
+          }"></span>
+        </ng-template>
+
+        <ng-template let-item pTemplate="content" let-index="index">
+          <div style="display: flex; flex-direction: column;" class="mt-2 mb-4">
+            <p-card class="text-left">
+
+              <!-- Cabecera -->
+              <ng-template pTemplate="header">
+                <div class="p-2 font-bold rounded flex justify-center text-center" [ngStyle]="{
+                  'background-color': srvHistorial.getColorFondo(item.idEstadoSolicitud),
+                  'color': srvHistorial.getColorTexto(item.idEstadoSolicitud)
+                }">
+                  {{ item.etapa }} – {{ item.estadoSolicitud }}
+                </div>
+              </ng-template>
+
+              <!-- Contenido -->
+              <div class="text-sm mb-2">
+                <i class="pi pi-calendar mr-2 text-blue-500"></i>
+                {{ item.fechaFormateada }}
+              </div>
+
+              <div class="text-sm mb-2">
+                <i class="pi pi-user-edit mr-2 text-green-600"></i>
+                Por: <b>{{ item.nombreUsuario }}</b>
+                <br>
+                <i class="pi pi-at mr-2 text-orange-600"></i>
+                : <b>{{ item.usuarioModifico }}</b>
+                <br>
+                <i class="pi pi-building-columns mr-2 text-yellow-600"></i>
+                : <b>{{ item.nombreUnidadAcademica }}</b>
+              </div>
+
+              @if (item.observacion) {
+              <div class="text-sm"
+                style="text-align: justify; max-width: 250px; white-space: normal; word-break: break-word;">
+                <i class="pi pi-comment mr-2 text-gray-600"></i>
+                <b>: </b>
+
+                @if (!item._expandirObservacion) {
+                <span>
+                  {{ item.observacion | slice: 0:150 }}
+                  @if (item.observacion.length > 150) {
+                  <span>...</span>
+                  }
+                </span>
+                }
+
+                @if (item._expandirObservacion) {
+                <span>{{ item.observacion }}</span>
+                }
+
+                @if (item.observacion.length > 150) {
+                <a href="javascript:void(0)" (click)="item._expandirObservacion = !item._expandirObservacion"
+                  class="ml-2 text-primary">
+                  {{ item._expandirObservacion ? 'Ver menos' : 'Ver más' }}
+                </a>
+                }
+              </div>
+              }
+
+            </p-card>
+          </div>
+        </ng-template>
+      </p-timeline>
+    </div>
+  </p-panel>
+
+  <br>
+
+  <div class="left-buttons">
+    <p-button (onClick)="descargarHistorialPDF()" icon="bi bi-file-earmark-spreadsheet fw-bolder"
+      label="Descargar Reporte" variant="text" [raised]="true" styleClass="btn fw-bolder custom-1" raised text />
+  </div>
+  
+  } @else {
+  <div class="text-center text-muted p-4">
+    <i class="pi pi-info-circle text-2xl mb-2 d-block"></i>
+    No hay historial disponible para esta solicitud.
+  </div>
+  }
+
+</p-dialog>

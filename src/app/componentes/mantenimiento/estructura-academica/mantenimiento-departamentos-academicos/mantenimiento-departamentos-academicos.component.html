@@ -1,0 +1,723 @@
+<p-toast [breakpoints]="{ '920px': { width: '100%', right: '0', left: '0' } }" />
+
+@if (!loadingtable) {
+<div class="custom-container">
+    <p-panel class="transparente">
+
+
+        <ng-template pTemplate="header">
+            <div class="boton-container">
+                <p-button icon="pi pi-angle-double-left" (click)="regresarPanel()" variant="outlined"
+                    pTooltip="Regresar a Ajustes de Estructura Académica" tooltipStyleClass="tooltip-custom-1" />
+            </div>
+            <div class="header-container title-header gap-2">
+                <span>
+                    Mantenimiento de Departamentos Académicos
+                </span>
+            </div>
+        </ng-template>
+
+        <br>
+        <br>
+
+
+        <p-tabs value="0" scrollable [(value)]="activeTab" (valueChange)="onTabChange($event)">
+            <p-tablist>
+                <p-tab [value]="0">Departamentos Académicos</p-tab>
+                <p-tab [value]="1">Tipo de Departamentos Académicos</p-tab>
+            </p-tablist>
+
+            <p-tabpanels>
+
+                <p-tabpanel [value]="0">
+                    @if (loadingDepartamentos) {
+                    <div class="flex flex-col items-center justify-center text-center h-full p-4"
+                        style="background-color: transparent;">
+                        <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+                        <p class="font-semibold text-gray-700 text-lg">
+                            Estamos cargando los departamentos académicos, por favor espera...
+                        </p>
+                    </div>
+                    }
+
+                    @if (!loadingDepartamentos) {
+                    <p-panel class="transparente">
+
+                        <p-table #dtDepartamento [value]="departamentos" [paginator]="true" columnResizeMode="expand"
+                            showGridlines class="rounded-table" [tableStyle]="{ 'min-width': '50rem' }" [rows]="5"
+                            [rowsPerPageOptions]="[5, 15, 25]" dataKey="id"
+                            [globalFilterFields]="['numero','nombreDepartamento']">
+
+                            <ng-template pTemplate="caption">
+                                <div class="toolbar">
+                                    <!-- Botones a la izquierda -->
+                                    <div class="centraciones">
+                                        <!-- Contenedor de los botones a la izquierda -->
+                                        <div class="left-buttons">
+                                            @if (permisoInsertar) {
+                                            <p-button label="Registrar" (click)="showDialog('RegistrarDepartamento')"
+                                                icon="bi bi-plus-circle" styleClass="btn fw-bolder custom-1 w-full"
+                                                raised text>
+                                            </p-button>
+                                            }
+                                        </div>
+
+
+                                        <!-- Contenedor de los botones a la derecha -->
+                                        <div class="right-search">
+                                            <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                                                styleClass="btn custom-slash" class="responsive"
+                                                (click)="clear(dtDepartamento)" />
+
+                                            <p-iconField iconPosition="right">
+                                                <p-inputIcon class="pi pi-search" />
+                                                <input pInputText type="text" class="custom-search-input"
+                                                    placeholder="Buscar Departamento" [(ngModel)]="searchValue"
+                                                    (input)="applyFilterGlobal($event, dtDepartamento)" />
+                                            </p-iconField>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-template>
+
+
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                                        <div class="flex items-center">
+                                            N°
+                                            <p-columnFilter type="text" field="numero" display="menu" />
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                                        <div class="flex items-center">
+                                            Departamentos Académicos
+                                            <p-columnFilter type="text" field="nombreDepartamento" display="menu" />
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 12rem" rowspan="2">
+                                        <div class="flex items-center">
+                                            Fecha de Modificación
+                                             <p-columnFilter type="date" dateFormat="dd 'de' MMMM 'del' yyyy, h:mm:ss a"
+                                                field="fechaModifico" display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <th class="centered-header" style="min-width: 8rem">
+                                        <div class="flex align-items-center">Acciones</div>
+                                    </th>
+                                    }
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-departamento>
+                                <tr>
+                                    <td class="centered-cell">{{ departamento.numero || 'No proporcionado' }}</td>
+                                    <td class="centered-cell">{{ departamento.nombreDepartamento || 'No proporcionado'
+                                        }}</td>
+                                    <td class="centered-cell">{{ departamento.fechaModifico ?
+                                        (departamento.fechaModifico | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a"): 'No
+                                        proporcionado' }}
+                                    </td>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <td class="centered-cell">
+                                        <div class="flex justify-center items-center">
+                                            <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                                                styleClass="btn fw-bolder custom-8" raised text></p-button>
+                                            <p-popover #op>
+                                                <div class="flex flex-col gap-4">
+
+                                                    @if (permisoActualizar) {
+                                                    <p-button label="Actualizar"
+                                                        (click)="cargarDatos(departamento, 'ModificarDepartamento', 'Departamento')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogActualizarDepartamento ? 'pi pi-spin pi-spinner' : 'bi bi-arrow-counterclockwise fw-medium'"
+                                                        styleClass="btn fw-bolder custom-1 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                    @if (permisoEliminar) {
+                                                    <p-button label="Eliminar"
+                                                        (click)="cargarDatos(departamento, 'EliminarDepartamento', 'Departamento')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogEliminarDepartamento ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle fw-medium'"
+                                                        styleClass="btn fw-bolder custom-7 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                </div>
+                                            </p-popover>
+                                        </div>
+                                    </td>
+                                    }
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="emptymessage">
+
+                                <tr>
+                                    <td colspan="3" class="centered-cell">
+                                        No se encontraron datos.
+                                    </td>
+                                </tr>
+                            </ng-template>
+
+                        </p-table>
+                        <br>
+
+                    </p-panel>
+                    }
+                </p-tabpanel>
+
+                <p-tabpanel [value]="1">
+                    @if (loadingTipoDepartamentos) {
+                    <div class="flex flex-col items-center justify-center text-center h-full p-4"
+                        style="background-color: transparent;">
+                        <i class="pi pi-spin pi-spinner text-blue-500 text-4xl mb-4"></i>
+                        <p class="font-semibold text-gray-700 text-lg">
+                            Estamos cargando los tipos departamentos académicos, por favor espera...
+                        </p>
+                    </div>
+                    }
+
+                    @if (!loadingTipoDepartamentos) {
+                    <p-panel class="transparente">
+
+
+                        <p-table #dtTipoDepartamento [value]="tiposDepartamentos" [paginator]="true"
+                            columnResizeMode="expand" showGridlines class="rounded-table"
+                            [tableStyle]="{ 'min-width': '50rem' }" [rows]="5" [rowsPerPageOptions]="[5, 15, 25]"
+                            dataKey="id" [globalFilterFields]="['numero','tipoDepartamento']">
+
+                            <ng-template pTemplate="caption">
+                                <div class="toolbar">
+                                    <!-- Botones a la izquierda -->
+                                    <div class="centraciones">
+                                        <!-- Contenedor de los botones a la izquierda -->
+                                        <div class="left-buttons">
+
+                                            @if (permisoInsertar) {
+                                            <p-button label="Registrar"
+                                                (click)="showDialog('RegistrarTipoDepartamento')"
+                                                icon="bi bi-plus-circle" styleClass="btn fw-bolder custom-1 w-full"
+                                                raised text>
+                                            </p-button>
+                                            }
+                                        </div>
+
+
+                                        <!-- Contenedor de los botones a la derecha -->
+                                        <div class="right-search">
+                                            <p-button label="Limpiar" icon="pi pi-filter-slash" [outlined]="true"
+                                                styleClass="btn custom-slash" class="responsive"
+                                                (click)="clear(dtTipoDepartamento)" />
+
+                                            <p-iconField iconPosition="right">
+                                                <p-inputIcon class="pi pi-search" />
+                                                <input pInputText type="text" class="custom-search-input"
+                                                    placeholder="Buscar Tipo Departamento" [(ngModel)]="searchValue"
+                                                    (input)="applyFilterGlobal($event, dtTipoDepartamento)" />
+                                            </p-iconField>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ng-template>
+
+
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th class="centered-header" style="min-width: 5rem" rowspan="2">
+                                        <div class="flex items-center">
+                                            N°
+                                            <p-columnFilter type="text" field="numero" display="menu" />
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 10rem" rowspan="2">
+                                        <div class="flex items-center">
+                                            Tipo de Departamentos Académicos
+                                            <p-columnFilter type="text" field="tipoDepartamento" display="menu" />
+                                        </div>
+                                    </th>
+                                    <th class="centered-header" style="min-width: 12rem" rowspan="2">
+                                        <div class="flex items-center">
+                                            Fecha de Modificación
+                                            <p-columnFilter type="date" dateFormat="dd 'de' MMMM 'del' yyyy, h:mm:ss a"
+                                                field="fechaModifico" display="menu"></p-columnFilter>
+                                        </div>
+                                    </th>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <th class="centered-header" style="min-width: 8rem">
+                                        <div class="flex align-items-center">Acciones</div>
+                                    </th>
+                                    }
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-departamento>
+                                <tr>
+                                    <td class="centered-cell">{{ departamento.numero || 'No proporcionado' }}</td>
+                                    <td class="centered-cell">{{ departamento.tipoDepartamento || 'No proporcionado'
+                                        }}</td>
+                                    <td class="centered-cell">{{ departamento.fechaModifico ?
+                                        (departamento.fechaModifico | date: "dd 'de' MMMM 'del' yyyy, h:mm:ss a"): 'No
+                                        proporcionado' }}
+                                    </td>
+                                    @if (permisoActualizar || permisoEliminar) {
+                                    <td class="centered-cell">
+                                        <div class="flex justify-center items-center">
+                                            <p-button (onClick)="op.toggle($event)" icon="pi pi-angle-double-down pi-fw"
+                                                styleClass="btn fw-bolder custom-8" raised text></p-button>
+                                            <p-popover #op>
+                                                <div class="flex flex-col gap-4">
+
+                                                    @if (permisoActualizar) {
+                                                    <p-button label="Actualizar"
+                                                        (click)="cargarDatos(departamento, 'ModificarTipoDepartamento', 'TipoDepartamento')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogActualizarTipoDepartamento ? 'pi pi-spin pi-spinner' : 'bi bi-arrow-counterclockwise fw-medium'"
+                                                        styleClass="btn fw-bolder custom-1 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                    @if (permisoEliminar) {
+                                                    <p-button label="Eliminar"
+                                                        (click)="cargarDatos(departamento, 'EliminarTipoDepartamento', 'TipoDepartamento')"
+                                                        [disabled]="loadingDialogGeneral"
+                                                        [icon]="loadingDialogEliminarTipoDepartamento ? 'pi pi-spin pi-spinner' : 'bi bi-x-circle fw-medium'"
+                                                        styleClass="btn fw-bolder custom-7 w-full" text>
+                                                    </p-button>
+                                                    }
+
+                                                </div>
+                                            </p-popover>
+                                        </div>
+                                    </td>
+                                    }
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="emptymessage">
+
+                                <tr>
+                                    <td colspan="3" class="centered-cell">
+                                        No se encontraron datos.
+                                    </td>
+                                </tr>
+                            </ng-template>
+
+                        </p-table>
+                        <br>
+
+                    </p-panel>
+                    }
+                </p-tabpanel>
+            </p-tabpanels>
+        </p-tabs>
+    </p-panel>
+</div>
+}
+
+<!-------------- Dialog de Registro de Tipo de Departamento---------- -->
+<p-dialog header="Header" [(visible)]="visibleRegistrarTipoDepartamento" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Registro de Tipo Departamento</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="insertarTipoDepartamento()" [formGroup]="RegistrarTipoDeptoForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <textarea pTextarea rows="1" [autoResize]="true" formControlName="tipoDepartamento"
+                            appCapitalizable appValidaciones [normalTextValidation]="true" [blockSpecialChars]="true"
+                            [blockEmojis]="true" [blockSQLInjection]="true"
+                            [invalid]="isInvalid(RegistrarTipoDeptoForm, 'tipoDepartamento')"
+                            [ngClass]="{ 'ng-invalid': showError && 
+                            (!RegistrarTipoDeptoForm.get('tipoDepartamento')?.value || 
+                            RegistrarTipoDeptoForm.get('tipoDepartamento')?.value.length > limites['tipoDepartamento']) }"
+                            (input)="verificarLimiteCaracteres(RegistrarTipoDeptoForm, 'tipoDepartamento')"
+                            [maxlength]="limites['tipoDepartamento']">
+                        </textarea>
+                        <label>
+                            <span>
+                                1. Tipo de Departamento <span style="color: red;">*</span>
+                            </span>
+                            <small
+                                [ngStyle]="{ color: RegistrarTipoDeptoForm.get('tipoDepartamento')?.value?.length > limites['tipoDepartamento'] ? 'red' : '#555','margin-left': '12px' }">
+                                {{ RegistrarTipoDeptoForm.get('tipoDepartamento')?.value?.length || 0 }} / {{
+                                limites['tipoDepartamento'] }}
+                            </small>
+                        </label>
+
+                        @if (isInvalid(RegistrarTipoDeptoForm, 'tipoDepartamento')) {
+                        <p-message severity="error" size="small" variant="simple">
+                            El tipo de departamento es requerido..
+                        </p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit"
+                        [disabled]="RegistrarTipoDeptoForm.invalid || isLoadingRegistrar"
+                        [icon]="isLoadingRegistrar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Actualizar Tipo de Departamento ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificarTipoDepartamento" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Actualización de {{ tipoDepartamento }}</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="actualizarTipoDepartamento()" [formGroup]="ActualizarTipoDeptoForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <textarea pTextarea rows="1" [autoResize]="true" formControlName="tipoDepartamento"
+                            appCapitalizable appValidaciones [normalTextValidation]="true" [blockSpecialChars]="true"
+                            [blockEmojis]="true" [blockSQLInjection]="true"
+                            [invalid]="isInvalid(ActualizarTipoDeptoForm, 'tipoDepartamento')"
+                            [ngClass]="{ 'ng-invalid': showError && 
+                            (!ActualizarTipoDeptoForm.get('tipoDepartamento')?.value || 
+                            ActualizarTipoDeptoForm.get('tipoDepartamento')?.value.length > limites['tipoDepartamento']) }"
+                            (input)="verificarLimiteCaracteres(ActualizarTipoDeptoForm, 'tipoDepartamento')"
+                            [maxlength]="limites['tipoDepartamento']">
+                        </textarea>
+                        <label>
+                            <span>
+                                1. Tipo de Departamento <span style="color: red;">*</span>
+                            </span>
+                            <small
+                                [ngStyle]="{ color: ActualizarTipoDeptoForm.get('tipoDepartamento')?.value?.length > limites['tipoDepartamento'] ? 'red' : '#555','margin-left': '12px' }">
+                                {{ ActualizarTipoDeptoForm.get('tipoDepartamento')?.value?.length || 0 }} / {{
+                                limites['tipoDepartamento'] }}
+                            </small>
+                        </label>
+
+                        @if (isInvalid(ActualizarTipoDeptoForm, 'tipoDepartamento')) {
+                        <p-message severity="error" size="small" variant="simple">
+                            El tipo de departamento es requerido..
+                        </p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit"
+                        [disabled]="ActualizarTipoDeptoForm.invalid || isLoadingActualizar"
+                        [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Diálogo de Eliminar Tipo de Departamento ---------- -->
+<p-dialog header="Header" [(visible)]="visibleEliminarTipoDepartamento" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Eliminación de {{ tipoDepartamento }}</h2>
+        </div>
+    </ng-template>
+
+    <form [formGroup]="EliminarTipoDeptoform">
+        <p-panel>
+            <div style="width: 100%; text-align: center; padding: 0;">
+                Estás a punto de eliminar el tipo de departamento con nombre <strong>{{ tipoDepartamento }}</strong>.
+            </div>
+
+            <br>
+
+            <div style="text-align: justify; padding: 0 1rem;">
+                Esta acción eliminará permanentemente el tipo de departamento del sistema. Una vez eliminado, no se
+                podrá
+                recuperar.
+                <br><br>
+                <strong>Advertencia:</strong> Si este tipo de departamento aún está asociado a uno o más registros, no
+                podrá
+                ser eliminado.
+                Para poder continuar, asegúrate de reasignar un nuevo tipo de departamento a todos los registros que
+                actualmente
+                lo
+                tienen asociado.
+                <br><br>
+                Por favor, asegúrate de comprender las implicaciones de esta acción antes de continuar.
+            </div>
+
+            <div style="text-align: center; padding-top: 1rem;">
+                ¿Estás seguro de que deseas eliminar este tipo de departamento?
+            </div>
+
+            <p-footer style="display: flex; justify-content: center; gap: 10px;">
+                <button pButton type="button" [disabled]="isLoadingEliminar"
+                    [icon]="isLoadingEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+                    class="btn fw-bolder custom-1 w-full" (click)="eliminarTipoDepartamento()"></button>
+
+                <button pButton type="button" icon="bi bi-x-circle" label="Cancelar"
+                    class="btn fw-bolder custom-2-1 w-full" [disabled]="isLoadingEliminar"
+                    (click)="visibleEliminarTipoDepartamento = false"></button>
+            </p-footer>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Registro de Departamento---------- -->
+<p-dialog header="Header" [(visible)]="visibleRegistrarDepartamento" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Registro de Departamento</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="insertarDepartamento()" [formGroup]="RegistrarDeptoForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                            <textarea pTextarea rows="1" [autoResize]="true" formControlName="nombreDepartamento"
+                            appCapitalizable appValidaciones [normalTextValidation]="true" [blockSpecialChars]="true"
+                            [blockEmojis]="true" [blockSQLInjection]="true"
+                            [invalid]="isInvalid(RegistrarDeptoForm, 'nombreDepartamento')"
+                            [ngClass]="{ 'ng-invalid': showError && 
+                            (!RegistrarDeptoForm.get('nombreDepartamento')?.value || 
+                            RegistrarDeptoForm.get('nombreDepartamento')?.value.length > limites['nombreDepartamento']) }"
+                            (input)="verificarLimiteCaracteres(RegistrarDeptoForm, 'nombreDepartamento')"
+                            [maxlength]="limites['nombreDepartamento']">
+                        </textarea>
+                          <label>
+                            <span>
+                                1. Nombre del Departamento <span style="color: red;">*</span>
+                            </span>
+                            <small
+                                [ngStyle]="{ color: RegistrarDeptoForm.get('nombreDepartamento')?.value?.length > limites['nombreDepartamento'] ? 'red' : '#555','margin-left': '12px' }">
+                                {{ RegistrarDeptoForm.get('nombreDepartamento')?.value?.length || 0 }} / {{
+                                limites['nombreDepartamento'] }}
+                            </small>
+                        </label>
+                        @if (isInvalid(RegistrarDeptoForm, 'nombreDepartamento')) {
+                        <p-message severity="error" size="small" variant="simple">El nombre del departamento es
+                            requerido..</p-message>
+                        }
+
+                    </p-iftalabel>
+                </div>
+
+
+                <div class="space"></div>
+
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idTipoDepartamento" [options]="tiposDepartamentos"
+                            optionLabel="tipoDepartamento" optionValue="idTipoDepartamento" [showClear]="true"
+                            [showClear]="true" [filter]="true" filterBy="tipoDepartamento" appendTo="body"
+                            class="w-full" [invalid]="isInvalid(RegistrarDeptoForm, 'idTipoDepartamento')" />
+                        <label for="dd-city">2. Tipo de Departamento Asociado *</label>
+                        @if (isInvalid(RegistrarDeptoForm, 'idTipoDepartamento')) {
+                        <p-message severity="error" size="small" variant="simple">El tipo de departamento asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idFacultad" [options]="facultad" optionLabel="nombreFacultad"
+                            optionValue="idFacultad" [showClear]="true" [showClear]="true" [filter]="true"
+                            filterBy="nombreFacultad" appendTo="body" class="w-full" [invalid]="isInvalid(RegistrarDeptoForm, 'idFacultad')" />
+                        <label for="dd-city">3. Facultad Asociada *</label>
+                        @if (isInvalid(RegistrarDeptoForm, 'idFacultad')) {
+                        <p-message severity="error" size="small" variant="simple">La facultad asociada es
+                            requerida..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit" [disabled]="RegistrarDeptoForm.invalid || isLoadingRegistrar"
+                        [icon]="isLoadingRegistrar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Dialog de Actualizar de Departamento ---------- -->
+<p-dialog header="Header" [(visible)]="visibleModificarDepartamento" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Actualización de {{ tipoDepartamento }}</h2>
+        </div>
+    </ng-template>
+
+    <form (ngSubmit)="actualizarDepartamento()" [formGroup]="ActualizarDeptoForm">
+        <p-panel>
+
+            <p-fluid>
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                            <textarea pTextarea rows="1" [autoResize]="true" formControlName="nombreDepartamento"
+                            appCapitalizable appValidaciones [normalTextValidation]="true" [blockSpecialChars]="true"
+                            [blockEmojis]="true" [blockSQLInjection]="true"
+                            [invalid]="isInvalid(ActualizarDeptoForm, 'nombreDepartamento')"
+                            [ngClass]="{ 'ng-invalid': showError && 
+                            (!ActualizarDeptoForm.get('nombreDepartamento')?.value || 
+                            ActualizarDeptoForm.get('nombreDepartamento')?.value.length > limites['nombreDepartamento']) }"
+                            (input)="verificarLimiteCaracteres(ActualizarDeptoForm, 'nombreDepartamento')"
+                            [maxlength]="limites['nombreDepartamento']">
+                        </textarea>
+                          <label>
+                            <span>
+                                1. Nombre del Departamento <span style="color: red;">*</span>
+                            </span>
+                            <small
+                                [ngStyle]="{ color: ActualizarDeptoForm.get('nombreDepartamento')?.value?.length > limites['nombreDepartamento'] ? 'red' : '#555','margin-left': '12px' }">
+                                {{ ActualizarDeptoForm.get('nombreDepartamento')?.value?.length || 0 }} / {{
+                                limites['nombreDepartamento'] }}
+                            </small>
+                        </label>
+                        @if (isInvalid(ActualizarDeptoForm, 'nombreDepartamento')) {
+                        <p-message severity="error" size="small" variant="simple">El nombre del departamento es
+                            requerido..</p-message>
+                        }
+
+                    </p-iftalabel>
+                </div>
+
+
+                <div class="space"></div>
+
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idTipoDepartamento" [options]="tiposDepartamentos"
+                            optionLabel="tipoDepartamento" optionValue="idTipoDepartamento" [showClear]="true"
+                            [showClear]="true" [filter]="true" filterBy="tipoDepartamento" appendTo="body"
+                            class="w-full" [invalid]="isInvalid(ActualizarDeptoForm, 'idTipoDepartamento')" />
+                        <label for="dd-city">2. Tipo de Departamento Asociado *</label>
+                        @if (isInvalid(ActualizarDeptoForm, 'idTipoDepartamento')) {
+                        <p-message severity="error" size="small" variant="simple">El tipo de departamento asociado es
+                            requerido..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="animated-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <p-iftalabel class="sm:col-span-2">
+                        <p-select formControlName="idFacultad" [options]="facultad" optionLabel="nombreFacultad"
+                            optionValue="idFacultad" [showClear]="true" [showClear]="true" [filter]="true"
+                            filterBy="nombreFacultad" appendTo="body" class="w-full" [invalid]="isInvalid(ActualizarDeptoForm, 'idFacultad')" />
+                        <label for="dd-city">3. Facultad Asociada *</label>
+                        @if (isInvalid(ActualizarDeptoForm, 'idFacultad')) {
+                        <p-message severity="error" size="small" variant="simple">La facultad asociada es
+                            requerida..</p-message>
+                        }
+                    </p-iftalabel>
+                </div>
+
+                <div class="space"></div>
+
+                <div class="pt-4">
+                    <p-button label="Enviar" type="submit"
+                        [disabled]="ActualizarDeptoForm.invalid || isLoadingActualizar"
+                        [icon]="isLoadingActualizar ? 'pi pi-spin pi-spinner' : 'bi bi-send'"
+                        styleClass="btn fw-bolder custom-1 w-full">
+                    </p-button>
+                </div>
+            </p-fluid>
+        </p-panel>
+    </form>
+
+</p-dialog>
+
+<!-------------- Diálogo de Eliminar Departamento ---------- -->
+<p-dialog header="Header" [(visible)]="visibleEliminarDepartamento" [modal]="true" [closable]="closableDialog"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '50vw' }" [draggable]="false"
+    [resizable]="false">
+
+    <ng-template pTemplate="header">
+        <div class="header-container title-header">
+            <h2 class="header-titles">Eliminación de {{ nombreDepartamento }}</h2>
+        </div>
+    </ng-template>
+
+    <form [formGroup]="EliminarTipoDeptoform">
+        <p-panel>
+            <div style="width: 100%; text-align: center; padding: 0;">
+                Estás a punto de eliminar el departamento con nombre <strong>{{ nombreDepartamento }}</strong>.
+            </div>
+
+            <br>
+
+            <div style="text-align: justify; padding: 0 1rem;">
+                Esta acción eliminará permanentemente el departamento del sistema. Una vez eliminado, no se podrá
+                recuperar.
+                <br><br>
+                <strong>Advertencia:</strong> Si este departamento aún está asociado a uno o más registros, no podrá
+                ser eliminado.
+                Para poder continuar, asegúrate de reasignar un nuevo departamento a todos los registros que actualmente
+                lo
+                tienen asociado.
+                <br><br>
+                Por favor, asegúrate de comprender las implicaciones de esta acción antes de continuar.
+            </div>
+
+            <div style="text-align: center; padding-top: 1rem;">
+                ¿Estás seguro de que deseas eliminar este departamento?
+            </div>
+
+            <p-footer style="display: flex; justify-content: center; gap: 10px;">
+                <button pButton type="button" [disabled]="isLoadingEliminar"
+                    [icon]="isLoadingEliminar ? 'pi pi-spin pi-spinner' : 'bi bi-check2-circle'" label="Aceptar"
+                    class="btn fw-bolder custom-1 w-full" (click)="eliminarDepartamento()"></button>
+
+                <button pButton type="button" icon="bi bi-x-circle" label="Cancelar"
+                    class="btn fw-bolder custom-2-1 w-full" [disabled]="isLoadingEliminar"
+                    (click)="visibleEliminarTipoDepartamento = false"></button>
+            </p-footer>
+        </p-panel>
+    </form>
+
+</p-dialog>
